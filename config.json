@@ -1,0 +1,9 @@
+{
+	"servername": "IRC-kitty",
+	"admin": "superAdmin",
+	"operators": {
+		"pveeta": "mypass",
+		"dlana": "superpass",
+		"obeedril": "mysuperpass"
+	}
+}
