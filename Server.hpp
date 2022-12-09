@@ -6,19 +6,21 @@
 class Server
 {
 	private:
+		std::string								_serverName;
+		std::string 							_configTokens[COUNT_TOKENS];
 		int										_port;
-		std::vector<User *>						_connectedUsers;
-		std::vector<struct pollfd>				_userFDs;
+		// std::vector<User *>						_connectedUsers;
+		// std::vector<struct pollfd>				_userFDs;
 		int										_sockfd;
 		sockaddr_in								_sockaddr;
-		std::string								_password;
+		std::string								_password; // это пароль админа?
 		std::string								_admin;
 		std::map<std::string, std::string>		_operators;
-		std::map<std::string, Channel *>		_channels;
-		std::map<std::string, Method>			_commands;
-		History									_nicknamesHistory;
+		// std::map<std::string, Channel *>		_channels;
+		// std::map<std::string, Method>			_commands;
+		// History									_nicknamesHistory;
 
-		Server();
+		// Server();
 		Server(const Server& copy);
 		Server	&operator=(const Server& other);
 
@@ -62,10 +64,20 @@ class Server
 		// int										handleUserFlags(const Message &msg, User &user);
 		// int										checkConnection(User &user);
 		// void									notifyUsers(User &user, const std::string &notification);
+std::vector<std::string> splitLines(std::string path);
+// std::vector<std::string> splitLines(char * path);
+std::vector<std::string> checkBraces(std::string buf);
+int onlySpaces(std::string buf);
+int emptyOrComments(std::string buf);
+void deleteSpaces(std::string *str);
+void bracesCounter(std::vector<std::string> res);
+// void checkTokens(std::vector<std::string> res);
+
 
 	public:
 		Server(int port, const std::string &password);
 		~Server();
+		void parseConfig();
 
 		// Getters
 

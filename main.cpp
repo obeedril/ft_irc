@@ -24,7 +24,7 @@ int main(int argc, const char* argv[]) {
 
 	if (port < 1024 || port > 49151)
 	{
-		std::cout << "\x1b[1;70m" << "> ERROR: wrong port" << "\n" << "\x1b[0m" << std::endl;
+		std::cout << "\x1b[1;70m" << "> ERROR: wrong user port" << "\n" << "\x1b[0m" << std::endl;
 		return (0);
 	}
 	signal(SIGINT, signalHandler); 
@@ -33,14 +33,28 @@ int main(int argc, const char* argv[]) {
 	// std::vector<Server*> vectorServers;
 
 	// for (std::vector<ServerPairs>::iterator it = parser->getServers().begin(); it!= parser->getServers().end(); ++it) {
-	// 	Server *ff_serv = new Server(*it);
+		Server *irc_serv = new Server(port, argv[1]);
+		FILE* fp = fopen(PATH_TO_CONFIG, "r+");
+		if (!fp) {
+			std::cerr << "\x1b[1;95m" << "> Can't open config file!\n" << "\x1b[0m";
+			return 0;
+		}
+		// std::fclose(fp); //вернуть!!!
+		try {
+			irc_serv->parseConfig();
+		}
+		catch (std::exception& e) {
+			std::cout << e.what() << std::endl;
+		}
+
+		
 	// 	vectorServers.push_back(ff_serv);
 	// }
 	// std::cout << "\x1b[1;95m" << "> WebServer Run!\n" << "\x1b[0m";
 	// Core* main_core = new Core(vectorServers);
 	while (gFlagExit) {
-        std::cout << "\x1b[1;95m" << "> WebServer Run!\n" << "\x1b[0m";
-                    break ;
+        std::cout << "\x1b[1;95m" << "> IRC server run!\n" << "\x1b[0m";
+                    break ; // временно!
 		// main_core->run();
 	}
 	// delete parser;
