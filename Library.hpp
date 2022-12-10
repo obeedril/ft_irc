@@ -32,12 +32,11 @@
 #define ADMIN_NAME "adminName"
 #define ADMIN_PASS "adminPass"
 #define OPERATORS "operators"
-#define COUNT_TOKENS 4
 
 
 // # include "ChannelsStorage.hpp"
 # include "User.hpp"
-//# include "Server.hpp"
+# include "Server.hpp"
 # include "Core.hpp"
 
 

@@ -1,5 +1,5 @@
 #ifndef USER_HPP
-# define USERHPP
+# define USER_HPP
 
 # include "Library.hpp"
 

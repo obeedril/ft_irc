@@ -4,16 +4,18 @@ NAME		= ircserv
 #-fsanitize=address -fvisibility=hidden -fvisibility-inlines-hidden
 # -std=c++98
 
-SRCS		= main.cpp  Core.cpp User.cpp \
-# Server.cpp  \
-# User.cpp    \
-# ChannelsStorage.cpp
+SRCS		= main.cpp \
+			Core.cpp \
+			Server.cpp \
+			User.cpp \
+#ChannelsStorage.cpp
 
-HEADERS		= library.hpp
+HEADERS		= Library.hpp
 
 OBJS		=	$(SRCS:.cpp=.o)
 
 CC			=	g++
+# CC			=	c++ !!!! заменить!!! 
 
 RM				= rm -Rf
 FLAGS			= -Wall -Wextra -Werror -g -std=c++98
