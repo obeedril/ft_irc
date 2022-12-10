@@ -13,6 +13,9 @@ class User {
         std::string password;
 
     public:
+
+        int count_cli; ////!!!!
+
         User();
         ~User();
         int getUserFd();

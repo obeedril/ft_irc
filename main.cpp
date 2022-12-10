@@ -33,28 +33,31 @@ int main(int argc, const char* argv[]) {
 	// std::vector<Server*> vectorServers;
 
 	// for (std::vector<ServerPairs>::iterator it = parser->getServers().begin(); it!= parser->getServers().end(); ++it) {
-		Server *irc_serv = new Server(port, argv[1]);
-		FILE* fp = fopen(PATH_TO_CONFIG, "r+");
-		if (!fp) {
-			std::cerr << "\x1b[1;95m" << "> Can't open config file!\n" << "\x1b[0m";
-			return 0;
-		}
-		// std::fclose(fp); //вернуть!!!
-		try {
-			irc_serv->parseConfig();
-		}
-		catch (std::exception& e) {
-			std::cout << e.what() << std::endl;
-		}
+		// Server *irc_serv = new Server(port, argv[1]);
+		// FILE* fp = fopen(PATH_TO_CONFIG, "r+");
+		// if (!fp) {
+		// 	std::cerr << "\x1b[1;95m" << "> Can't open config file!\n" << "\x1b[0m";
+		// 	return 0;
+		// }
+		// // std::fclose(fp); //вернуть!!!
+		// try {
+		// 	irc_serv->parseConfig();
+		// }
+		// catch (std::exception& e) {
+		// 	std::cout << e.what() << std::endl;
+		// }
 
 		
 	// 	vectorServers.push_back(ff_serv);
 	// }
 	// std::cout << "\x1b[1;95m" << "> WebServer Run!\n" << "\x1b[0m";
 	// Core* main_core = new Core(vectorServers);
+	Core core_irc = Core(port);
+	std::cout << "\x1b[1;95m" << "> IRC server run!\n" << "\x1b[0m";
 	while (gFlagExit) {
-        std::cout << "\x1b[1;95m" << "> IRC server run!\n" << "\x1b[0m";
-                    break ; // временно!
+        //
+                   // break ; // временно!
+		core_irc.run();
 		// main_core->run();
 	}
 	// delete parser;
