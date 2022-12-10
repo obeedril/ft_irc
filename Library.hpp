@@ -7,11 +7,25 @@
 # include <stdlib.h>
 # include <netinet/in.h>
 # include <iostream>
-# include <map>
+# include <stdio.h>
+# include <string.h>
+# include <sys/types.h>
+# include <netdb.h>
+# include <fcntl.h>
+# include <poll.h>
 # include <vector>
 # include <list>
-#include <cstdio>
-
+# include <string>
+# include <sstream>
+# include <fstream>
+# include <map>
+# include <cstdio>
+# include <cstring>
+# include <arpa/inet.h>
+# include <algorithm>
+# include <csignal>
+# include <ctime>
+# include <iomanip>
 
 #define PATH_TO_CONFIG "config.conf"
 #define SERV_NAME "serverName"
@@ -22,8 +36,9 @@
 
 
 // # include "ChannelsStorage.hpp"
-// # include "User.hpp"
-# include "Server.hpp"
+# include "User.hpp"
+//# include "Server.hpp"
+# include "Core.hpp"
 
 
 
