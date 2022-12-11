@@ -35,7 +35,7 @@
 
 enum t_command
 {
-	NO_COMMAND,
+	NO_COMMAND = -1,
     USER,
 	NICK,
 	PASS,

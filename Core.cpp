@@ -101,7 +101,7 @@ void	Core::run() {
 							sprintf(bufWrite, "%s %d: %s\n", it1->second.getUserName().c_str(), it1->second.getUserFd(), str);
 							break;
 						}
-						writeToUser(s, 8);
+						writeToUser(s, 0); // отправка конкретному пользователю
 						j = -1;
 					}
 				}
@@ -131,6 +131,7 @@ int		Core::createNewSocket() {
 	FD_SET(user_fd, &active_);
 
 	sprintf(bufWrite, "IRC : client %d just arrived\n", new_user.getUserFd());
+	new_user.setMessage(static_cast<std::string>(bufWrite));
 	writeToUser(user_fd, 0);
 	return (0);
 };
@@ -142,53 +143,61 @@ void	Core::error(int err_type) {
 };
 
 int		Core::writeToUser(int current_fd, int recipient_fd) {
+	std::map<int, User>::iterator it1 = map_users.find(current_fd);
 	if (recipient_fd == 0){
 		for(int s = 0; s <= max; ++s) {
 			if (FD_ISSET(s, &write_) && s != current_fd) {
-				send(s, bufWrite, strlen(bufWrite), 0);
+				send(s, it1->second.getMessage().c_str(), it1->second.getMessage().length(), 0);
 			
 			}
 		}
 	} else {
-		send(recipient_fd, bufWrite, strlen(bufWrite), 0);
+		send(recipient_fd, it1->second.getMessage().c_str(), it1->second.getMessage().length(), 0);
 	}
 	return (0);
 };
 
-// void parseBuffer(std::string buf){
+void Core::parseBuffer(std::string buf, int user_fd){
 
-// 	std::string command;
+	std::string command_str;
+	size_t pos; // Olya, privet!!!!!!!
+
+	std::map<int, User>::iterator it1 = map_users.find(user_fd);
+	if (it1 == map_users.end()) {
+		write(2, "Users not found\n", 26);
+		return ; ////!!!!
+	}
+
+	pos = buf.find(" ", 0);
+	command_str = buf.substr(0, pos);
+	it1->second.setMessage(buf.substr(pos + 1, buf.length() - 2));
+
+	std::cout << "command |" << command_str  << "|" << std::endl;
+	std::cout << "message |" << it1->second.getMessage() << "|" << std::endl;
+
+	std::string commands[8] = {"USER", "NICK",	"PASS",    "QIUT",	"PRIVMSG",	"NOTICE", "JOIN", "KICK"};
 
 	
+	for (int i = 0; i < 8; i++){
+		if (commands[i] == command_str) {
+			it1->second.setCommand(static_cast<t_command>(i));
+		}
+	}
 
-
-// }
+}
 
 int		Core::readFromUser(int user_fd) {
-	char local_buf[512];
+	char local_buf[512] = "/0";
 	length_message = 0;
 
 	length_message = recv(user_fd, local_buf, 512, 0);
-	// std::map<int, User>::iterator it1 = map_users.find(user_fd);
-	// it1->second.
-	std::string str;
-
+	std::map<int, User>::iterator it1 = map_users.find(user_fd);
+	it1->second.setMessage(local_buf);
 	
-	std::cout << "buffer " << str.append(local_buf) << std::endl;
+	std::cout << "buffer " << it1->second.getMessage() << std::endl;
+
+	parseBuffer(it1->second.getMessage(), user_fd);
 	
-
-
-	char *istr;
-	istr = strstr(bufRead, "USER");
-	if (istr != NULL) {
-		std::map<int, User>::iterator it1 = map_users.find(user_fd);
-		if (it1 == map_users.end()) {
-			write(2, "Users not found\n", 26);
-			return (0); ////!!!!
-		}
-		it1->second.setCommand(USER);
-	}
-
 	//parser message!!!!
 	//
 	return (0);
