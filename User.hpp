@@ -7,6 +7,7 @@ class User {
     private:
         int userFd;
         bool isAdminHere;
+        std::string message;
         std::string channelHere;
         std::string login;
         std::string userName;
