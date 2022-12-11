@@ -63,7 +63,7 @@ void	Core::run() {
 			}
 			if (length_message <= 0) {
 				sprintf(bufWrite, "IRC : client %d just left\n", it1->second.getUserFd());
-				writeToUser(s);
+				writeToUser(s, 0);
 				FD_CLR(s, &active_);
 				close(s);
 				break ;
@@ -101,7 +101,7 @@ void	Core::run() {
 							sprintf(bufWrite, "%s %d: %s\n", it1->second.getUserName().c_str(), it1->second.getUserFd(), str);
 							break;
 						}
-						writeToUser(s);
+						writeToUser(s, 8);
 						j = -1;
 					}
 				}
@@ -131,7 +131,7 @@ int		Core::createNewSocket() {
 	FD_SET(user_fd, &active_);
 
 	sprintf(bufWrite, "IRC : client %d just arrived\n", new_user.getUserFd());
-	writeToUser(user_fd);
+	writeToUser(user_fd, 0);
 	return (0);
 };
 
@@ -141,18 +141,33 @@ void	Core::error(int err_type) {
 	exit(1);
 };
 
-int		Core::writeToUser(int current_fd) {
-	for(int s = 0; s <= max; ++s) {
-		if (FD_ISSET(s, &write_) && s != current_fd) {
-			send(s, bufWrite, strlen(bufWrite), 0);
+int		Core::writeToUser(int current_fd, int recipient_fd) {
+	if (recipient_fd == 0){
+		for(int s = 0; s <= max; ++s) {
+			if (FD_ISSET(s, &write_) && s != current_fd) {
+				send(s, bufWrite, strlen(bufWrite), 0);
+			}
 		}
+	} else {
+		send(recipient_fd, bufWrite, strlen(bufWrite), 0);
 	}
 	return (0);
 };
 
+void parseBuffer(std::string buf){
+
+	std::string command;
+	
+	
+
+
+}
+
 int		Core::readFromUser(int user_fd) {
 	length_message = 0;
 	length_message = recv(user_fd, bufRead, 42*4096, 0);
+  std::string str;
+	std::cout << "buffer " << str.append(bufRead) << std::endl;
 	char *istr;
 	istr = strstr(bufRead, "USER");
 	if (istr != NULL) {
