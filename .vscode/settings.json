@@ -79,6 +79,11 @@
         "memory_resource": "cpp",
         "ranges": "cpp",
         "stop_token": "cpp",
+        "codecvt": "cpp",
+        "csignal": "cpp",
+        "fstream": "cpp",
+        "iomanip": "cpp",
+        "stack": "cpp"
         "filesystem": "cpp"
     }
 }

@@ -146,6 +146,7 @@ int		Core::writeToUser(int current_fd, int recipient_fd) {
 		for(int s = 0; s <= max; ++s) {
 			if (FD_ISSET(s, &write_) && s != current_fd) {
 				send(s, bufWrite, strlen(bufWrite), 0);
+			
 			}
 		}
 	} else {
@@ -154,20 +155,29 @@ int		Core::writeToUser(int current_fd, int recipient_fd) {
 	return (0);
 };
 
-void parseBuffer(std::string buf){
+// void parseBuffer(std::string buf){
 
-	std::string command;
+// 	std::string command;
+
 	
-	
 
 
-}
+// }
 
 int		Core::readFromUser(int user_fd) {
+	char local_buf[512];
 	length_message = 0;
-	length_message = recv(user_fd, bufRead, 42*4096, 0);
-  std::string str;
-	std::cout << "buffer " << str.append(bufRead) << std::endl;
+
+	length_message = recv(user_fd, local_buf, 512, 0);
+	// std::map<int, User>::iterator it1 = map_users.find(user_fd);
+	// it1->second.
+	std::string str;
+
+	
+	std::cout << "buffer " << str.append(local_buf) << std::endl;
+	
+
+
 	char *istr;
 	istr = strstr(bufRead, "USER");
 	if (istr != NULL) {
@@ -178,6 +188,7 @@ int		Core::readFromUser(int user_fd) {
 		}
 		it1->second.setCommand(USER);
 	}
+
 	//parser message!!!!
 	//
 	return (0);
