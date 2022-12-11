@@ -160,22 +160,26 @@ int		Core::writeToUser(int current_fd, int recipient_fd) {
 void Core::parseBuffer(std::string buf, int user_fd){
 
 	std::string command_str;
-	size_t pos;
+	size_t pos; // Olya, privet!!!!!!!
+
+	std::map<int, User>::iterator it1 = map_users.find(user_fd);
+	if (it1 == map_users.end()) {
+		write(2, "Users not found\n", 26);
+		return ; ////!!!!
+	}
 
 	pos = buf.find(" ", 0);
 	command_str = buf.substr(0, pos);
+	it1->second.setMessage(buf.substr(pos + 1, buf.length() - 2));
+
 	std::cout << "command |" << command_str  << "|" << std::endl;
+	std::cout << "message |" << it1->second.getMessage() << "|" << std::endl;
 
 	std::string commands[8] = {"USER", "NICK",	"PASS",    "QIUT",	"PRIVMSG",	"NOTICE", "JOIN", "KICK"};
 
 	
 	for (int i = 0; i < 8; i++){
 		if (commands[i] == command_str) {
-			std::map<int, User>::iterator it1 = map_users.find(user_fd);
-			if (it1 == map_users.end()) {
-				write(2, "Users not found\n", 26);
-				return ; ////!!!!
-			}
 			it1->second.setCommand(static_cast<t_command>(i));
 		}
 	}
