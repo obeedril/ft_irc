@@ -11,6 +11,7 @@ class User {
         std::string login;
         std::string userName;
         std::string password;
+        t_command command;
 
     public:
 
@@ -31,6 +32,8 @@ class User {
         void setUserName(std::string _userName);
         void setPassword(std::string _password);
 
+        t_command getCommand();
+        void setCommand(t_command _command);
 };
 
 

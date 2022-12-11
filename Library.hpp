@@ -33,12 +33,22 @@
 #define ADMIN_PASS "adminPass"
 #define OPERATORS "operators"
 
+enum t_command
+{
+	NO_COMMAND,
+    USER,
+	NICK,
+	PASS,
+    QIUT,
+	PRIVMSG,
+	NOTICE,
+	JOIN,
+	KICK
+};
 
-// # include "ChannelsStorage.hpp"
 # include "User.hpp"
 # include "Server.hpp"
 # include "Core.hpp"
-
-
+//# include "ChannelsStorage.hpp"
 
 #endif
