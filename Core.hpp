@@ -30,6 +30,7 @@ class Core {
 		int		createNewSocket();
 		int		writeToUser(int current_fd, int recepient_fd); 
 		int		readFromUser(int user_fd);
+		void parseBuffer (std::string buf, int user_fd);
 
 		void	error(int err_type);
 };

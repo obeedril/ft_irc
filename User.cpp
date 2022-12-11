@@ -59,3 +59,11 @@
         void  User::setCommand(t_command _command) {
             command = _command;
         }
+
+        std::string User::getMessage(){
+            return(message);
+        }
+
+        void User::setMessage(std::string message){
+            this->message = message;
+        }
