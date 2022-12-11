@@ -160,7 +160,8 @@ int		Core::writeToUser(int current_fd, int recipient_fd) {
 void Core::parseBuffer(std::string buf, int user_fd){
 
 	std::string command_str;
-	size_t pos; // Olya, privet!!!!!!!
+	size_t pos; // Olya, privet!!!!!!! 
+	// привееееет! :)
 
 	std::map<int, User>::iterator it1 = map_users.find(user_fd);
 	if (it1 == map_users.end()) {
@@ -169,24 +170,31 @@ void Core::parseBuffer(std::string buf, int user_fd){
 	}
 
 	pos = buf.find(" ", 0);
-	command_str = buf.substr(0, pos);
-	it1->second.setMessage(buf.substr(pos + 1, buf.length() - 2));
+	size_t posEnd = buf.find("\r\n", pos);
+	if (pos != std::string::npos && posEnd != std::string::npos) {
+		command_str = buf.substr(0, pos);
+		std::string tmp = buf.substr(pos + 1, posEnd);
 
-	std::cout << "command |" << command_str  << "|" << std::endl;
-	std::cout << "message |" << it1->second.getMessage() << "|" << std::endl;
+		it1->second.setMessage(tmp.substr(0, tmp.find("\n") - 1));
 
-	std::string commands[8] = {"USER", "NICK",	"PASS",    "QIUT",	"PRIVMSG",	"NOTICE", "JOIN", "KICK"};
+		std::cout << "command |" << command_str  << "|" << std::endl;
+		std::cout << "message |" << it1->second.getMessage() << "|" << std::endl;
 
-	
-	for (int i = 0; i < 8; i++){
-		if (commands[i] == command_str) {
-			it1->second.setCommand(static_cast<t_command>(i));
+		std::string commands[8] = {"USER", "NICK",	"PASS",    "QIUT",	"PRIVMSG",	"NOTICE", "JOIN", "KICK"};
+
+		
+		for (int i = 0; i < 8; i++){
+			if (commands[i] == command_str) {
+				it1->second.setCommand(static_cast<t_command>(i));
+			}
 		}
 	}
+
 
 }
 
 int		Core::readFromUser(int user_fd) {
+
 	char local_buf[512] = "/0";
 	length_message = 0;
 
@@ -194,7 +202,7 @@ int		Core::readFromUser(int user_fd) {
 	std::map<int, User>::iterator it1 = map_users.find(user_fd);
 	it1->second.setMessage(local_buf);
 	
-	std::cout << "buffer " << it1->second.getMessage() << std::endl;
+	// std::cout << "buffer " << it1->second.getMessage() << "|" << std::endl;
 
 	parseBuffer(it1->second.getMessage(), user_fd);
 	

@@ -45,6 +45,8 @@ int main(int argc, const char* argv[]) {
 
 	Core core_irc = Core(port);
 	std::cout << "\x1b[1;95m" << "> IRC server run!\n" << "\x1b[0m";
+
+	
 	while (gFlagExit) {
 		core_irc.run();
 	}
