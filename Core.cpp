@@ -73,7 +73,34 @@ void	Core::run() {
 					str[j] = bufRead[i];
 					if (str[j] == '\n') {
 						str[j] = '\0';
-						sprintf(bufWrite, "%s %d: %s\n", it1->second.getUserName().c_str(), it1->second.getUserFd(), str);
+						switch (it1->second.getCommand())
+						{
+						case USER:
+							//
+							sprintf(bufWrite, "%d %s\n", 311, " USER guest tolmoon tolsun :Ronnie Reagan");
+							break;
+						case NICK:
+							//
+							break;
+						case PASS:
+							//
+							break;
+						case PRIVMSG:
+							//
+							break;
+						case NOTICE:
+							//
+							break;
+						case JOIN:
+							//
+							break;
+						case KICK:
+							//
+							break;
+						default:
+							sprintf(bufWrite, "%s %d: %s\n", it1->second.getUserName().c_str(), it1->second.getUserFd(), str);
+							break;
+						}
 						writeToUser(s);
 						j = -1;
 					}
@@ -95,6 +122,7 @@ int		Core::createNewSocket() {
 	User new_user;
 	new_user.setUserFd(user_fd);
 	new_user.setUserName("Default_name");
+	new_user.setCommand(NO_COMMAND);
 	map_users.insert(std::pair<int, User> (user_fd, new_user));
 
 	new_user.count_cli = count_cli;
@@ -125,6 +153,16 @@ int		Core::writeToUser(int current_fd) {
 int		Core::readFromUser(int user_fd) {
 	length_message = 0;
 	length_message = recv(user_fd, bufRead, 42*4096, 0);
+	char *istr;
+	istr = strstr(bufRead, "USER");
+	if (istr != NULL) {
+		std::map<int, User>::iterator it1 = map_users.find(user_fd);
+		if (it1 == map_users.end()) {
+			write(2, "Users not found\n", 26);
+			return (0); ////!!!!
+		}
+		it1->second.setCommand(USER);
+	}
 	//parser message!!!!
 	//
 	return (0);

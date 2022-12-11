@@ -51,3 +51,11 @@
         void User::setPassword(std::string _password){
             password = _password;
         }
+
+        t_command  User::getCommand() {
+            return command;
+        }
+
+        void  User::setCommand(t_command _command) {
+            command = _command;
+        }
