@@ -20,6 +20,8 @@ class Core {
 
 		std::map<int, User> map_users;
 
+		//t_command command;
+
 	public:
 		Core(int port_);
 		~Core();
