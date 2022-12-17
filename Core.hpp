@@ -19,6 +19,8 @@ class Core {
 		int length_message;
 
 		std::map<int, User> map_users;
+		Messenger *storage;
+
 
 		//t_command command;
 
@@ -30,7 +32,7 @@ class Core {
 		int		createNewSocket();
 		int		writeToUser(int current_fd, int recepient_fd); 
 		int		readFromUser(int user_fd);
-		void parseBuffer (std::string buf, int user_fd);
+		// void parseBuffer (std::string buf, User user);
 
 		void	error(int err_type);
 };

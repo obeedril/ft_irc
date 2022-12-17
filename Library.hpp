@@ -46,7 +46,15 @@ enum t_command
 	KICK
 };
 
+typedef struct s_message{
+	std::string cmd;
+	std::string receiver;
+	std::string restMess;
+
+} t_message;
+
 # include "User.hpp"
+# include "Messenger.hpp"
 # include "Server.hpp"
 # include "Core.hpp"
 //# include "ChannelsStorage.hpp"

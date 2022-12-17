@@ -157,56 +157,16 @@ int		Core::writeToUser(int current_fd, int recipient_fd) {
 	return (0);
 };
 
-void Core::parseBuffer(std::string buf, int user_fd){
-
-	std::string command_str;
-	size_t pos; // Olya, privet!!!!!!! 
-	// привееееет! :)
-
-	std::map<int, User>::iterator it1 = map_users.find(user_fd);
-	if (it1 == map_users.end()) {
-		write(2, "Users not found\n", 26);
-		return ; ////!!!!
-	}
-
-	pos = buf.find(" ", 0);
-	size_t posEnd = buf.find("\r\n", pos);
-	if (pos != std::string::npos && posEnd != std::string::npos) {
-		command_str = buf.substr(0, pos);
-		std::string tmp = buf.substr(pos + 1, posEnd);
-
-		it1->second.setMessage(tmp.substr(0, tmp.find("\n") - 1));
-
-		std::cout << "command |" << command_str  << "|" << std::endl;
-		std::cout << "message |" << it1->second.getMessage() << "|" << std::endl;
-
-		std::string commands[8] = {"USER", "NICK",	"PASS",    "QIUT",	"PRIVMSG",	"NOTICE", "JOIN", "KICK"};
-
-		
-		for (int i = 0; i < 8; i++){
-			if (commands[i] == command_str) {
-				it1->second.setCommand(static_cast<t_command>(i));
-			}
-		}
-	}
-
-
-}
 
 int		Core::readFromUser(int user_fd) {
-
-	char local_buf[512] = "/0";
-	length_message = 0;
-
-	length_message = recv(user_fd, local_buf, 512, 0);
+	// Messenger *messenger = new Messenger();
+	storage = new Messenger();
 	std::map<int, User>::iterator it1 = map_users.find(user_fd);
-	it1->second.setMessage(local_buf);
-	
-	// std::cout << "buffer " << it1->second.getMessage() << "|" << std::endl;
-
-	parseBuffer(it1->second.getMessage(), user_fd);
-	
-	//parser message!!!!
-	//
-	return (0);
-};	
+	// std::cout << "first" << it1->first << " second " << it1->second.getMessage() << std::endl;
+	length_message = 0;
+	char tmp[4048];
+	length_message = recv(user_fd, tmp, 42*4096, 0);
+	if (length_message > 0)
+		storage->parseBuffer(tmp, it1->second); 
+	return (length_message);
+};

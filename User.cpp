@@ -52,7 +52,7 @@
             password = _password;
         }
 
-        t_command  User::getCommand() {
+                t_command  User::getCommand() {
             return command;
         }
 
@@ -65,5 +65,6 @@
         }
 
         void User::setMessage(std::string message){
+            this->message.clear();
             this->message = message;
         }

@@ -8,6 +8,7 @@ SRCS		= main.cpp \
 			Core.cpp \
 			Server.cpp \
 			User.cpp \
+			Messenger.cpp
 #ChannelsStorage.cpp
 
 HEADERS		= Library.hpp

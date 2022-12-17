@@ -1,5 +1,5 @@
 #ifndef USER_HPP
-# define USER_HPP
+# define USERHPP
 
 # include "Library.hpp"
 
@@ -7,16 +7,15 @@ class User {
     private:
         int userFd;
         bool isAdminHere;
-        std::string message;
         std::string channelHere;
         std::string login;
         std::string userName;
         std::string password;
+
+        std::string message;
         t_command command;
 
     public:
-
-        int count_cli; ////!!!!
 
         User();
         ~User();
@@ -37,6 +36,7 @@ class User {
 
         t_command getCommand();
         void setCommand(t_command _command);
+
 };
 
 
