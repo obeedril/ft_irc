@@ -4,7 +4,7 @@ NAME		= ircserv
 #-fsanitize=address -fvisibility=hidden -fvisibility-inlines-hidden
 # -std=c++98
 
-SRCS		= main.cpp  Core.cpp User.cpp \
+SRCS		= main.cpp  Core.cpp User.cpp Server.cpp\
 # Server.cpp  \
 # User.cpp    \
 # ChannelsStorage.cpp

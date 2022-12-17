@@ -12,9 +12,10 @@ class User {
         std::string userName;
         std::string password;
 
-    public:
+        std::string message;
+        t_command command;
 
-        int count_cli; ////!!!!
+    public:
 
         User();
         ~User();
@@ -30,6 +31,11 @@ class User {
         void setLogin(std::string _login);
         void setUserName(std::string _userName);
         void setPassword(std::string _password);
+        std::string getMessage();
+        void setMessage(std::string message);
+
+        t_command getCommand();
+        void setCommand(t_command _command);
 
 };
 

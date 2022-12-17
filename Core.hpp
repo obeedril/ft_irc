@@ -20,6 +20,8 @@ class Core {
 
 		std::map<int, User> map_users;
 
+		//int flag_msg;
+
 	public:
 		Core(int port_);
 		~Core();
@@ -30,6 +32,9 @@ class Core {
 		int		readFromUser(int user_fd);
 
 		void	error(int err_type);
+
+		void parser_message(int user_fd, char *bufRead);
+		// void check_message(int user_fd);
 };
 
 #endif

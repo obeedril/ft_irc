@@ -34,10 +34,22 @@
 #define OPERATORS "operators"
 #define COUNT_TOKENS 4
 
+enum t_command
+{
+	NO_COMMAND = -1,
+    USER,
+	NICK,
+	PASS,
+    QIUT,
+	PRIVMSG,
+	NOTICE,
+	JOIN,
+	KICK
+};
 
 // # include "ChannelsStorage.hpp"
 # include "User.hpp"
-//# include "Server.hpp"
+# include "Server.hpp"
 # include "Core.hpp"
 
 
