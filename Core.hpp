@@ -15,12 +15,30 @@ class Core {
 		int count_cli;
 		struct sockaddr_in servaddr;
 		socklen_t len_adr;
+		Server *_irc_serv;
 
 		int length_message;
+		// size_t errorCode;
 
 		std::map<int, User> map_users;
 
-		//t_command command;
+		// Commands
+
+		// int										passCmd(const Messenger &msg, User &user);
+		// int										nickCmd(const Messenger &msg, User &user);
+		// int										userCmd(const Messenger &msg, User &user);
+		int										userCmd(const std::string &msg, int user_fd);
+		// void	setError(size_t code);
+		// size_t	getError();
+		int		replyError(User &user, int err, const std::string &str1, const std::string &str2);
+		// int										quitCmd(const Messenger &msg, User &user);
+		// int										privmsgCmd(const Messenger &msg, User &user);
+		// int										noticeCmd(const Messenger &msg, User &user);
+		// int										joinCmd(const Messenger &msg, User &user);
+		// int										kickCmd(const Messenger &msg, User &user);
+		std::string tostring(std::vector<std::string> &v);
+
+		//int flag_msg;
 
 	public:
 		Core(int port_);
@@ -28,12 +46,15 @@ class Core {
 
 		void	run();
 		int		createNewSocket();
-		int		writeToUser(int current_fd, int recepient_fd); 
+		int		writeToUser(int current_fd); 
 		int		readFromUser(int user_fd);
-		void parseBuffer (std::string buf, int user_fd);
 
 		void	error(int err_type);
+
+		void parser_message(int user_fd, char *bufRead);
+		void setServ(Server *newServ);
+		std::string getServName();
+		// void check_message(int user_fd);
 };
 
 #endif
-

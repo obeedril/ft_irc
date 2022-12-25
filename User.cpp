@@ -24,6 +24,10 @@
             return userName;
         }
 
+        std::string User::getRealName(){
+            return realName;
+        }
+
         std::string User::getPassword(){
             return password;
         }
@@ -48,11 +52,15 @@
             userName = _userName;
         }
 
+        void User::setRealName(std::string _realName){
+            realName = _realName;
+        }
+
         void User::setPassword(std::string _password){
             password = _password;
         }
 
-        t_command  User::getCommand() {
+                t_command  User::getCommand() {
             return command;
         }
 
@@ -65,5 +73,6 @@
         }
 
         void User::setMessage(std::string message){
+            this->message.clear();
             this->message = message;
         }
