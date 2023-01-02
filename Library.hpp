@@ -44,14 +44,15 @@ enum t_command
 	PRIVMSG,
 	NOTICE,
 	JOIN,
-	KICK
+	KICK,
+	BOT
 };
 
 // # include "ChannelsStorage.hpp"
 # include "User.hpp"
 # include "Server.hpp"
+# include "Bot.hpp"
 # include "Core.hpp"
-
 
 
 #endif

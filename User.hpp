@@ -11,6 +11,7 @@ class User {
         std::string login;
         std::string userName;
         std::string password;
+        bool botDialog;
 
         std::string message;
         t_command command;
@@ -37,6 +38,8 @@ class User {
         t_command getCommand();
         void setCommand(t_command _command);
 
+        bool getBotDialog();
+        void setBotDialog(bool botDialog);
 };
 
 

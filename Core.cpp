@@ -60,7 +60,7 @@ void	Core::run() {
 				return ; ////!!!!
 			}
 			if (length_message <= 0) {
-				sprintf(bufWrite, "IRC : client %s just left\n", it1->second.getUserName().c_str());
+				//sprintf(bufWrite, "IRC : client %s just left\n", it1->second.getUserName().c_str());
 				writeToUser(s);
 				FD_CLR(s, &active_);
 				close(s);
@@ -95,6 +95,7 @@ int		Core::createNewSocket() {
 	new_user.setUserFd(user_fd);
 	new_user.setUserName("Default_name");
 	new_user.setCommand(NO_COMMAND);
+	new_user.setBotDialog(false);
 	map_users.insert(std::pair<int, User> (user_fd, new_user));
 
 	//new_user.count_cli = count_cli;
@@ -118,9 +119,16 @@ void	Core::error(int err_type) {
 int		Core::writeToUser(int current_fd) {
 	std::map<int, User>::iterator it1 = map_users.find(current_fd);
 	std::cout << "write: " << current_fd << std::endl;
-	for(int s = 0; s <= max; ++s) {
-		if (FD_ISSET(s, &write_) && s != current_fd) {
-			send(s, it1->second.getMessage().c_str(), it1->second.getMessage().length(), 0);
+	std::cout << "it1->second.getBotDialog(): " << it1->second.getBotDialog() << std::endl;
+	if (it1->second.getBotDialog() == true) {
+		std::cout << "send from BOT: " << it1->second.getMessage().c_str() << std::endl;
+		send(current_fd, it1->second.getMessage().c_str(), it1->second.getMessage().length(), 0);
+	}
+	else {
+		for(int s = 0; s <= max; ++s) {
+			if (FD_ISSET(s, &write_) && s != current_fd) {
+				send(s, it1->second.getMessage().c_str(), it1->second.getMessage().length(), 0);
+			}
 		}
 	}
 	it1->second.setMessage("");
@@ -151,14 +159,25 @@ void Core::parser_message(int user_fd, char *bufRead) {
 
 	it1 = map_users.find(user_fd);
 
-	istr = strstr(bufRead, "User");
+	istr = strstr(bufRead, "USER");
 	if (istr != NULL)
 		it1->second.setCommand(USER);
 	else 
 		it1->second.setCommand(NO_COMMAND);
+	//----------- BOT ---------
+	istr = strstr(bufRead, "BOT");
+	if (istr != NULL || it1->second.getBotDialog() == true)
+		it1->second.setCommand(BOT);
+	else 
+		it1->second.setCommand(NO_COMMAND);
+	//----------- BOT ---------
 	it1->second.setMessage(tmpstr);
 	switch (it1->second.getCommand())
 		{
+		case BOT: //----------- BOT ---------
+			initBot(&it1->second, tmpstr);
+			break;
+			//----------- BOT ---------
 		case USER:
 			//
 			sprintf(tmp, "%d %s\n", 311, " USER guest tolmoon tolsun :Hard Code");
@@ -192,3 +211,19 @@ void Core::parser_message(int user_fd, char *bufRead) {
 			break;
 		}
 };
+
+void Core::initBot(User *my_client, std::string msg) {
+	std::map<int, Bot>::iterator it1 = map_robots.find(my_client->getUserFd());
+	if (it1 == map_robots.end()) {
+		std::cout << "new BOT: " << msg << std::endl;
+		my_client->setBotDialog(true);
+		Bot new_bot(my_client);
+		map_robots.insert(std::pair<int, Bot> (my_client->getUserFd(), new_bot));
+		new_bot.callBot(msg);
+	}
+	else {
+		std::cout << "old BOT: " << msg << std::endl;
+		it1->second.callBot(msg);
+	}
+}
+

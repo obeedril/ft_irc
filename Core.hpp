@@ -9,7 +9,7 @@ class Core {
 		int listen_sock;
 		int id[64*1024];
 		int port;
-		char bufRead[42*4096], str[42*4096], bufWrite[42*4097];
+		//char bufRead[42*4096], str[42*4096], bufWrite[42*4097];
 		int max;
 		fd_set read_, write_, active_;
 		int count_cli;
@@ -20,6 +20,7 @@ class Core {
 
 		std::map<int, User> map_users;
 
+		std::map<int, Bot> map_robots;
 		//int flag_msg;
 
 	public:
@@ -35,6 +36,7 @@ class Core {
 
 		void parser_message(int user_fd, char *bufRead);
 		// void check_message(int user_fd);
+		void initBot(User *my_client, std::string msg);
 };
 
 #endif
