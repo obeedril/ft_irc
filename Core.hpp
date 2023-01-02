@@ -19,10 +19,13 @@ class Core {
 		int length_message;
 
 		std::map<int, User> map_users;
-		Messenger *storage;
+		
+		Messenger *storage_messages;
+		Message *message;
 
 
-		//t_command command;
+
+		//int flag_msg;
 
 	public:
 		Core(int port_);
@@ -30,12 +33,15 @@ class Core {
 
 		void	run();
 		int		createNewSocket();
-		int		writeToUser(int current_fd, int recepient_fd); 
+		int		writeToUser(int current_fd); 
 		int		readFromUser(int user_fd);
-		// void parseBuffer (std::string buf, User user);
 
 		void	error(int err_type);
+
+		void parser_message(int user_fd, char *bufRead);
+		void setStorage_messages(Messenger *_storage_messages);
+		Messenger *getStorage_messages();
+		// void check_message(int user_fd);
 };
 
 #endif
-

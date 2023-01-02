@@ -1,6 +1,8 @@
 # include "Library.hpp"
 
 Core::Core(int port_) {
+
+	storage_messages = new Messenger();
 	listen_sock = 0;
 	this->port = port_;
 	max = 0;
@@ -40,7 +42,6 @@ Core::~Core() {
 };
 
 void	Core::run() {
-
 	read_ = write_ =  active_;
 	if (select(max + 1, &read_, &write_, NULL, NULL) < 0) { 
 		return ;
@@ -51,60 +52,33 @@ void	Core::run() {
 			if (res < 0) {
 				return ;
 			}
-			break;
+			break ;
 		}
 		if (FD_ISSET(s, &read_) && s != listen_sock) {
 			readFromUser(s);
-			
 			std::map<int, User>::iterator it1 = map_users.find(s);
 			if (it1 == map_users.end()) {
 				write(2, "Users not found\n", 26);
 				return ; ////!!!!
 			}
 			if (length_message <= 0) {
-				sprintf(bufWrite, "IRC : client %d just left\n", it1->second.getUserFd());
-				writeToUser(s, 0);
+				sprintf(bufWrite, "IRC : client %s just left\n", it1->second.getUserName().c_str());
+				writeToUser(s);
 				FD_CLR(s, &active_);
 				close(s);
 				break ;
 			}
 			else {
-				for (int i = 0, j = 0; i < length_message; ++i, ++j) {
-					str[j] = bufRead[i];
-					if (str[j] == '\n') {
-						str[j] = '\0';
-						switch (it1->second.getCommand())
-						{
-						case USER:
-							//
-							sprintf(bufWrite, "%d %s\n", 311, " USER guest tolmoon tolsun :Ronnie Reagan");
-							break;
-						case NICK:
-							//
-							break;
-						case PASS:
-							//
-							break;
-						case PRIVMSG:
-							//
-							break;
-						case NOTICE:
-							//
-							break;
-						case JOIN:
-							//
-							break;
-						case KICK:
-							//
-							break;
-						default:
-							sprintf(bufWrite, "%s %d: %s\n", it1->second.getUserName().c_str(), it1->second.getUserFd(), str);
-							break;
-						}
-						writeToUser(s, 0); // отправка конкретному пользователю
-						j = -1;
-					}
-				}
+				writeToUser(s);
+				// for (int i = 0, j = 0; i < length_message; ++i, ++j) {
+					// str[j] = bufRead[i];
+					// if (str[j] == '\n') {
+					// 	str[j] = '\0';
+					// 	check_message(s);
+					// 	writeToUser(s);
+					// 	j = -1;
+					// }
+				// }
 			}
 		}
 	}
@@ -125,14 +99,18 @@ int		Core::createNewSocket() {
 	new_user.setCommand(NO_COMMAND);
 	map_users.insert(std::pair<int, User> (user_fd, new_user));
 
-	new_user.count_cli = count_cli;
+	//new_user.count_cli = count_cli;
 	id[user_fd] = count_cli;
 	count_cli++;
 	FD_SET(user_fd, &active_);
-
-	sprintf(bufWrite, "IRC : client %d just arrived\n", new_user.getUserFd());
-	new_user.setMessage(static_cast<std::string>(bufWrite));
-	writeToUser(user_fd, 0);
+	// std::map<int, User>::iterator it1 = map_users.find(user_fd);
+	char tmp[4048];
+	std::string str;
+	sprintf(tmp, "IRC : client %d just arrived\n", new_user.getUserFd());
+	message->setRestMess(str.append(tmp));
+	storage_messages->insertMessage(new_user, *message);
+	// it1->second.setMessage(static_cast<std::string>(tmp));
+	writeToUser(user_fd);
 	return (0);
 };
 
@@ -142,31 +120,101 @@ void	Core::error(int err_type) {
 	exit(1);
 };
 
-int		Core::writeToUser(int current_fd, int recipient_fd) {
-	std::map<int, User>::iterator it1 = map_users.find(current_fd);
-	if (recipient_fd == 0){
-		for(int s = 0; s <= max; ++s) {
-			if (FD_ISSET(s, &write_) && s != current_fd) {
-				send(s, it1->second.getMessage().c_str(), it1->second.getMessage().length(), 0);
-			
-			}
+int		Core::writeToUser(int current_fd) {
+	// std::map<int, User>::iterator it1 = map_users.find(current_fd);
+	std::map<int, Message>::iterator it1 = storage_messages->getMessages().find(current_fd);
+	std::cout << "write: " << current_fd << std::endl;
+	for(int s = 0; s <= max; ++s) {
+		if (FD_ISSET(s, &write_) && s != current_fd) {
+			//std::cout << "it1->second.restMess " << it1->second.restMess << std::endl;
+			// send(s, it1->second.getMessage().c_str(), it1->second.getMessage().length(), 0);
+			send(s, it1->second.getRestMess().c_str(), it1->second.getRestMess().length(), 0);
 		}
-	} else {
-		send(recipient_fd, it1->second.getMessage().c_str(), it1->second.getMessage().length(), 0);
 	}
+	//it1->second.setMessage("");
 	return (0);
 };
 
-
 int		Core::readFromUser(int user_fd) {
-	// Messenger *messenger = new Messenger();
-	storage = new Messenger();
+	message = new Message;
+	// storage_messages->insertMessage();
+	std::string str;
 	std::map<int, User>::iterator it1 = map_users.find(user_fd);
-	// std::cout << "first" << it1->first << " second " << it1->second.getMessage() << std::endl;
 	length_message = 0;
 	char tmp[4048];
 	length_message = recv(user_fd, tmp, 42*4096, 0);
-	if (length_message > 0)
-		storage->parseBuffer(tmp, it1->second); 
+	if (length_message > 0){
+		// parser_message(user_fd, tmp);
+		message->setRawMessage(str.append(tmp));
+		storage_messages->insertMessage();
+		storage_messages->parseBuffer(message, it1->second);
+	}
+
 	return (length_message);
 };
+
+void Core::setStorage_messages(Messenger *_storage_messeges){
+	storage_messages = _storage_messeges;
+};
+Messenger* Core::getStorage_messages(){
+	return storage_messages;
+};
+
+
+
+// void Core::parser_message(int user_fd, char *bufRead) {
+// 	char							tmp[4048];
+// 	std::string						tmpstr(bufRead);
+// 	size_t							pos;
+// 	std::map<int, User>::iterator	it1;
+// 	char							*istr;
+
+// 	pos = tmpstr.find("\r\n");
+// 	if (pos != std::string::npos) {
+// 		tmpstr = tmpstr.substr(0, pos);
+// 		std::cout << " CUT: " << tmpstr  << std::endl;
+// 	}
+
+// 	it1 = map_users.find(user_fd);
+
+// 	istr = strstr(bufRead, "User");
+// 	if (istr != NULL)
+// 		it1->second.setCommand(USER);
+// 	else 
+// 		it1->second.setCommand(NO_COMMAND);
+// 	it1->second.setMessage(tmpstr);
+// 	switch (it1->second.getCommand())
+// 		{
+// 		case USER:
+// 			//
+// 			sprintf(tmp, "%d %s\n", 311, " USER guest tolmoon tolsun :Hard Code");
+// 			it1->second.setMessage(static_cast<std::string>(tmp));
+// 			break;
+// 		case NICK:
+// 			//
+// 			break;
+// 		case PASS:
+// 			//
+// 			break;
+// 		case PRIVMSG:
+// 			//
+// 			break;
+// 		case NOTICE:
+// 			//
+// 			break;
+// 		case JOIN:
+// 			//
+// 			break;
+// 		case KICK:
+// 			//
+// 			break;
+// 		default:
+// 			std::cout << "default Message: " << it1->second.getMessage().c_str() << std::endl;
+// 			sprintf(tmp, "%s %d: %s\n", it1->second.getUserName().c_str(),
+// 			it1->second.getUserFd(), it1->second.getMessage().c_str());
+// 			std::cout << "new Message: " << tmp << std::endl;
+// 			std::string tmpstr(tmp);
+// 			it1->second.setMessage(tmpstr);
+// 			break;
+// 		}
+// };

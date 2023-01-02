@@ -1,6 +1,7 @@
 #include "Library.hpp"
 
-        User::User(){}
+        User::User(){
+        }
 
         User::~User(){}
 
@@ -60,11 +61,11 @@
             command = _command;
         }
 
-        std::string User::getMessage(){
-            return(message);
-        }
+        // std::string User::getMessage(){
+        //     return(message);
+        // }
 
-        void User::setMessage(std::string message){
-            this->message.clear();
-            this->message = message;
-        }
+        // void User::setMessage(std::string message){
+        //     this->message.clear();
+        //     this->message = message;
+        // }
