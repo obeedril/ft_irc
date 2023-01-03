@@ -39,7 +39,7 @@ class Core {
 		void	error(int err_type);
 
 		void parser_message(int user_fd, char *bufRead);
-		void setStorage_messages(Messenger *_storage_messages);
+		// void setStorage_messages(Messenger *_storage_messages);
 		Messenger *getStorage_messages();
 		// void check_message(int user_fd);
 };

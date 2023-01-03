@@ -1,6 +1,12 @@
 #include "Library.hpp"
 
-    Message::Message(){}
+    Message::Message(){
+        rawMessage = "";
+        cmd = "";
+	    receiver = "";
+        restMess = "";
+	    prefix = "";
+    }
     Message::~Message(){}
 
     void Message::setRawMessage(std::string _rawMessage){
@@ -11,10 +17,12 @@
         cmd = _cmd;
     }
     void Message::setRestMess(std::string _restMess){
+        // restMess.clear();
+        // restMess = "";
         restMess = _restMess;
     }
-    void Message::setPrefix(std::string _restMess){
-        restMess = _restMess;
+    void Message::setPrefix(std::string _prefix){
+        prefix = _prefix;
     }
     std::string Message::getCmd(){
         return cmd;

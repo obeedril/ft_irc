@@ -94,6 +94,7 @@ int		Core::createNewSocket() {
 	}
 
 	User new_user;
+	Message new_message;
 	new_user.setUserFd(user_fd);
 	new_user.setUserName("Default_name");
 	new_user.setCommand(NO_COMMAND);
@@ -106,9 +107,12 @@ int		Core::createNewSocket() {
 	// std::map<int, User>::iterator it1 = map_users.find(user_fd);
 	char tmp[4048];
 	std::string str;
-	sprintf(tmp, "IRC : client %d just arrived\n", new_user.getUserFd());
-	message->setRestMess(str.append(tmp));
-	storage_messages->insertMessage(new_user, *message);
+	sprintf(tmp, "IRC : client %d just arrived\n", user_fd); // new_user.getUserFd()
+	new_message.setRestMess(str.append(tmp));
+	// std::cout << "str " << str << std::endl;
+	storage_messages->insertMessage(user_fd, new_message); // new_user.getUserFd()
+	// std::cout << "new mess " << new_message.getRestMess() << std::endl;
+	// std::cout << "storage_messages->getMessageByFd(new_user.getUserFd()) " << storage_messages->getMessageByFd(new_user.getUserFd()) << std::endl;
 	// it1->second.setMessage(static_cast<std::string>(tmp));
 	writeToUser(user_fd);
 	return (0);
@@ -122,13 +126,16 @@ void	Core::error(int err_type) {
 
 int		Core::writeToUser(int current_fd) {
 	// std::map<int, User>::iterator it1 = map_users.find(current_fd);
-	std::map<int, Message>::iterator it1 = storage_messages->getMessages().find(current_fd);
+	// std::map<int, Message>::iterator it = storage_messages->getMessages().find(current_fd);
+	std::string str = storage_messages->getMessageByFd(current_fd);
 	std::cout << "write: " << current_fd << std::endl;
 	for(int s = 0; s <= max; ++s) {
 		if (FD_ISSET(s, &write_) && s != current_fd) {
-			//std::cout << "it1->second.restMess " << it1->second.restMess << std::endl;
+			//  std::cout << "str " << str << std::endl;
+			// std::cout << "it1->second.restMess " << it->second.getRestMess() << std::endl;
 			// send(s, it1->second.getMessage().c_str(), it1->second.getMessage().length(), 0);
-			send(s, it1->second.getRestMess().c_str(), it1->second.getRestMess().length(), 0);
+			send(s, str.c_str(), str.length(), 0);
+			storage_messages->deleteMessage(current_fd);
 		}
 	}
 	//it1->second.setMessage("");
@@ -136,26 +143,27 @@ int		Core::writeToUser(int current_fd) {
 };
 
 int		Core::readFromUser(int user_fd) {
-	message = new Message;
+	Message new_message;
 	// storage_messages->insertMessage();
 	std::string str;
-	std::map<int, User>::iterator it1 = map_users.find(user_fd);
+	//std::map<int, User>::iterator it1 = map_users.find(user_fd);
 	length_message = 0;
 	char tmp[4048];
 	length_message = recv(user_fd, tmp, 42*4096, 0);
 	if (length_message > 0){
 		// parser_message(user_fd, tmp);
-		message->setRawMessage(str.append(tmp));
-		storage_messages->insertMessage();
-		storage_messages->parseBuffer(message, it1->second);
+		new_message.setRawMessage(str.append(tmp));
+		//new_message.setRawMessage(str.append("\r\n"));
+		storage_messages->insertMessage(user_fd, new_message);
+		storage_messages->parseBuffer(user_fd);
 	}
 
 	return (length_message);
 };
 
-void Core::setStorage_messages(Messenger *_storage_messeges){
-	storage_messages = _storage_messeges;
-};
+// void Core::setStorage_messages(Messenger &_storage_messeges){
+// 	storage_messages = _storage_messeges;
+// };
 Messenger* Core::getStorage_messages(){
 	return storage_messages;
 };

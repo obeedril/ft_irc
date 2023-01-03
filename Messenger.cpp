@@ -7,8 +7,14 @@ Messenger::~Messenger(){
 
 }
 
-void Messenger::insertMessage(User &user, Message &mess){
-	messages.insert(std::pair<int, Message> (user.getUserFd(), mess));
+void Messenger::insertMessage(int senderFd, Message mess){
+	messages.insert(std::pair<int, Message> (senderFd, mess));
+}
+
+void Messenger::deleteMessage(int senderFd){
+	std::map<int, Message>::iterator it = messages.find(senderFd);
+	if (it != messages.end())
+		messages.erase(it);
 }
 
 void Messenger::setMessages(std::map<int, Message> _messages){
@@ -19,24 +25,26 @@ std::map<int, Message> Messenger::getMessages(){
 	return messages;
 }
 
-// void Messenger::setMess(Message _mess){
-// 	mess = _mess;
-// }
+std::string Messenger::getMessageByFd(int senderFd){
+	std::map<int, Message>::iterator it = messages.find(senderFd);
+	if (it != messages.end())
+		return it->second.getRestMess();
+	return "";
+}
 
-// Message Messenger::getMess(){
-// 	return mess;
-// }
 
-// void Messenger::parseBuffer(std::string buf, int user_fd){
+void Messenger::parseBuffer(int senderFd){
 
-	void Messenger::parseBuffer(Message &message, User &user){
-	
-	// std::string message;
-	// std::string command;
-	size_t pos; // Olya, privet!!!!!!! 
-	// привееееет! :)
+	std::cout << "AAAAAA" << std::endl;
 
-	// message.append(buf);
+// std::string message;
+// std::string command;
+size_t pos; // Olya, privet!!!!!!! 
+
+std::map<int, Message>::iterator it1 = messages.find(senderFd);
+if (it1 != messages.end()){
+
+	std::cout << "BBBB" << std::endl;
 
 
 	// std::map<int, User>::iterator it1 = map_users.find(user_fd);
@@ -45,30 +53,31 @@ std::map<int, Message> Messenger::getMessages(){
 	// 	return ; ////!!!!
 	// }
 
-	pos = message.getRawMessage().find(":", 0);
-	size_t posEnd = message.getRawMessage().find("\r\n", pos);
+	pos = it1->second.getRawMessage().find(":", 0);
+	size_t posEnd = it1->second.getRawMessage().find("\r\n", pos);
 	if (pos != std::string::npos){
-		message.setPrefix(message.getRawMessage().substr(0, pos));
-		message.setRawMessage(message.getRawMessage().substr(pos + 1, posEnd));
+		it1->second.setPrefix(it1->second.getRawMessage().substr(0, pos));
+		it1->second.setRawMessage(it1->second.getRawMessage().substr(pos + 1, posEnd));
 	}
-
-	pos = message.getRawMessage().find(" ", 0);
+	std::cout << "CCCCCC" << std::endl;
+	pos = it1->second.getRawMessage().find(" ", 0);
 	if (pos != std::string::npos && posEnd != std::string::npos) {
-		message.setCmd(message.getRawMessage().substr(0, pos));
-		message.setRawMessage(message.getRawMessage().substr(pos + 1, posEnd));
+		std::cout << "DDDDD" << std::endl;
+		it1->second.setCmd(it1->second.getRawMessage().substr(0, pos));
+		it1->second.setRawMessage(it1->second.getRawMessage().substr(pos + 1, posEnd));
 
 		// pos = message.find(" ", 0);
 		// mess.receiver = message.substr(0, pos);
 		// message = message.substr(pos + 1, posEnd);
-		message.setRestMess(message.getRawMessage().substr(0, message.getRawMessage().find("\n") - 1));
+		it1->second.setRestMess(it1->second.getRawMessage().substr(0, it1->second.getRawMessage().find("\n") - 1));
 
 		// std::string tmp = message.substr(pos + 1, posEnd);
 
 		// it1->second.setMessage(tmp.substr(0, tmp.find("\n") - 1)); // добавить
 
-		// std::cout << "command |" << mess.getCmd()  << "|" << std::endl;
+		std::cout << "command |" << it1->second.getCmd()  << "|" << std::endl;
 		// std::cout << "message |" << mess.receiver << "|" << std::endl;
-		// std::cout << "restMess |" << mess.getRestMess() << "|" << std::endl;
+		std::cout << "restMess |" << it1->second.getRestMess() << "|" << std::endl;
 
 		// pair<iterator,bool> insert (const value_type& val)
 		// messages.insert(std::pair<int, t_message> (user.getUserFd(), mess));
@@ -83,6 +92,7 @@ std::map<int, Message> Messenger::getMessages(){
 		// 	}
 		// }
 	}
+}
 
 
 }

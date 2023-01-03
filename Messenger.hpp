@@ -13,11 +13,13 @@ private:
 public:
     Messenger();
     ~Messenger();
-   void parseBuffer(Message &message, User &user);
+   void parseBuffer(int senderFd);
 
    void setMessages(std::map<int, Message> _messages);
    std::map<int, Message> getMessages();
-   void insertMessage(User &user, Message &mess);
+   void insertMessage(int senderFd, Message mess);
+   void deleteMessage(int senderFd);
+   std::string getMessageByFd(int senderFd);
 
 //    void setMess(Message _mess);
 //    Message getMess();
