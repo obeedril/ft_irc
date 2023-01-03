@@ -27,6 +27,8 @@
 # include <ctime>
 # include <iomanip>
 
+#include <cmath> //для робота
+
 #define PATH_TO_CONFIG "config.conf"
 #define SERV_NAME "serverName"
 #define ADMIN_NAME "adminName"
@@ -46,6 +48,19 @@ enum t_command
 	JOIN,
 	KICK,
 	BOT
+};
+
+enum t_bot_command
+{
+	HELLO_BOT,
+    PLAY,
+    WEATHER,
+    BYE_BOT,
+    READY,
+    NO_COMM,
+	YES,
+	NO,
+	FINISH
 };
 
 // # include "ChannelsStorage.hpp"

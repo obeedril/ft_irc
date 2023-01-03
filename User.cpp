@@ -70,10 +70,10 @@
 			this->message = message;
 		}
 
-		bool User::getBotDialog() {
+		t_bot_command User::getBotDialog() {
 			return(botDialog);
 		}
 
-		void User::setBotDialog(bool botDialog) {
+		void User::setBotDialog(t_bot_command botDialog) {
 			this->botDialog = botDialog;
 		}

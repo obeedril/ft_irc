@@ -95,7 +95,7 @@ int		Core::createNewSocket() {
 	new_user.setUserFd(user_fd);
 	new_user.setUserName("Default_name");
 	new_user.setCommand(NO_COMMAND);
-	new_user.setBotDialog(false);
+	new_user.setBotDialog(NO);
 	map_users.insert(std::pair<int, User> (user_fd, new_user));
 
 	//new_user.count_cli = count_cli;
@@ -120,9 +120,12 @@ int		Core::writeToUser(int current_fd) {
 	std::map<int, User>::iterator it1 = map_users.find(current_fd);
 	std::cout << "write: " << current_fd << std::endl;
 	std::cout << "it1->second.getBotDialog(): " << it1->second.getBotDialog() << std::endl;
-	if (it1->second.getBotDialog() == true) {
+	if (it1->second.getBotDialog() != NO) {
 		std::cout << "send from BOT: " << it1->second.getMessage().c_str() << std::endl;
 		send(current_fd, it1->second.getMessage().c_str(), it1->second.getMessage().length(), 0);
+		if (it1->second.getBotDialog() == FINISH) {
+			it1->second.setBotDialog(NO);
+		}
 	}
 	else {
 		for(int s = 0; s <= max; ++s) {
@@ -166,7 +169,7 @@ void Core::parser_message(int user_fd, char *bufRead) {
 		it1->second.setCommand(NO_COMMAND);
 	//----------- BOT ---------
 	istr = strstr(bufRead, "BOT");
-	if (istr != NULL || it1->second.getBotDialog() == true)
+	if (istr != NULL || it1->second.getBotDialog() != NO)
 		it1->second.setCommand(BOT);
 	else 
 		it1->second.setCommand(NO_COMMAND);
@@ -216,7 +219,7 @@ void Core::initBot(User *my_client, std::string msg) {
 	std::map<int, Bot>::iterator it1 = map_robots.find(my_client->getUserFd());
 	if (it1 == map_robots.end()) {
 		std::cout << "new BOT: " << msg << std::endl;
-		my_client->setBotDialog(true);
+		my_client->setBotDialog(YES);
 		Bot new_bot(my_client);
 		map_robots.insert(std::pair<int, Bot> (my_client->getUserFd(), new_bot));
 		new_bot.callBot(msg);
