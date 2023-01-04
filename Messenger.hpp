@@ -20,7 +20,7 @@ public:
    void deleteMessage(int senderFd);
    std::string getRawMessageByFd(int senderFd);
 
-   std::string parsRecvStr(std::string str);
+  void parsRecvStr(std::string str, int senderFd);
 
 
 //    void setMess(Message _mess);
