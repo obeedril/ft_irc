@@ -14,6 +14,8 @@ class User {
         std::string password;
         bool flagRegistred;
 
+        t_bot_command botDialog; //for robot
+
     public:
         User();
         ~User();
@@ -32,9 +34,11 @@ class User {
         void setUserName(std::string _userName);
         void setRealName(std::string _realName);
         void setPassword(std::string _password);
+        
         void setRegistFlag(bool);
 
+        t_bot_command getBotDialog();
+        void setBotDialog(t_bot_command botDialog);
 };
-
 
 #endif

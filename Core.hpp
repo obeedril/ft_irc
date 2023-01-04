@@ -9,9 +9,8 @@ class Core {
 		int listen_sock;
 		int id[64*1024];
 		int port;
-		// char bufRead[42*4096];
-		// char str[42*4096];
 		char bufWrite[42*4097];
+
 		int max;
 		fd_set read_, write_, active_;
 		int count_cli;
@@ -23,6 +22,7 @@ class Core {
 		// size_t errorCode;
 
 		std::map<int, User> map_users;
+
 		
 		Messenger *storage_messages;
 		// Message *message;

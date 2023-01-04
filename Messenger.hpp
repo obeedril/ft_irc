@@ -6,8 +6,8 @@
 class Messenger {
 
 private:
-
-    std::map<int, Message> messages;
+    std::map<int, Message>  messages;
+    std::map<int, Bot>      map_robots;
 
 public:
     Messenger();
@@ -23,6 +23,8 @@ public:
 
   void parsRecvStr(std::string str, User* sender);
 
+  std::string initBot(User *my_client, std::string msg);
+  void deleteBot(int senderFd);
 
 //    void setMess(Message _mess);
 //    Message getMess();
