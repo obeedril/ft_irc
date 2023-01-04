@@ -13,7 +13,7 @@ class User {
         std::string password;
 
         //std::string message;
-        t_command command;
+        // t_command command;
 
     public:
 
@@ -34,8 +34,8 @@ class User {
         // std::string getMessage();
         // void setMessage(std::string message);
 
-        t_command getCommand();
-        void setCommand(t_command _command);
+        // t_command getCommand();
+        // void setCommand(t_command _command);
 
 };
 

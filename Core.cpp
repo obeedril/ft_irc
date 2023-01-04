@@ -151,10 +151,12 @@ int		Core::readFromUser(int user_fd) {
 	length_message = 0;
 	char tmp[4048];
 	length_message = recv(user_fd, tmp, 42*4096, 0);
+	str.append(tmp);
+	str = str.substr(0, str.find("\r\n", 0)+1);
 	if (length_message > 0){
 		// parser_message(user_fd, tmp);
 
-		cmd = storage_messages->parsRecvStr(str.append(tmp));
+		cmd = storage_messages->parsRecvStr(str);
 		if (cmd.length() > 0)
 			new_message.setCmd(cmd);
 		new_message.setRawMessage(str);
