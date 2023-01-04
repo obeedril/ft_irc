@@ -15,6 +15,8 @@ class User {
         bool flagRegistred;
         Server *_irc_serv;
 
+        t_bot_command botDialog; //for robot
+
     public:
         User(Server *new_irc_serv);
         ~User();
@@ -34,11 +36,13 @@ class User {
         void setUserName(std::string _userName);
         void setRealName(std::string _realName);
         void setPassword(std::string _password);
+        
         void setRegistFlag(bool);
         void setServ(Server *newServ);
 
 
+        t_bot_command getBotDialog();
+        void setBotDialog(t_bot_command botDialog);
 };
-
 
 #endif

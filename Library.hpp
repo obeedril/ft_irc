@@ -27,6 +27,8 @@
 # include <ctime>
 # include <iomanip>
 
+#include <cmath> //для робота
+
 #define PATH_TO_CONFIG "config.conf"
 #define SERV_NAME "serverName"
 #define ADMIN_NAME "adminName"
@@ -50,14 +52,26 @@ typedef struct s_message{
 
 } t_message;
 
+enum t_bot_command
+{
+	HELLO_BOT,
+    PLAY,
+    WEATHER,
+    BYE_BOT,
+    READY,
+    NO_COMM,
+	YES,
+	NO,
+	FINISH
+};
+
 // # include "ChannelsStorage.hpp"
 # include "Server.hpp"
 # include "Errors.hpp"
 # include "User.hpp"
 # include "Message.hpp"
+# include "Bot.hpp"
 # include "Messenger.hpp"
 # include "Core.hpp"
-
-
 
 #endif
