@@ -152,7 +152,7 @@ int		Core::readFromUser(int user_fd) {
 	// storage_messages->insertMessage();
 	std::string str;
 	std::string cmd;
-	//std::map<int, User>::iterator it1 = map_users.find(user_fd);
+	// std::map<int, User>::iterator it1 = map_users.find(user_fd);
 	length_message = 0;
 	char tmp[4048];
 	length_message = recv(user_fd, tmp, 42*4096, 0);
@@ -163,7 +163,7 @@ int		Core::readFromUser(int user_fd) {
 
 		new_message.setRawMessage(str);
 		storage_messages->insertMessage(user_fd, new_message);
-		storage_messages->parsRecvStr(str, user_fd);
+		storage_messages->parsRecvStr(str, &(map_users.find(user_fd))->second);
 	
 		//new_message.setRawMessage(str.append(tmp));
 		//new_message.setRawMessage(str.append("\r\n"));

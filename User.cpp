@@ -1,6 +1,7 @@
 #include "Library.hpp"
 
 User::User(){
+    flagRegistred = false;
 }
 
 User::~User(){}
@@ -33,6 +34,10 @@ std::string User::getPassword(){
     return password;
 }
 
+bool User::getRegistFlag(){
+    return flagRegistred;
+}
+
 void User::setUserFd(int _userFd){
     userFd = _userFd;
 }
@@ -59,4 +64,8 @@ void User::setRealName(std::string _realName){
 
 void User::setPassword(std::string _password){
     password = _password;
+}
+
+void User::setRegistFlag(bool flag){
+    flagRegistred = flag;
 }
