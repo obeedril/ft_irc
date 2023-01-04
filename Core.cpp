@@ -97,7 +97,7 @@ int		Core::createNewSocket() {
 	Message new_message;
 	new_user.setUserFd(user_fd);
 	new_user.setUserName("Default_name");
-	new_user.setCommand(NO_COMMAND);
+	// new_user.setCommand(NO_COMMAND);
 	map_users.insert(std::pair<int, User> (user_fd, new_user));
 
 	//new_user.count_cli = count_cli;
