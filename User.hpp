@@ -13,11 +13,12 @@ class User {
         std::string realName; //realname
         std::string password;
         bool flagRegistred;
+        Server *_irc_serv;
 
         t_bot_command botDialog; //for robot
 
     public:
-        User();
+        User(Server *new_irc_serv);
         ~User();
         int getUserFd();
         bool getIsAdminHere();
@@ -26,6 +27,7 @@ class User {
         std::string getUserName(); //username
         std::string getRealName(); //realname
         std::string getPassword();
+        std::string getServName();
         bool getRegistFlag();
         void setUserFd(int _userFd);
         void setIsAdminHere(bool _isAdminHere);
@@ -36,6 +38,8 @@ class User {
         void setPassword(std::string _password);
         
         void setRegistFlag(bool);
+        void setServ(Server *newServ);
+
 
         t_bot_command getBotDialog();
         void setBotDialog(t_bot_command botDialog);

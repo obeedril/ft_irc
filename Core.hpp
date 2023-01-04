@@ -32,10 +32,10 @@ class Core {
 		// int										passCmd(const Messenger &msg, User &user);
 		// int										nickCmd(const Messenger &msg, User &user);
 		// int										userCmd(const Messenger &msg, User &user);
-		int										userCmd(const std::string &msg, int user_fd);
+		// int										userCmd(const std::string &msg, int user_fd);
 		// void	setError(size_t code);
 		// size_t	getError();
-		int		replyError(User &user, int err, const std::string &str1, const std::string &str2);
+		// int		replyError(User &user, int err, const std::string &str1, const std::string &str2);
 		// int										quitCmd(const Messenger &msg, User &user);
 		// int										privmsgCmd(const Messenger &msg, User &user);
 		// int										noticeCmd(const Messenger &msg, User &user);

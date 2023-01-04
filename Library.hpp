@@ -66,12 +66,12 @@ enum t_bot_command
 };
 
 // # include "ChannelsStorage.hpp"
+# include "Server.hpp"
 # include "Errors.hpp"
 # include "User.hpp"
 # include "Message.hpp"
 # include "Bot.hpp"
 # include "Messenger.hpp"
-# include "Server.hpp"
 # include "Core.hpp"
 
 #endif

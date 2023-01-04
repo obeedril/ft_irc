@@ -1,7 +1,8 @@
 #include "Library.hpp"
 
-User::User(){
+User::User(Server *new_irc_serv){
     flagRegistred = false;
+    _irc_serv = new_irc_serv;
 }
 
 User::~User(){}
@@ -36,6 +37,10 @@ std::string User::getPassword(){
 
 bool User::getRegistFlag(){
     return flagRegistred;
+}
+
+std::string User::getServName() {
+	return _irc_serv->getServName();
 }
 
 void User::setUserFd(int _userFd){
@@ -76,5 +81,9 @@ void User::setBotDialog(t_bot_command botDialog) {
 
 void User::setRegistFlag(bool flag){
     flagRegistred = flag;
+}
+
+void User::setServ(Server *newServ) {
+	_irc_serv = newServ;
 }
 
