@@ -9,7 +9,9 @@ Server::Server(int port, const std::string &password) {
 	_configTokens.push_back(OPERATORS);
 };
 
-
+std::string	Server::getServName() {
+	return _serverName;
+}
 
 
 //   *** удаление пробелов, кавычек и ; ***

@@ -1,4 +1,3 @@
-
 #ifndef MESSENGER_HPP
 # define MESSENGER_HPP
 
@@ -8,7 +7,6 @@ class Messenger {
 
 private:
 
-    // Message mess;
     std::map<int, Message> messages;
 
 public:
@@ -27,8 +25,6 @@ public:
 
 //    void setMess(Message _mess);
 //    Message getMess();
-
-
 
 };
 

@@ -17,7 +17,8 @@ HEADERS		= Library.hpp
 OBJS		=	$(SRCS:.cpp=.o)
 
 CC			=	g++
-# CC			=	c++ !!!! заменить!!! 
+# CC			=	c++ 
+#!!!! заменить!!! 
 
 RM				= rm -Rf
 FLAGS			= -Wall -Wextra -Werror -g -std=c++98

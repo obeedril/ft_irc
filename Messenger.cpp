@@ -1,6 +1,7 @@
 #include "Library.hpp"
 
 Messenger::Messenger(){
+
 }
 
 Messenger::~Messenger(){
@@ -93,7 +94,6 @@ if (it != messages.end()){
 	std::cout << "BBBB" << std::endl;
 	std::cout << "it1->second.getRawMessage()" << it->second.getRawMessage() << "|" << std::endl;
 
-
 	// std::map<int, User>::iterator it1 = map_users.find(user_fd);
 	// if (it1 == map_users.end()) {
 	// 	write(2, "Users not found\n", 26);
@@ -148,6 +148,5 @@ if (it != messages.end()){
 		// }
 	}
 }
-
 
 }

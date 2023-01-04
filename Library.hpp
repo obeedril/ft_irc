@@ -32,6 +32,7 @@
 #define ADMIN_NAME "adminName"
 #define ADMIN_PASS "adminPass"
 #define OPERATORS "operators"
+// #define COUNT_TOKENS 4
 
 
 // typedef struct s_message{
@@ -42,11 +43,21 @@
 
 // } t_message;
 
+typedef struct s_message{
+	std::string cmd;
+	std::string receiver;
+	std::string restMess;
+
+} t_message;
+
+// # include "ChannelsStorage.hpp"
+# include "Errors.hpp"
 # include "User.hpp"
 # include "Message.hpp"
 # include "Messenger.hpp"
 # include "Server.hpp"
 # include "Core.hpp"
-//# include "ChannelsStorage.hpp"
+
+
 
 #endif
