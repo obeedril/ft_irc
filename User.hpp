@@ -32,8 +32,8 @@ class User {
         void setUserName(std::string _userName);
         void setRealName(std::string _realName);
         void setPassword(std::string _password);
-        std::string getMessage();
-        void setMessage(std::string message);
+        //std::string getMessage();
+        //void setMessage(std::string message);
 
         t_bot_command getBotDialog();
         void setBotDialog(t_bot_command botDialog);

@@ -61,8 +61,8 @@ void	Core::run() {
 				return ; ////!!!!
 			}
 			if (length_message <= 0) {
-				sprintf(bufWrite, "IRC : client %s just left\n", it1->second.getUserName().c_str());
-				writeToUser(s);
+				//sprintf(bufWrite, "IRC : client %s just left\n", it1->second.getUserName().c_str());
+				//writeToUser(s);
 				FD_CLR(s, &active_);
 				close(s);
 				break ;
@@ -155,7 +155,7 @@ int		Core::writeToUser(int current_fd) {
 			}
 		}
 	}
-	it1->second.setMessage("");
+	//it1->second.setMessage("");
 	return (0);
 };
 
