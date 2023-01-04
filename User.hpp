@@ -13,6 +13,8 @@ class User {
         std::string realName; //realname
         std::string password;
 
+        t_bot_command botDialog; //for robot
+
     public:
         User();
         ~User();
@@ -31,6 +33,8 @@ class User {
         void setRealName(std::string _realName);
         void setPassword(std::string _password);
 
+        t_bot_command getBotDialog();
+        void setBotDialog(t_bot_command botDialog);
 };
 
 

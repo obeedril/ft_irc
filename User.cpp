@@ -60,3 +60,11 @@ void User::setRealName(std::string _realName){
 void User::setPassword(std::string _password){
     password = _password;
 }
+
+t_bot_command User::getBotDialog() {
+    return(botDialog);
+}
+
+void User::setBotDialog(t_bot_command botDialog) {
+    this->botDialog = botDialog;
+}

@@ -21,6 +21,7 @@ class Core {
 		// size_t errorCode;
 
 		std::map<int, User> map_users;
+
 		
 		Messenger *storage_messages;
 		Message *message;

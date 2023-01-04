@@ -19,8 +19,7 @@ Core::Core(int port_) {
 	FD_SET(listen_sock, &active_);
 
 	const int trueFlag = 1;
-	if (setsockopt(listen_sock, SOL_SOCKET, SO_REUSEADDR, &trueFlag, sizeof(int)) < 0)
-	{
+	if (setsockopt(listen_sock, SOL_SOCKET, SO_REUSEADDR, &trueFlag, sizeof(int)) < 0) {
 		std::cout << "setsockopt failed" << std::endl;
 		exit(EXIT_FAILURE);
 	}
@@ -127,22 +126,35 @@ void	Core::error(int err_type) {
 };
 
 int		Core::writeToUser(int current_fd) {
+	std::map<int, User>::iterator it1 = map_users.find(current_fd);
 
-	// std::map<int, User>::iterator it1 = map_users.find(current_fd);
-	// std::map<int, Message>::iterator it = storage_messages->getMessages().find(current_fd);
-	std::string str = storage_messages->getRawMessageByFd(current_fd);
-	std::cout << "write: " << current_fd << std::endl;
-	for(int s = 0; s <= max; ++s) {
-		if (FD_ISSET(s, &write_) && s != current_fd) {
-			//  std::cout << "str " << str << std::endl;
-			// std::cout << "it1->second.restMess " << it->second.getRestMess() << std::endl;
-			// send(s, it1->second.getMessage().c_str(), it1->second.getMessage().length(), 0);
-			send(s, str.c_str(), str.length(), 0);
+	if (it1 == map_users.end()) {
+		write(2, "Users not found\n", 26);
+		return (0) ; ////!!!!
+	} 
+	else  {
+		// std::map<int, Message>::iterator it = storage_messages->getMessages().find(current_fd);
+		std::string str = storage_messages->getRawMessageByFd(current_fd);
+		std::cout << "write: " << current_fd << std::endl;
+		if (it1->second.getBotDialog() != NO) {
+			send(current_fd, str.c_str(), str.length(), 0);
 			storage_messages->deleteMessage(current_fd);
+			if (it1->second.getBotDialog() == FINISH) {
+				it1->second.setBotDialog(NO);
+				storage_messages->deleteBot(current_fd);
+			}
+			return (0);
+		}
+		for(int s = 0; s <= max; ++s) {
+			if (FD_ISSET(s, &write_) && s != current_fd) {
+				//  std::cout << "str " << str << std::endl;
+				// std::cout << "it1->second.restMess " << it->second.getRestMess() << std::endl;
+				// send(s, it1->second.getMessage().c_str(), it1->second.getMessage().length(), 0);
+				send(s, str.c_str(), str.length(), 0);
+				storage_messages->deleteMessage(current_fd);
+			}
 		}
 	}
-	//it1->second.setMessage("");
-
 	return (0);
 };
 
@@ -163,7 +175,7 @@ int		Core::readFromUser(int user_fd) {
 
 		new_message.setRawMessage(str);
 		storage_messages->insertMessage(user_fd, new_message);
-		storage_messages->parsRecvStr(str, user_fd);
+		storage_messages->parsRecvStr(str, &(map_users.find(user_fd))->second);
 	
 		//new_message.setRawMessage(str.append(tmp));
 		//new_message.setRawMessage(str.append("\r\n"));
@@ -398,4 +410,3 @@ int		Core::replyError(User &user, int err, const std::string &str, const std::st
 	send(user.getUserFd(), msg.c_str(), msg.size(), MSG_NOSIGNAL);
 	return (-1);
 }
-
