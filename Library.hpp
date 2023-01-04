@@ -33,18 +33,6 @@
 #define ADMIN_PASS "adminPass"
 #define OPERATORS "operators"
 
-enum t_command
-{
-	NO_COMMAND = -1,
-    USER,
-	NICK,
-	PASS,
-    QIUT,
-	PRIVMSG,
-	NOTICE,
-	JOIN,
-	KICK
-};
 
 // typedef struct s_message{
 // 	std::string cmd;
