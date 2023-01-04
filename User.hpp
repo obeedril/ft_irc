@@ -8,35 +8,32 @@ class User {
         int userFd;
         bool isAdminHere;
         std::string channelHere;
-        std::string login;
-        std::string userName;
+        std::string login; //nickname
+        std::string userName; //username
+        std::string realName; //realname
         std::string password;
-        t_bot_command botDialog;
 
-        std::string message;
-        t_command command;
+        t_bot_command botDialog; //for robot
 
     public:
-
         User();
         ~User();
         int getUserFd();
         bool getIsAdminHere();
         std::string getChannelHere();
-        std::string getLogin();
-        std::string getUserName();
+        std::string getLogin(); //nickname
+        std::string getUserName(); //username
+        std::string getRealName(); //realname
         std::string getPassword();
         void setUserFd(int _userFd);
         void setIsAdminHere(bool _isAdminHere);
         void setChannelHere(std::string _channelHere);
         void setLogin(std::string _login);
         void setUserName(std::string _userName);
+        void setRealName(std::string _realName);
         void setPassword(std::string _password);
         std::string getMessage();
         void setMessage(std::string message);
-
-        t_command getCommand();
-        void setCommand(t_command _command);
 
         t_bot_command getBotDialog();
         void setBotDialog(t_bot_command botDialog);

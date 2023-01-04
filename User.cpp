@@ -1,79 +1,70 @@
 #include "Library.hpp"
 
-		User::User(){}
+User::User(){
+}
 
-		User::~User(){}
+User::~User(){}
 
-		int User::getUserFd(){
-			return userFd;
-		}
+int User::getUserFd(){
+    return userFd;
+}
 
-		bool User::getIsAdminHere(){
-			return isAdminHere;
-		}
+bool User::getIsAdminHere(){
+    return isAdminHere;
+}
 
-		std::string User::getChannelHere(){
-			return channelHere;
-		}
+std::string User::getChannelHere(){
+    return channelHere;
+}
 
-		std::string User::getLogin(){
-			return login;
-		}
+std::string User::getLogin(){
+    return login;
+}
 
-		std::string User::getUserName(){
-			return userName;
-		}
+std::string User::getUserName(){
+    return userName;
+}
 
-		std::string User::getPassword(){
-			return password;
-		}
+std::string User::getRealName(){
+    return realName;
+}
 
-		void User::setUserFd(int _userFd){
-			userFd = _userFd;
-		}
+std::string User::getPassword(){
+    return password;
+}
 
-		void User::setIsAdminHere(bool _isAdminHere){
-			isAdminHere = _isAdminHere;
-		}
+void User::setUserFd(int _userFd){
+    userFd = _userFd;
+}
 
-		void User::setChannelHere(std::string _channelHere){
-			channelHere = _channelHere;
-		}
+void User::setIsAdminHere(bool _isAdminHere){
+    isAdminHere = _isAdminHere;
+}
 
-		void User::setLogin(std::string _login){
-			login = _login;
-		}
+void User::setChannelHere(std::string _channelHere){
+    channelHere = _channelHere;
+}
 
-		void User::setUserName(std::string _userName){
-			userName = _userName;
-		}
+void User::setLogin(std::string _login){
+    login = _login;
+}
 
-		void User::setPassword(std::string _password){
-			password = _password;
-		}
+void User::setUserName(std::string _userName){
+    userName = _userName;
+}
 
-				t_command  User::getCommand() {
-			return command;
-		}
+void User::setRealName(std::string _realName){
+    realName = _realName;
+}
 
-		void  User::setCommand(t_command _command) {
-			command = _command;
-		}
+void User::setPassword(std::string _password){
+    password = _password;
+}
 
-		std::string User::getMessage(){
-			return(message);
-		}
+t_bot_command User::getBotDialog() {
+    return(botDialog);
+}
 
-		void User::setMessage(std::string message){
-			this->message.clear();
-			this->message = "";
-			this->message = message;
-		}
-
-		t_bot_command User::getBotDialog() {
-			return(botDialog);
-		}
-
-		void User::setBotDialog(t_bot_command botDialog) {
-			this->botDialog = botDialog;
-		}
+void User::setBotDialog(t_bot_command botDialog) {
+    this->botDialog = botDialog;
+}

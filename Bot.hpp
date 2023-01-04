@@ -9,6 +9,7 @@ class Bot {
         int UserFd;
         int startGame;
         int gameNum;
+        int bad_dialog;
         
 
         std::string message;
@@ -22,7 +23,11 @@ class Bot {
         int callBot(std::string msg);
         int playGame(std::string msg);
         int getWeather();
+        int parserWeather();
         void exitBot();
+
+        std::string getMsg();
+        void setMsg(std::string msg);
 
 };
 

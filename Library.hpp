@@ -34,21 +34,23 @@
 #define ADMIN_NAME "adminName"
 #define ADMIN_PASS "adminPass"
 #define OPERATORS "operators"
-#define COUNT_TOKENS 4
+// #define COUNT_TOKENS 4
 
-enum t_command
-{
-	NO_COMMAND = -1,
-    USER,
-	NICK,
-	PASS,
-    QIUT,
-	PRIVMSG,
-	NOTICE,
-	JOIN,
-	KICK,
-	BOT
-};
+
+// typedef struct s_message{
+// 	std::string cmd;
+// 	std::string receiver;
+// 	std::string restMess;
+// 	std::string prefix;
+
+// } t_message;
+
+typedef struct s_message{
+	std::string cmd;
+	std::string receiver;
+	std::string restMess;
+
+} t_message;
 
 enum t_bot_command
 {
@@ -64,10 +66,12 @@ enum t_bot_command
 };
 
 // # include "ChannelsStorage.hpp"
+# include "Errors.hpp"
 # include "User.hpp"
-# include "Server.hpp"
+# include "Message.hpp"
 # include "Bot.hpp"
+# include "Messenger.hpp"
+# include "Server.hpp"
 # include "Core.hpp"
-
 
 #endif
