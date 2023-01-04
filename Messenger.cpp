@@ -33,10 +33,16 @@ std::string Messenger::getRawMessageByFd(int senderFd) {
 	return "";
 }
 
-void Messenger::parsRecvStr(std::string str, User* sender) {
 
+bool Messenger::checkRegistered(User* sender) {
+	if (!(*sender).getLogin().empty() && !(*sender).getUserName().empty() && !(*sender).getPassword().empty()) 
+		(*sender).setRegistFlag(true);
+	return((*sender).getRegistFlag());
+
+
+void Messenger::parsRecvStr(std::string str, User* sender) {
 	std::map<int, Message>::iterator it = messages.find((*sender).getUserFd());
-	//bool flag = checkRegistered(sender);
+	bool flag = checkRegistered(sender);
 
 	if (str.find("USER", 0) != std::string::npos) {
 		it->second.setCmd("USER");
@@ -50,23 +56,23 @@ void Messenger::parsRecvStr(std::string str, User* sender) {
 		it->second.setCmd("PASS");
 		std::cout << "cmd PASS" << std::endl;
 	}
-	if (str.find("QUIT", 0) != std::string::npos) {
+	if (str.find("QUIT", 0) != std::string::npos && flag == true){
 		it->second.setCmd("QUIT");
 		std::cout << "cmd QUIT" << std::endl;
 	}
-	if (str.find("PRIVMSG", 0) != std::string::npos) {
+	if (str.find("PRIVMSG", 0) != std::string::npos && flag == true){
 		it->second.setCmd("PRIVMSG");
 		std::cout << "cmd PRIVMSG" << std::endl;
 	}
-	if (str.find("NOTICE", 0) != std::string::npos) {
+	if (str.find("NOTICE", 0) != std::string::npos && flag == true){
 		it->second.setCmd("USER");
 		std::cout << "cmd NOTICE" << std::endl;
 	}
-	if (str.find("JOIN", 0) != std::string::npos) {
+	if (str.find("JOIN", 0) != std::string::npos && flag == true){
 		it->second.setCmd("JOIN");
 		std::cout << "cmd JOIN" << std::endl;
 	}
-	if (str.find("KICK", 0) != std::string::npos) {
+	if (str.find("KICK", 0) != std::string::npos && flag == true){
 		it->second.setCmd("USER");
 		std::cout << "cmd KICK" << std::endl;
 	}
@@ -74,7 +80,7 @@ void Messenger::parsRecvStr(std::string str, User* sender) {
 		it->second.setCmd("CAP LS");
 		std::cout << "cmd CAP LS" << std::endl;
 	}
-	if (str.find("BOT", 0) != std::string::npos || sender->getBotDialog() == YES) {
+	if ((str.find("BOT", 0) != std::string::npos || sender->getBotDialog() == YES) && flag == true) {
 		it->second.setCmd("BOT");
 		it->second.setRawMessage(initBot(sender, it->second.getRawMessage()));
 		std::cout << "cmd BOT" << std::endl;

@@ -21,6 +21,7 @@ public:
     ~Message();
 
     void setRawMessage(std::string rawMessage);
+    void setReadyMess(std::string ready_mess);
     void setCmd(std::string cmd);
     void setRestMess(std::string restMess);
     void setPrefix(std::string prefix);
@@ -28,10 +29,7 @@ public:
     std::string getRestMess();
     std::string getPrefix();
     std::string getRawMessage();
-
-   
-
-
+    std::string getReadyMess();
 
 };
 

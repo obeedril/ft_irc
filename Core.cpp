@@ -165,7 +165,7 @@ int		Core::readFromUser(int user_fd) {
 	// storage_messages->insertMessage();
 	std::string str;
 	std::string cmd;
-	//std::map<int, User>::iterator it1 = map_users.find(user_fd);
+	// std::map<int, User>::iterator it1 = map_users.find(user_fd);
 	length_message = 0;
 	char tmp[4048];
 	length_message = recv(user_fd, tmp, 42*4096, 0);

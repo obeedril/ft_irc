@@ -1,5 +1,5 @@
 #ifndef USER_HPP
-# define USERHPP
+# define USER_HPP
 
 # include "Library.hpp"
 
@@ -12,6 +12,7 @@ class User {
         std::string userName; //username
         std::string realName; //realname
         std::string password;
+        bool flagRegistred;
 
         t_bot_command botDialog; //for robot
 
@@ -25,6 +26,7 @@ class User {
         std::string getUserName(); //username
         std::string getRealName(); //realname
         std::string getPassword();
+        bool getRegistFlag();
         void setUserFd(int _userFd);
         void setIsAdminHere(bool _isAdminHere);
         void setChannelHere(std::string _channelHere);
@@ -32,12 +34,11 @@ class User {
         void setUserName(std::string _userName);
         void setRealName(std::string _realName);
         void setPassword(std::string _password);
-        //std::string getMessage();
-        //void setMessage(std::string message);
+        
+        void setRegistFlag(bool);
 
         t_bot_command getBotDialog();
         void setBotDialog(t_bot_command botDialog);
 };
-
 
 #endif

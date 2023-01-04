@@ -9,7 +9,8 @@ class Core {
 		int listen_sock;
 		int id[64*1024];
 		int port;
-		//char bufRead[42*4096], str[42*4096], bufWrite[42*4097];
+		char bufWrite[42*4097];
+
 		int max;
 		fd_set read_, write_, active_;
 		int count_cli;
@@ -24,7 +25,7 @@ class Core {
 
 		
 		Messenger *storage_messages;
-		Message *message;
+		// Message *message;
 
 		// Commands
 

@@ -1,6 +1,7 @@
 #include "Library.hpp"
 
 User::User(){
+    flagRegistred = false;
 }
 
 User::~User(){}
@@ -31,6 +32,10 @@ std::string User::getRealName(){
 
 std::string User::getPassword(){
     return password;
+}
+
+bool User::getRegistFlag(){
+    return flagRegistred;
 }
 
 void User::setUserFd(int _userFd){
@@ -68,3 +73,8 @@ t_bot_command User::getBotDialog() {
 void User::setBotDialog(t_bot_command botDialog) {
     this->botDialog = botDialog;
 }
+
+void User::setRegistFlag(bool flag){
+    flagRegistred = flag;
+}
+

@@ -19,6 +19,7 @@ public:
    void insertMessage(int senderFd, Message mess);
    void deleteMessage(int senderFd);
    std::string getRawMessageByFd(int senderFd);
+   bool checkRegistered(User* sender) ;
 
   void parsRecvStr(std::string str, User* sender);
 
