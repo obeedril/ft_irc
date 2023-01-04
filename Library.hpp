@@ -51,11 +51,11 @@ typedef struct s_message{
 } t_message;
 
 // # include "ChannelsStorage.hpp"
+# include "Server.hpp"
 # include "Errors.hpp"
 # include "User.hpp"
 # include "Message.hpp"
 # include "Messenger.hpp"
-# include "Server.hpp"
 # include "Core.hpp"
 
 

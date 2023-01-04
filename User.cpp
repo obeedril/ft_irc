@@ -1,7 +1,8 @@
 #include "Library.hpp"
 
-User::User(){
+User::User(Server *new_irc_serv){
     flagRegistred = false;
+    _irc_serv = new_irc_serv;
 }
 
 User::~User(){}
@@ -38,6 +39,10 @@ bool User::getRegistFlag(){
     return flagRegistred;
 }
 
+std::string User::getServName() {
+	return _irc_serv->getServName();
+}
+
 void User::setUserFd(int _userFd){
     userFd = _userFd;
 }
@@ -68,4 +73,8 @@ void User::setPassword(std::string _password){
 
 void User::setRegistFlag(bool flag){
     flagRegistred = flag;
+}
+
+void User::setServ(Server *newServ) {
+	_irc_serv = newServ;
 }

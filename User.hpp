@@ -13,9 +13,10 @@ class User {
         std::string realName; //realname
         std::string password;
         bool flagRegistred;
+        Server *_irc_serv;
 
     public:
-        User();
+        User(Server *new_irc_serv);
         ~User();
         int getUserFd();
         bool getIsAdminHere();
@@ -24,6 +25,7 @@ class User {
         std::string getUserName(); //username
         std::string getRealName(); //realname
         std::string getPassword();
+        std::string getServName();
         bool getRegistFlag();
         void setUserFd(int _userFd);
         void setIsAdminHere(bool _isAdminHere);
@@ -33,6 +35,8 @@ class User {
         void setRealName(std::string _realName);
         void setPassword(std::string _password);
         void setRegistFlag(bool);
+        void setServ(Server *newServ);
+
 
 };
 
