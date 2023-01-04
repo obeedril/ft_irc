@@ -161,11 +161,10 @@ int		Core::readFromUser(int user_fd) {
 	if (length_message > 0){
 		// parser_message(user_fd, tmp);
 
-		cmd = storage_messages->parsRecvStr(str);
-		if (cmd.length() > 0)
-			new_message.setCmd(cmd);
 		new_message.setRawMessage(str);
 		storage_messages->insertMessage(user_fd, new_message);
+		storage_messages->parsRecvStr(str, user_fd);
+	
 		//new_message.setRawMessage(str.append(tmp));
 		//new_message.setRawMessage(str.append("\r\n"));
 		//std::cout << "RECV  fd|" << user_fd << "|" << new_message.getRawMessage() << "|" << std::endl;

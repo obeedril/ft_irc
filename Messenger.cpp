@@ -33,51 +33,52 @@ std::string Messenger::getRawMessageByFd(int senderFd){
 	return "";
 }
 
-std::string Messenger::parsRecvStr(std::string str){
+void Messenger::parsRecvStr(std::string str, int senderFd){
 
-	std::string cmd = "";
+	std::map<int, Message>::iterator it = messages.find(senderFd);
+	
 
 	if (str.find("USER", 0) != std::string::npos){
-		cmd = "USER";
+		it->second.setCmd("USER");
 		std::cout << "cmd USER" << std::endl;
 	}
 	if (str.find("NICK", 0) != std::string::npos){
-		cmd = "NICK";
+		it->second.setCmd("NICK");
 		std::cout << "cmd NICK" << std::endl;
 	}
 	if (str.find("PASS", 0) != std::string::npos){
-		cmd = "PASS";
+		it->second.setCmd("PASS");
 		std::cout << "cmd PASS" << std::endl;
 	}
 	if (str.find("QUIT", 0) != std::string::npos){
-		cmd = "QUIT";
+		it->second.setCmd("QUIT");
 		std::cout << "cmd QUIT" << std::endl;
 	}
 	if (str.find("PRIVMSG", 0) != std::string::npos){
-		cmd = "PRIVMSG";
+		it->second.setCmd("PRIVMSG");
 		std::cout << "cmd PRIVMSG" << std::endl;
 	}
 	if (str.find("NOTICE", 0) != std::string::npos){
-		cmd = "NOTICE";
+		it->second.setCmd("USER");
 		std::cout << "cmd NOTICE" << std::endl;
 	}
 	if (str.find("JOIN", 0) != std::string::npos){
-		cmd = "JOIN";
+		it->second.setCmd("JOIN");
 		std::cout << "cmd JOIN" << std::endl;
 	}
 	if (str.find("KICK", 0) != std::string::npos){
-		cmd = "KICK";
+		it->second.setCmd("USER");
 		std::cout << "cmd KICK" << std::endl;
 	}
 	if (str.find("CAP LS", 0) != std::string::npos){
-		cmd = "CAP LS";
+		it->second.setCmd("CAP LS");
 		std::cout << "cmd CAP LS" << std::endl;
 	}
 	if (str.find("BOT", 0) != std::string::npos){
-		cmd = "BOT";
+		it->second.setCmd("BOT");
 		std::cout << "cmd BOT" << std::endl;
 	}
-	return cmd;
+
 }
 
 void Messenger::parseBuffer(int senderFd){

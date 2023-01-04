@@ -9,6 +9,8 @@ private:
 
     std::string rawMessage;
     std::string cmd;
+    std::string ready_mess;
+
 	std::string receiver;
 	std::string restMess;
 	std::string prefix;
