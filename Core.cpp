@@ -108,7 +108,7 @@ int		Core::createNewSocket() {
 	char tmp[4048];
 	std::string str;
 	sprintf(tmp, "IRC : client %d just arrived\n", user_fd); // new_user.getUserFd()
-	new_message.setRestMess(str.append(tmp));
+	new_message.setRawMessage(str.append(tmp));
 	// std::cout << "str " << str << std::endl;
 	storage_messages->insertMessage(user_fd, new_message); // new_user.getUserFd()
 	// std::cout << "new mess " << new_message.getRestMess() << std::endl;
@@ -127,7 +127,7 @@ void	Core::error(int err_type) {
 int		Core::writeToUser(int current_fd) {
 	// std::map<int, User>::iterator it1 = map_users.find(current_fd);
 	// std::map<int, Message>::iterator it = storage_messages->getMessages().find(current_fd);
-	std::string str = storage_messages->getMessageByFd(current_fd);
+	std::string str = storage_messages->getRawMessageByFd(current_fd);
 	std::cout << "write: " << current_fd << std::endl;
 	for(int s = 0; s <= max; ++s) {
 		if (FD_ISSET(s, &write_) && s != current_fd) {
@@ -146,16 +146,24 @@ int		Core::readFromUser(int user_fd) {
 	Message new_message;
 	// storage_messages->insertMessage();
 	std::string str;
+	std::string cmd;
 	//std::map<int, User>::iterator it1 = map_users.find(user_fd);
 	length_message = 0;
 	char tmp[4048];
 	length_message = recv(user_fd, tmp, 42*4096, 0);
 	if (length_message > 0){
 		// parser_message(user_fd, tmp);
-		new_message.setRawMessage(str.append(tmp));
-		//new_message.setRawMessage(str.append("\r\n"));
+
+		cmd = storage_messages->parsRecvStr(str.append(tmp));
+		if (cmd.length() > 0)
+			new_message.setCmd(cmd);
+		new_message.setRawMessage(str);
 		storage_messages->insertMessage(user_fd, new_message);
-		storage_messages->parseBuffer(user_fd);
+		//new_message.setRawMessage(str.append(tmp));
+		//new_message.setRawMessage(str.append("\r\n"));
+		//std::cout << "RECV  fd|" << user_fd << "|" << new_message.getRawMessage() << "|" << std::endl;
+		//storage_messages->insertMessage(user_fd, new_message);
+		//storage_messages->parseBuffer(user_fd);
 	}
 
 	return (length_message);
@@ -167,6 +175,8 @@ int		Core::readFromUser(int user_fd) {
 Messenger* Core::getStorage_messages(){
 	return storage_messages;
 };
+
+
 
 
 

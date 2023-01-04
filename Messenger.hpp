@@ -1,3 +1,4 @@
+
 #ifndef MESSENGER_HPP
 # define MESSENGER_HPP
 
@@ -19,7 +20,10 @@ public:
    std::map<int, Message> getMessages();
    void insertMessage(int senderFd, Message mess);
    void deleteMessage(int senderFd);
-   std::string getMessageByFd(int senderFd);
+   std::string getRawMessageByFd(int senderFd);
+
+   std::string parsRecvStr(std::string str);
+
 
 //    void setMess(Message _mess);
 //    Message getMess();
