@@ -21,6 +21,9 @@ class Core {
 		// size_t errorCode;
 
 		std::map<int, User> map_users;
+		
+		Messenger *storage_messages;
+		Message *message;
 
 		// Commands
 
@@ -38,6 +41,7 @@ class Core {
 		// int										kickCmd(const Messenger &msg, User &user);
 		std::string tostring(std::vector<std::string> &v);
 
+
 		//int flag_msg;
 
 	public:
@@ -51,10 +55,11 @@ class Core {
 
 		void	error(int err_type);
 
-		void parser_message(int user_fd, char *bufRead);
+		Messenger *getStorage_messages();
 		void setServ(Server *newServ);
 		std::string getServName();
 		// void check_message(int user_fd);
 };
 
 #endif
+

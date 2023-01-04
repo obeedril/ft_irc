@@ -34,18 +34,14 @@
 #define OPERATORS "operators"
 // #define COUNT_TOKENS 4
 
-enum t_command
-{
-	NO_COMMAND = -1,
-    USER,
-	NICK,
-	PASS,
-    QIUT,
-	PRIVMSG,
-	NOTICE,
-	JOIN,
-	KICK
-};
+
+// typedef struct s_message{
+// 	std::string cmd;
+// 	std::string receiver;
+// 	std::string restMess;
+// 	std::string prefix;
+
+// } t_message;
 
 typedef struct s_message{
 	std::string cmd;
@@ -57,6 +53,7 @@ typedef struct s_message{
 // # include "ChannelsStorage.hpp"
 # include "Errors.hpp"
 # include "User.hpp"
+# include "Message.hpp"
 # include "Messenger.hpp"
 # include "Server.hpp"
 # include "Core.hpp"

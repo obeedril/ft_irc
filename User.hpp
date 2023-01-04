@@ -1,5 +1,5 @@
 #ifndef USER_HPP
-# define USER_HPP
+# define USERHPP
 
 # include "Library.hpp"
 
@@ -13,11 +13,7 @@ class User {
         std::string realName; //realname
         std::string password;
 
-        std::string message;
-        t_command command;
-
     public:
-
         User();
         ~User();
         int getUserFd();
@@ -34,11 +30,6 @@ class User {
         void setUserName(std::string _userName);
         void setRealName(std::string _realName);
         void setPassword(std::string _password);
-        std::string getMessage();
-        void setMessage(std::string message);
-
-        t_command getCommand();
-        void setCommand(t_command _command);
 
 };
 
