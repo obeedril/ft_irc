@@ -33,11 +33,19 @@ std::string Messenger::getRawMessageByFd(int senderFd) {
 	return "";
 }
 
+std::string Messenger::getCmdInMessageByFd(int senderFd) {
+	std::map<int, Message>::iterator it = messages.find(senderFd);
+	if (it != messages.end())
+		return it->second.getCmd();
+	return "";
+}
+
 
 bool Messenger::checkRegistered(User* sender) {
 	if (!(*sender).getLogin().empty() && !(*sender).getUserName().empty() && !(*sender).getPassword().empty()) 
 		(*sender).setRegistFlag(true);
 	return((*sender).getRegistFlag());
+}
 
 
 void Messenger::parsRecvStr(std::string str, User* sender, std::map<int, User>::iterator begin, std::map<int, User>::iterator end) {
@@ -77,7 +85,7 @@ void Messenger::parsRecvStr(std::string str, User* sender, std::map<int, User>::
 		std::cout << "cmd JOIN" << std::endl;
 	}
 	else if (str.find("KICK", 0) != std::string::npos && flag == true){
-		it->second.setCmd("USER");
+		it->second.setCmd("KICK");
 		std::cout << "cmd KICK" << std::endl;
 	}
 	else if (str.find("CAP LS", 0) != std::string::npos) {
@@ -119,8 +127,6 @@ std::string Messenger::initBot(User *my_client, std::string msg) {
 }
 
 
-}
-
 /* USER command */
 
 std::vector<std::string> Messenger::stringSplit(const std::string &line, char delimiter) {
@@ -149,26 +155,54 @@ std::string Messenger::tostring(std::vector<std::string> &v)
     return os.str();
 }
 
+void	Messenger::printWelcome(User* sender, std::map<int, Message>::iterator	it1, std::string name, int flag) {
+	// flag 1 - username ; 2 - pass; 3 - nick; 4 - realname
+	if (checkRegistered(sender)) {
+		it1->second.setReadyMess(name + " " + "Пользователь " + name + " aka (" + \
+		sender->getRealName() + ") ворвался в чат!\r\n");
+	}
+	else if (flag == 1) {
+		std::string msg = "ADMIN Ok! Changed USERNAME to " + name + "\r\n";
+		send(sender->getUserFd(), msg.c_str(), msg.size(), MSG_NOSIGNAL);
+	}
+	else if (flag == 2) {
+		std::string msg = "ADMIN Ok! Changed password\r\n";
+		send(sender->getUserFd(), msg.c_str(), msg.size(), MSG_NOSIGNAL);
+	}
+	else if (flag == 3) {
+		std::string msg = "ADMIN Ok! Changed NICK to " + name + "\r\n";
+		send(sender->getUserFd(), msg.c_str(), msg.size(), MSG_NOSIGNAL);
+	}
+	else if (flag == 4) {
+		std::string msg = "ADMIN Ok! Changed REALNAME to " + name + "\r\n";
+		send(sender->getUserFd(), msg.c_str(), msg.size(), MSG_NOSIGNAL);
+	}
+}
+
 int	Messenger::userCmd(const std::string &msg, User* sender, std::map<int, User>::iterator begin, std::map<int, User>::iterator end) {
 	// std::cout << "it1->second.getMessage() = " << msg << std::endl;
 	std::map<int, Message>::iterator	it1; // !!!
 	it1 = messages.find((*sender).getUserFd());
+	int flag = 0;
+	std::cout << "DEFAULT username =  = " << sender->getUserName() << std::endl;
+	if (!sender->getUserName().empty())
+		flag = 1;
 	// int userFd = it1->first;// !!!
 
 	std::vector<std::string> arr = stringSplit(msg, ' ');
 	arr.erase(arr.begin()); // удаляем из команды элемент USER
-	std::cout << "arr[0]полсе делита = " << arr[0] << std::endl;
+	// std::cout << "arr[0]полсе делита = " << arr[0] << std::endl;
 	if (arr.size() < 4) {
 		// std::string tmp(arr.begin(), arr.end());
 
-    std::stringstream ss;
-    for (std::vector<std::string>::iterator it3 = arr.begin(); it3 != arr.end(); it3++)    {
+    // std::stringstream ss;
+    // for (std::vector<std::string>::iterator it3 = arr.begin(); it3 != arr.end(); it3++)    {
 
-            ss << " ";
-        ss << *it3;
-    }
+    //         ss << " ";
+    //     ss << *it3;
+    // }
  
-    std::cout << ss.str() << std::endl;  
+    // std::cout << ss.str() << std::endl;  
 
 
 		return(replyError(sender, ERR_NEEDMOREPARAMS, tostring(arr), ""));
@@ -182,12 +216,14 @@ int	Messenger::userCmd(const std::string &msg, User* sender, std::map<int, User>
 		}
 	(*sender).setUserName(arr[0]);// arr[0] тк слово USER уже удалили
 
+	it1->second.setReadyMess(arr[0] + " " + "Пользователь " + arr[0] + " ворвался в чат!\r\n");
 	it1->second.setRawMessage(arr[0] + " " + "Пользователь " + arr[0] + " ворвался в чат!\r\n");
 	if (arr[arr.size() - 1][0] == ':')
 		(*sender).setRealName(arr[arr.size() - 1].substr(1));
 	else
 		(*sender).setRealName(arr[arr.size() - 1]);
 	// std::cout << "RealName = " << (*sender).getRealName() << std::endl;
+	printWelcome(sender, it1, arr[0], flag);
 	return 0;
 }
 
@@ -199,7 +235,7 @@ int		Messenger::replyError(User *user, int err, const std::string &str, const st
 	std::stringstream	ss;
 	ss << err;
 	msg += ss.str() + " " + user->getLogin();
-
+	// std::cout << "msg = " << msg << std::endl;
 	(void)arg; // ?????
 
 	switch (err)

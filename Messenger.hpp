@@ -20,6 +20,8 @@ public:
    void deleteMessage(int senderFd);
    std::string getRawMessageByFd(int senderFd);
    bool checkRegistered(User* sender) ;
+   std::string getCmdInMessageByFd(int senderFd);
+
 
   void parsRecvStr(std::string str, User* sender, std::map<int, User>::iterator begin, std::map<int, User>::iterator end);
 
@@ -29,8 +31,9 @@ public:
     int		replyError(User *user, int err, const std::string &str1, const std::string &str2);
     std::vector<std::string> stringSplit(const std::string &line, char delimiter);
     std::string tostring(std::vector<std::string> &v);
-  std::string initBot(User *my_client, std::string msg);
-  void deleteBot(int senderFd);
+    std::string initBot(User *my_client, std::string msg);
+    void deleteBot(int senderFd);
+    void	printWelcome(User* sender, std::map<int, Message>::iterator	it1, std::string name, int flag);
 
 //    void setMess(Message _mess);
 //    Message getMess();

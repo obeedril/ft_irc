@@ -93,7 +93,7 @@ int		Core::createNewSocket() {
 	User new_user(_irc_serv);
 	Message new_message;
 	new_user.setUserFd(user_fd);
-	new_user.setUserName("Default_name");
+	new_user.setUserName("");
 	// new_user.setCommand(NO_COMMAND);
 	map_users.insert(std::pair<int, User> (user_fd, new_user));
 
@@ -124,29 +124,35 @@ void	Core::error(int err_type) {
 };
 
 int		Core::writeToUser(int current_fd) {
-	std::map<int, User>::iterator it1 = map_users.find(current_fd);
+	std::map<int, User>::iterator itForUsers = map_users.find(current_fd);
 
 
-	// std::map<int, User>::iterator it1 = map_users.find(current_fd);
+	// std::map<int, User>::iterator itForMess = map_users.find(current_fd);
 
 
-	if (it1 == map_users.end()) {
+	if (itForUsers == map_users.end()) {
 		write(2, "Users not found\n", 26);
 		return (0) ; ////!!!!
 	} 
 	else  {
-  	std::map<int, Message>::iterator it = storage_messages->getMessages().find(current_fd);
-	std::string str = storage_messages->getRawMessageByFd(current_fd);
-	std::cout << "write: " << current_fd << std::endl;
-	if ((it->second.getCmd()).empty()) {
-		storage_messages->deleteMessage(current_fd);
-		return (0);
-	}
-		if (it1->second.getBotDialog() != NO) {
+		std::string str = storage_messages->getRawMessageByFd(current_fd);
+
+		std::string strForMess = storage_messages->getCmdInMessageByFd(current_fd);
+
+std::cout << ">> getRawMessageByFd = " << str << std::endl;
+std::cout << ">>> getCmdInMessageByFd " << strForMess << std::endl;
+
+		// std::map<int, Message>::iterator itForMess = storage_messages->getMessages().find(current_fd);
+		std::cout << "write: " << current_fd << std::endl;
+		if (strForMess.empty()) {
+			storage_messages->deleteMessage(current_fd);
+			return (0);
+		}
+		if (itForUsers->second.getBotDialog() != NO) {
 			send(current_fd, str.c_str(), str.length(), 0);
 			storage_messages->deleteMessage(current_fd);
-			if (it1->second.getBotDialog() == FINISH) {
-				it1->second.setBotDialog(NO);
+			if (itForUsers->second.getBotDialog() == FINISH) {
+				itForUsers->second.setBotDialog(NO);
 				storage_messages->deleteBot(current_fd);
 			}
 			return (0);
@@ -154,8 +160,8 @@ int		Core::writeToUser(int current_fd) {
 		for(int s = 0; s <= max; ++s) {
 			if (FD_ISSET(s, &write_) && s != current_fd) {
 				//  std::cout << "str " << str << std::endl;
-				// std::cout << "it1->second.restMess " << it->second.getRestMess() << std::endl;
-				// send(s, it1->second.getMessage().c_str(), it1->second.getMessage().length(), 0);
+				// std::cout << "itForMess->second.restMess " << itForMess->second.getRestMess() << std::endl;
+				// send(s, itForMess->second.getMessage().c_str(), itForMess->second.getMessage().length(), 0);
 				send(s, str.c_str(), str.length(), 0);
 				storage_messages->deleteMessage(current_fd);
 			}
