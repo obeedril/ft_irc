@@ -83,9 +83,11 @@ int		Core::createNewSocket() {
 	User	new_user(_irc_serv);
 	Message	new_message;
 	new_user.setUserFd(user_fd);
-	new_user.setUserName("Default_name");
+
+	new_user.setUserName("");
 	new_user.setBotDialog(NO);
 	storage_messages->addUser(user_fd, new_user); //map_users.insert(std::pair<int, User> (user_fd, new_user));
+
 	//new_user.count_cli = count_cli;
 	//id[user_fd] = count_cli;
 	//count_cli++;
@@ -100,6 +102,7 @@ void	Core::error(int err_type) {
 };
 
 int		Core::writeToUser(int current_fd) {
+
 	std::vector<int> deque; 
 	deque = storage_messages->getDeq(current_fd);
 	std::string str = storage_messages->getReadyMessByFd(current_fd);
@@ -107,6 +110,7 @@ int		Core::writeToUser(int current_fd) {
 		if (FD_ISSET(deque[i], &write_)) {
 			send(deque[i], str.c_str(), str.length(), 0);
 			storage_messages->deleteMessage(current_fd);
+
 		}
 	}
 	return (0);

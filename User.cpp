@@ -43,6 +43,10 @@ std::string User::getServName() {
 	return _irc_serv->getServName();
 }
 
+std::vector<std::string>	User::getMotdFromServer() {
+    return _irc_serv->getMotd();
+}
+
 void User::setUserFd(int _userFd){
     userFd = _userFd;
 }

@@ -11,6 +11,7 @@ private:
 		std::map<int, User>			map_users;
 
 public:
+
 		Messenger();
 		~Messenger();
 	
@@ -34,6 +35,11 @@ public:
 		std::string tostring(std::vector<std::string> &v);
 		std::string initBot(int user_fd, std::string msg);
 		void deleteBot(int senderFd);
+    void	printWelcome(User* sender, std::map<int, Message>::iterator	it1, std::string name, int flag);
+    void	sendMotd(User* sender);
+
+// PASS cmd
+    int	passCmd(const std::string &msg, User* sender);
 
 		//    void setMess(Message _mess);
 		//    Message getMess();
@@ -43,6 +49,7 @@ public:
 		//map_users 
 		void addUser(int user_fd, User new_user);
 		int  getUserFd(int Fd);
+
 
 };
 

@@ -26,6 +26,11 @@
     void Message::setPrefix(std::string _prefix){
         prefix = _prefix;
     }
+
+    void Message::setReadyMess(std::string mess) {
+        ready_mess = mess;
+    }
+
     std::string Message::getCmd(){
         return cmd;
     }

@@ -30,6 +30,7 @@
 #include <cmath> //для робота
 
 #define PATH_TO_CONFIG "config.conf"
+#define PATH_TO_MOTD "welcome.motd"
 #define SERV_NAME "serverName"
 #define ADMIN_NAME "adminName"
 #define ADMIN_PASS "adminPass"
@@ -67,7 +68,7 @@ enum t_bot_command
 
 // # include "ChannelsStorage.hpp"
 # include "Server.hpp"
-# include "Errors.hpp"
+# include "ErrorsAndReplies.hpp"
 # include "User.hpp"
 # include "Message.hpp"
 # include "Bot.hpp"
