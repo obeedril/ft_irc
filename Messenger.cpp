@@ -27,7 +27,15 @@ void Messenger::setReadyMessInMessageByFd(std::string str, int senderFd) {
 	std::string tmp = it->second.getReadyMess();
 	if (!tmp.empty())
 		tmp = "";
-	tmp = str;
+	it->second.setReadyMess(str);
+}
+
+void Messenger::setRawMessInMessageByFd(std::string str, int senderFd) {
+	std::map<int, Message>::iterator it = messages.find(senderFd);
+	std::string tmp = it->second.getRawMessage();
+	if (!tmp.empty())
+		tmp = "";
+	it->second.setRawMessage(str);
 }
 
 std::map<int, Message> Messenger::getMessages() {
@@ -140,6 +148,13 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 		it->second.setCmd("USER");
 		std::cout << ">> FIND cmd USER!" << std::endl;
 		
+		std::vector<int> one_deque_user;
+		one_deque_user.push_back(userFd);
+		it->second.setDeque(one_deque_user);
+		User ptr = it_user->second;
+		userCmd(it->second.getRawMessage(), &ptr);
+
+
 		// if (userCmd(it->second.getRawMessage(), sender, begin, end))
 		// 	it->second.setCmd("");
 	}
@@ -148,9 +163,12 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 		std::cout << "cmd NICK" << std::endl;
 	}
 	else if (str.find("PASS", 0) != std::string::npos) {
-
 		it->second.setCmd("PASS");
+		std::vector<int> one_deque_user;
+		one_deque_user.push_back(userFd);
+		it->second.setDeque(one_deque_user);
 		std::cout << "cmd PASS" << std::endl;
+		passCmd(it->second.getRawMessage(), &it_user->second);
 	}
 	else if (str.find("QUIT", 0) != std::string::npos && flag == true){
 		it->second.setCmd("QUIT");
@@ -177,7 +195,7 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 
 		it->second.setCmd("CAP LS");
 		std::cout << "cmd CAP LS" << std::endl;
-		//it->second.setRawMessage("\r\n");
+		it->second.setRawMessage("\r\n");
 	}
 	else if ((str.find("BOT", 0) != std::string::npos || it_user->second.getBotDialog() == YES)
 				&& flag == true) {
@@ -294,7 +312,7 @@ void	Messenger::printWelcome(User* sender, std::map<int, Message>::iterator	it1,
 	}
 }
 
-int	Messenger::userCmd(const std::string &msg, User* sender, std::map<int, User>::iterator begin, std::map<int, User>::iterator end) {
+int	Messenger::userCmd(const std::string &msg, User* sender) {
 	// std::cout << "it1->second.getMessage() = " << msg << std::endl;
 	std::map<int, Message>::iterator	it1; // !!!
 	it1 = messages.find((*sender).getUserFd());
@@ -308,23 +326,12 @@ int	Messenger::userCmd(const std::string &msg, User* sender, std::map<int, User>
 	arr.erase(arr.begin()); // удаляем из команды элемент USER
 	// std::cout << "arr[0]полсе делита = " << arr[0] << std::endl;
 	if (arr.size() < 4) {
-		// std::string tmp(arr.begin(), arr.end());
-
-    // std::stringstream ss;
-    // for (std::vector<std::string>::iterator it3 = arr.begin(); it3 != arr.end(); it3++)    {
-
-    //         ss << " ";
-    //     ss << *it3;
-    // }
- 
-    // std::cout << ss.str() << std::endl;  
-
-
 		return(replyError(sender, ERR_NEEDMOREPARAMS, tostring(arr), ""));
 	}
-	for (; begin != end; begin++)
+	std::map<int, User>::iterator it_u = map_users.begin();
+	for (; it_u != map_users.end(); it_u++)
 	{
-		if (arr[0] == begin->second.getUserName()) { // arr[0] тк слово USER уже удалили
+		if (arr[0] == it_u->second.getUserName()) { // arr[0] тк слово USER уже удалили
 			std::cout << "повтор ника" << std::endl;
 			return(replyError(sender, ERR_ALREADYREGISTRED, "", ""));
 		}
@@ -520,9 +527,10 @@ int		Messenger::replyError(User *user, int err, const std::string &str, const st
 		break;
 	}
 	// std::cout << "222повтор ника" << std::endl;
-	setReadyMessInMessageByFd(msg, user->getUserFd());
+	// setReadyMessInMessageByFd(msg, user->getUserFd());
+	setRawMessInMessageByFd(msg, user->getUserFd());
 	// send(user->getUserFd(), msg.c_str(), msg.size(), MSG_NOSIGNAL);
-	// std::cout << "333повтор ника" << std::endl;
+	std::cout << ">> msg = " << msg << std::endl;
 	return (-1);
 }
 
