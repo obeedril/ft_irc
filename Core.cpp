@@ -38,6 +38,7 @@ Core::Core(int port_) {
 };
 
 Core::~Core() {
+	delete storage_messages;
 };
 
 void	Core::run() {
@@ -55,8 +56,7 @@ void	Core::run() {
 		}
 		if (FD_ISSET(s, &read_) && s != listen_sock) {
 			readFromUser(s);
-			std::map<int, User>::iterator it1 = map_users.find(s);
-			if (it1 == map_users.end()) {
+			if (storage_messages->getUserFd(s) == -1) {
 				write(2, "Users not found\n", 26);
 				return ; ////!!!!
 			}
@@ -67,15 +67,6 @@ void	Core::run() {
 			}
 			else {
 				writeToUser(s);
-				// for (int i = 0, j = 0; i < length_message; ++i, ++j) {
-					// str[j] = bufRead[i];
-					// if (str[j] == '\n') {
-					// 	str[j] = '\0';
-					// 	check_message(s);
-					// 	writeToUser(s);
-					// 	j = -1;
-					// }
-				// }
 			}
 		}
 	}
@@ -89,31 +80,16 @@ int		Core::createNewSocket() {
 	if (max < user_fd) {
 		max = user_fd;
 	}
-
-	User new_user(_irc_serv);
-	Message new_message;
+	User	new_user(_irc_serv);
+	Message	new_message;
 	new_user.setUserFd(user_fd);
 	new_user.setUserName("Default_name");
-	// new_user.setCommand(NO_COMMAND);
-	map_users.insert(std::pair<int, User> (user_fd, new_user));
-
+	new_user.setBotDialog(NO);
+	storage_messages->addUser(user_fd, new_user); //map_users.insert(std::pair<int, User> (user_fd, new_user));
 	//new_user.count_cli = count_cli;
-	id[user_fd] = count_cli;
-	count_cli++;
+	//id[user_fd] = count_cli;
+	//count_cli++;
 	FD_SET(user_fd, &active_);
-
-	// std::map<int, User>::iterator it1 = map_users.find(user_fd);
-	// char tmp[4048];
-	// std::string str;
-	// sprintf(tmp, "IRC : client %d just arrived\n", user_fd); // new_user.getUserFd()
-	// new_message.setRawMessage(str.append(tmp));
-	// std::cout << "str " << str << std::endl;
-	// storage_messages->insertMessage(user_fd, new_message); // new_user.getUserFd()
-	// std::cout << "new mess " << new_message.getRestMess() << std::endl;
-	// std::cout << "storage_messages->getMessageByFd(new_user.getUserFd()) " << storage_messages->getMessageByFd(new_user.getUserFd()) << std::endl;
-	// it1->second.setMessage(static_cast<std::string>(tmp));
-
-	// writeToUser(user_fd);
 	return (0);
 };
 
@@ -124,53 +100,22 @@ void	Core::error(int err_type) {
 };
 
 int		Core::writeToUser(int current_fd) {
-	std::map<int, User>::iterator it1 = map_users.find(current_fd);
-
-
-	// std::map<int, User>::iterator it1 = map_users.find(current_fd);
-
-
-	if (it1 == map_users.end()) {
-		write(2, "Users not found\n", 26);
-		return (0) ; ////!!!!
-	} 
-	else  {
-  	std::map<int, Message>::iterator it = storage_messages->getMessages().find(current_fd);
+	std::vector<int> deque; 
+	deque = storage_messages->getDeq(current_fd);
 	std::string str = storage_messages->getRawMessageByFd(current_fd);
-	std::cout << "write: " << current_fd << std::endl;
-	if ((it->second.getCmd()).empty()) {
-		storage_messages->deleteMessage(current_fd);
-		return (0);
-	}
-		if (it1->second.getBotDialog() != NO) {
-			send(current_fd, str.c_str(), str.length(), 0);
+	for(int i = 0; i < static_cast<int>(deque.size()); i++) {
+		if (FD_ISSET(deque[i], &write_)) {
+			send(deque[i], str.c_str(), str.length(), 0);
 			storage_messages->deleteMessage(current_fd);
-			if (it1->second.getBotDialog() == FINISH) {
-				it1->second.setBotDialog(NO);
-				storage_messages->deleteBot(current_fd);
-			}
-			return (0);
-		}
-		for(int s = 0; s <= max; ++s) {
-			if (FD_ISSET(s, &write_) && s != current_fd) {
-				//  std::cout << "str " << str << std::endl;
-				// std::cout << "it1->second.restMess " << it->second.getRestMess() << std::endl;
-				// send(s, it1->second.getMessage().c_str(), it1->second.getMessage().length(), 0);
-				send(s, str.c_str(), str.length(), 0);
-				storage_messages->deleteMessage(current_fd);
-			}
 		}
 	}
-
 	return (0);
 };
 
 int		Core::readFromUser(int user_fd) {
-
-	Message new_message;
-	// storage_messages->insertMessage();
-	std::string str;
-	std::string cmd;
+	Message		new_message;
+	std::string	str;
+	std::string	cmd;
 	// std::map<int, User>::iterator it1 = map_users.find(user_fd);
 	length_message = 0;
 	char tmp[4048];
@@ -178,25 +123,16 @@ int		Core::readFromUser(int user_fd) {
 	str.append(tmp);
 	str = str.substr(0, str.find("\r\n", 0)+1);
 	if (length_message > 0){
-		// parser_message(user_fd, tmp);
-
 		new_message.setRawMessage(str);
+		std::cout << "insertMessage " << new_message.getRawMessage() << std::endl;
 		storage_messages->insertMessage(user_fd, new_message);
-		storage_messages->parsRecvStr(str, &(map_users.find(user_fd))->second, map_users.begin(), map_users.end());
-	
-		//new_message.setRawMessage(str.append(tmp));
-		//new_message.setRawMessage(str.append("\r\n"));
-		//std::cout << "RECV  fd|" << user_fd << "|" << new_message.getRawMessage() << "|" << std::endl;
-		//storage_messages->insertMessage(user_fd, new_message);
-		//storage_messages->parseBuffer(user_fd);
+		std::cout << "insertMessage2 " << new_message.getRawMessage() << std::endl;
+		std::cout << "insertMessage3 " << storage_messages->getRawMessageByFd(user_fd) << std::endl;
+		storage_messages->parsRecvStr(str, user_fd); //storage_messages->parsRecvStr(str, &(map_users.find(user_fd))->second, map_users.begin(), map_users.end());
 	}
-
 	return (length_message);
 };
 
-// void Core::setStorage_messages(Messenger &_storage_messeges){
-// 	storage_messages = _storage_messeges;
-// };
 Messenger* Core::getStorage_messages(){
 	return storage_messages;
 };

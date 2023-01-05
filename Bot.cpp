@@ -2,7 +2,6 @@
 
 Bot::Bot(User *my_client) {
 	gameNum = 50;
-	UserFd = UserFd;
 	bot_com = NO_COMM;
 	this->my_client = my_client;
 	startGame = 0;

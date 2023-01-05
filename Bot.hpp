@@ -6,7 +6,7 @@
 class Bot {
     private:
         User *my_client;
-        int UserFd;
+        //int UserFd;
         int startGame;
         int gameNum;
         int bad_dialog;
