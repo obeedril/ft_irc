@@ -50,6 +50,9 @@ public:
 		void addUser(int user_fd, User new_user);
 		int  getUserFd(int Fd);
 
+    void setReadyMessInMessageByFd(std::string str, int senderFd);
+    std::string getCmdInMessageByFd(int senderFd);
+
 
 };
 

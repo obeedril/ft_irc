@@ -62,12 +62,6 @@ std::string Messenger::getCmdInMessageByFd(int senderFd) {
 }
 
 
-bool Messenger::checkRegistered(User* sender) {
-	if (!(*sender).getLogin().empty() && !(*sender).getUserName().empty() && !(*sender).getPassword().empty()) 
-		(*sender).setRegistFlag(true);
-	return((*sender).getRegistFlag());
-
-
 void Messenger::parserPrivmsg(Message mess){
 	std::string tmp = "";
 	size_t len = mess.getRawMessage().length();
@@ -131,6 +125,8 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 	std::map<int, Message>::iterator it = messages.find(userFd);
 	std::map<int, User>::iterator it_user = map_users.find(userFd);
 	bool flag = checkRegistered(userFd);
+
+	flag = true;
 	
 	std::vector<int> deque_users;
 	//std::map<int, User>::iterator it_u = map_users.begin();
@@ -275,7 +271,7 @@ void	Messenger::sendMotd(User* sender) {
 void	Messenger::printWelcome(User* sender, std::map<int, Message>::iterator	it1, std::string name, int flag) {
 	// flag 1 - username ; 2 - pass; 3 - nick; 4 - realname
 	(void)it1;
-	if (checkRegistered(sender)) {
+	if (checkRegistered(sender->getUserFd())) {
 		sendMotd(sender);
 		// it1->second.setReadyMess(name + " " + "Пользователь " + name + " aka (" +
 		// sender->getRealName() + ") ворвался в чат!\r\n");
