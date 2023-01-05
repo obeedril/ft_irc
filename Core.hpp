@@ -21,7 +21,7 @@ class Core {
 		int length_message;
 		// size_t errorCode;
 
-		std::map<int, User> map_users;
+		//std::map<int, User> map_users;
 
 		
 		Messenger *storage_messages;

@@ -10,8 +10,8 @@
     Message::~Message(){}
 
     void Message::setRawMessage(std::string _rawMessage){
-        rawMessage.clear();
-        rawMessage = "";
+        // rawMessage.clear();
+        // rawMessage = "";
         rawMessage = _rawMessage;
     }
 
@@ -45,6 +45,25 @@
         return rawMessage;
     }
 
-    std::string Message::getReadyMess() {
-        return ready_mess;
+    void Message::setReadyMess(std::string _readyMess){
+        readyMess = _readyMess;
+    }
+
+    std::string Message::getReadyMess(){
+        return readyMess;
+    }
+
+    void Message::setReceiver(std::string _receiver){
+        receiver = _receiver;
+    }
+
+    std::string Message::getReceiver(){
+        return receiver;
+    }
+    std::vector<int> Message::getDeque() {
+        return deque;
+    }
+
+    void Message::setDeque(std::vector<int> deque) {
+        this->deque = deque;
     }
