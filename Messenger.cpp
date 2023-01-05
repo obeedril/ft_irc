@@ -36,6 +36,33 @@ std::string Messenger::getRawMessageByFd(int senderFd) {
 	return "";
 }
 
+std::string Messenger::getReadyMessByFd(int senderFd) {
+	std::map<int, Message>::iterator it = messages.find(senderFd);
+	if (it != messages.end())
+		return it->second.getReadyMess();
+	return "";
+}
+
+void Messenger::parserPrivmsg(Message mess){
+	std::string tmp = "";
+	size_t len = mess.getRawMessage().length();
+	tmp = mess.getRawMessage().substr(mess.getCmd().length() + 1, len);
+
+	size_t pos = tmp.find(" ", 0);
+	if (pos == std::string::npos){
+		std::cout << "reciver is not identifire" << std::endl;
+		return;
+	} 
+	mess.setReceiver(tmp.substr(0, pos));
+	mess.setReadyMess(tmp.substr(mess.getReceiver().length() + 1, len));
+
+	// ------------------------------
+	std::cout << "tmp |" << tmp << "|" << std::endl;
+	std::cout << "reciver |" << mess.getReceiver() << "|" << std::endl;
+	std::cout << "tmp |" << tmp << "|" << std::endl;
+	std::cout << "readyMess |" << mess.getReadyMess() << "|" << std::endl;
+	// ------------------------------
+}
 
 bool Messenger::checkRegistered(int userFd) {
 	std::map<int, User>::iterator it_user = map_users.find(userFd);
@@ -74,7 +101,7 @@ int  Messenger::getUserFd(int Fd) {
 	return (it1->second.getUserFd());
 }
 
-void Messenger::parsRecvStr(std::string str, int userFd) { //, User* sender, std::map<int, User>::iterator begin, std::map<int, User>::iterator end) {
+void Messenger::parsRecvStr(std::string str, int userFd) {
 	std::map<int, Message>::iterator it = messages.find(userFd);
 	std::map<int, User>::iterator it_user = map_users.find(userFd);
 	bool flag = checkRegistered(userFd);
@@ -94,11 +121,11 @@ void Messenger::parsRecvStr(std::string str, int userFd) { //, User* sender, std
 		// if (userCmd(it->second.getRawMessage(), sender, begin, end))
 		// 	it->second.setCmd("");
 	}
-	if (str.find("NICK", 0) != std::string::npos) {
+	else if (str.find("NICK", 0) != std::string::npos) {
 		it->second.setCmd("NICK");
 		std::cout << "cmd NICK" << std::endl;
 	}
-	if (str.find("PASS", 0) != std::string::npos) {
+	else if (str.find("PASS", 0) != std::string::npos) {
 
 		it->second.setCmd("PASS");
 		std::cout << "cmd PASS" << std::endl;
@@ -109,10 +136,11 @@ void Messenger::parsRecvStr(std::string str, int userFd) { //, User* sender, std
 	}
 	else if (str.find("PRIVMSG", 0) != std::string::npos && flag == true){
 		it->second.setCmd("PRIVMSG");
+		parserPrivmsg(it->second);
 		std::cout << "cmd PRIVMSG" << std::endl;
 	}
 	else if (str.find("NOTICE", 0) != std::string::npos && flag == true){
-		it->second.setCmd("USER");
+		it->second.setCmd("NOTICE");
 		std::cout << "cmd NOTICE" << std::endl;
 	}
 	else if (str.find("JOIN", 0) != std::string::npos && flag == true){
@@ -120,7 +148,7 @@ void Messenger::parsRecvStr(std::string str, int userFd) { //, User* sender, std
 		std::cout << "cmd JOIN" << std::endl;
 	}
 	else if (str.find("KICK", 0) != std::string::npos && flag == true){
-		it->second.setCmd("USER");
+		it->second.setCmd("KICK");
 		std::cout << "cmd KICK" << std::endl;
 	}
 	else if (str.find("CAP LS", 0) != std::string::npos) {
@@ -218,12 +246,12 @@ int	Messenger::userCmd(const std::string &msg, User* sender, std::map<int, User>
 		return(replyError(sender, ERR_NEEDMOREPARAMS, tostring(arr), ""));
 	}
 	for (; begin != end; begin++)
-		{
-			if (arr[0] == begin->second.getUserName()) { // arr[0] тк слово USER уже удалили
-				std::cout << "повтор ника" << std::endl;
-				return(replyError(sender, ERR_ALREADYREGISTRED, "", ""));
-			}
+	{
+		if (arr[0] == begin->second.getUserName()) { // arr[0] тк слово USER уже удалили
+			std::cout << "повтор ника" << std::endl;
+			return(replyError(sender, ERR_ALREADYREGISTRED, "", ""));
 		}
+	}
 	(*sender).setUserName(arr[0]);// arr[0] тк слово USER уже удалили
 
 	it1->second.setRawMessage(arr[0] + " " + "Пользователь " + arr[0] + " ворвался в чат!\r\n");

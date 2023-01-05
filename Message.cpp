@@ -40,18 +40,25 @@
         return rawMessage;
     }
 
+    void Message::setReadyMess(std::string _readyMess){
+        readyMess = _readyMess;
+    }
+
+    std::string Message::getReadyMess(){
+        return readyMess;
+    }
+
+    void Message::setReceiver(std::string _receiver){
+        receiver = _receiver;
+    }
+
+    std::string Message::getReceiver(){
+        return receiver;
+    }
     std::vector<int> Message::getDeque() {
         return deque;
     }
 
     void Message::setDeque(std::vector<int> deque) {
         this->deque = deque;
-    }
-
-    std::string Message::getReadyMess() {
-         return this->ready_mess;
-    }
-
-    void Message::setReadyMess(std::string ready_mess) {
-        this->ready_mess = ready_mess;
     }

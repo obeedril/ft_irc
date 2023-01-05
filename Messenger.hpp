@@ -13,16 +13,18 @@ private:
 public:
 		Messenger();
 		~Messenger();
-	 void parseBuffer(int senderFd);
+	
 
+   void parserPrivmsg(Message mess);
 	 void setMessages(std::map<int, Message> _messages);
 	 std::map<int, Message> getMessages();
 	 void insertMessage(int senderFd, Message mess);
 	 void deleteMessage(int senderFd);
 	 std::string getRawMessageByFd(int senderFd);
 	 bool checkRegistered(int userFd);
+   std::string getReadyMessByFd(int senderFd);
 
-	void parsRecvStr(std::string str, int userFd);//, User* sender, std::map<int, User>::iterator begin, std::map<int, User>::iterator end);
+	void parsRecvStr(std::string str, int userFd);
 
 
 		// USER cmd
