@@ -39,3 +39,20 @@
     std::string Message::getRawMessage(){
         return rawMessage;
     }
+
+    void Message::setReadyMess(std::string _readyMess){
+        readyMess = _readyMess;
+    }
+
+    std::string Message::getReadyMess(){
+        return readyMess;
+    }
+
+    void Message::setReceiver(std::string _receiver){
+        receiver = _receiver;
+    }
+
+    std::string Message::getReceiver(){
+        return receiver;
+    }
+

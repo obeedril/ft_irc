@@ -135,13 +135,14 @@ int		Core::writeToUser(int current_fd) {
 		return (0) ; ////!!!!
 	} 
 	else  {
-  	std::map<int, Message>::iterator it = storage_messages->getMessages().find(current_fd);
-	std::string str = storage_messages->getRawMessageByFd(current_fd);
-	std::cout << "write: " << current_fd << std::endl;
-	if ((it->second.getCmd()).empty()) {
-		storage_messages->deleteMessage(current_fd);
-		return (0);
-	}
+		std::map<int, Message>::iterator it = storage_messages->getMessages().find(current_fd);
+		// std::string str = storage_messages->getRawMessageByFd(current_fd);
+		std::string str = storage_messages->getReadyMessByFd(current_fd);
+		std::cout << "write: " << current_fd << std::endl;
+		if ((it->second.getCmd()).empty()) {
+			storage_messages->deleteMessage(current_fd);
+			return (0);
+		}
 		if (it1->second.getBotDialog() != NO) {
 			send(current_fd, str.c_str(), str.length(), 0);
 			storage_messages->deleteMessage(current_fd);
@@ -176,7 +177,9 @@ int		Core::readFromUser(int user_fd) {
 	char tmp[4048];
 	length_message = recv(user_fd, tmp, 42*4096, 0);
 	str.append(tmp);
-	str = str.substr(0, str.find("\r\n", 0)+1);
+	std::cout << "RECV STR0 |" << str << "|" << std::endl;
+	str = str.substr(0, str.find("\r\n", 0) + 2);
+	std::cout << "RECV STR1 |" << str << "|" << std::endl;
 	if (length_message > 0){
 		// parser_message(user_fd, tmp);
 
@@ -184,10 +187,6 @@ int		Core::readFromUser(int user_fd) {
 		storage_messages->insertMessage(user_fd, new_message);
 		storage_messages->parsRecvStr(str, &(map_users.find(user_fd))->second, map_users.begin(), map_users.end());
 	
-		//new_message.setRawMessage(str.append(tmp));
-		//new_message.setRawMessage(str.append("\r\n"));
-		//std::cout << "RECV  fd|" << user_fd << "|" << new_message.getRawMessage() << "|" << std::endl;
-		//storage_messages->insertMessage(user_fd, new_message);
 		//storage_messages->parseBuffer(user_fd);
 	}
 
