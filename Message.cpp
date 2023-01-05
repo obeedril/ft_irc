@@ -27,10 +27,6 @@
         prefix = _prefix;
     }
 
-    void Message::setReadyMess(std::string mess) {
-        ready_mess = mess;
-    }
-
     std::string Message::getCmd(){
         return cmd;
     }

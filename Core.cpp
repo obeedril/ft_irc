@@ -105,7 +105,9 @@ int		Core::writeToUser(int current_fd) {
 
 	std::vector<int> deque; 
 	deque = storage_messages->getDeq(current_fd);
-	std::string str = storage_messages->getReadyMessByFd(current_fd);
+	std::string str = storage_messages->getRawMessageByFd(current_fd); // заменить на readyMess
+	std::cout << "str109 |" << str << "|" << std::endl;
+
 	for(int i = 0; i < static_cast<int>(deque.size()); i++) {
 		if (FD_ISSET(deque[i], &write_)) {
 			send(deque[i], str.c_str(), str.length(), 0);
