@@ -16,17 +16,18 @@ public:
 		~Messenger();
 	
 
-   void parserPrivmsg(Message mess);
-	 void setMessages(std::map<int, Message> _messages);
-	 std::map<int, Message> getMessages();
-	 void insertMessage(int senderFd, Message mess);
-	 void deleteMessage(int senderFd);
-	 std::string getRawMessageByFd(int senderFd);
-	 bool checkRegistered(int userFd);
-   std::string getReadyMessByFd(int senderFd);
+	void parserPrivmsg(Message mess);
+	void setMessages(std::map<int, Message> _messages);
+	std::map<int, Message> getMessages();
+	void insertMessage(int senderFd, Message mess);
+	void deleteMessage(int senderFd);
+	std::string getRawMessageByFd(int senderFd);
+	bool checkRegistered(int userFd);
+	std::string getReadyMessByFd(int senderFd);
 
 	void parsRecvStr(std::string str, int userFd);
 
+	void dequeMaker(User *user, int flag); //flag 1 = for 1 user, flag 2 = to all except user in argument, flag 3 = to all, flag 4 = to channel except user in argument (NOT WORKS!!!!), flag 5 = to channel and user in argument (NOT WORKS!!!!)
 
 		// USER cmd
 		int		userCmd(const std::string &msg, User* sender);
@@ -35,11 +36,15 @@ public:
 		std::string tostring(std::vector<std::string> &v);
 		std::string initBot(int user_fd, std::string msg);
 		void deleteBot(int senderFd);
-    void	printWelcome(User* sender, std::map<int, Message>::iterator	it1, std::string name, int flag);
+    // void	printWelcome(User* sender, std::map<int, Message>::iterator	it1, std::string name, int flag);
+		void	printWelcome(User* sender, std::string name, int flag);
+
     void	sendMotd(User* sender);
 
 // PASS cmd
     int	passCmd(const std::string &msg, User* sender);
+// NICK cmd
+	int	nickCmd(const std::string &msg, User* sender);
 
 		//    void setMess(Message _mess);
 		//    Message getMess();

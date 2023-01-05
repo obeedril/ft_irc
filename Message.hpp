@@ -36,6 +36,7 @@ public:
 
     std::vector<int> getDeque();
     void setDeque(std::vector<int> deque);
+    // void clearDeque(std::vector<int> deque);
 };
 
 #endif

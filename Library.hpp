@@ -35,8 +35,11 @@
 #define ADMIN_NAME "adminName"
 #define ADMIN_PASS "adminPass"
 #define OPERATORS "operators"
-// #define COUNT_TOKENS 4
-
+#define ONE_USER 1
+#define TO_ALL_BUT_NO_THIS_USER 2
+#define TO_ALL 3
+#define TO_CHANNEL_BUT_NO_THIS_USER 4
+#define TO_CHANNEL 5
 
 // typedef struct s_message{
 // 	std::string cmd;

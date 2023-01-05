@@ -63,3 +63,7 @@
     void Message::setDeque(std::vector<int> deque) {
         this->deque = deque;
     }
+
+    // void Message::clearDeque(std::vector<int> deque) {
+    //     this->deque.erase();
+    // }
