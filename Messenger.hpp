@@ -29,7 +29,7 @@ public:
 
 
 		// USER cmd
-		int		userCmd(const std::string &msg, User* sender, std::map<int, User>::iterator begin, std::map<int, User>::iterator end);
+		int		userCmd(const std::string &msg, User* sender);
 		int		replyError(User *user, int err, const std::string &str1, const std::string &str2);
 		std::vector<std::string> stringSplit(const std::string &line, char delimiter);
 		std::string tostring(std::vector<std::string> &v);
@@ -51,6 +51,7 @@ public:
 		int  getUserFd(int Fd);
 
     void setReadyMessInMessageByFd(std::string str, int senderFd);
+	void setRawMessInMessageByFd(std::string str, int senderFd); // удалить! это пока нет печати через readymess
     std::string getCmdInMessageByFd(int senderFd);
 
 
