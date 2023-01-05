@@ -16,7 +16,7 @@
 // #define ERR_NOTOPLEVEL			413
 // #define ERR_WILDTOPLEVEL		414
 // #define ERR_UNKNOWNCOMMAND		421
-// #define ERR_NOMOTD				422
+#define ERR_NOMOTD				422
 // #define ERR_NOADMININFO			423
 // #define ERR_FILEERROR			424
 // #define ERR_NONICKNAMEGIVEN		431
@@ -81,9 +81,9 @@
 // #define RPL_ENDOFBANLIST		368
 // #define RPL_INFO				371
 // #define RPL_ENDOFINFO			374
-// #define RPL_MOTDSTART			375
-// #define RPL_MOTD				372
-// #define RPL_ENDOFMOTD			376
+#define RPL_MOTDSTART			375
+#define RPL_MOTD				372
+#define RPL_ENDOFMOTD			376
 // #define RPL_YOUREOPER			381
 // #define RPL_REHASHING			382
 // #define RPL_TIME				391

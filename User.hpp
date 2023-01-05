@@ -28,6 +28,7 @@ class User {
         std::string getRealName(); //realname
         std::string getPassword();
         std::string getServName();
+		std::vector<std::string>	getMotdFromServer();
         bool getRegistFlag();
         void setUserFd(int _userFd);
         void setIsAdminHere(bool _isAdminHere);

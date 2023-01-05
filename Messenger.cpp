@@ -22,6 +22,14 @@ void Messenger::setMessages(std::map<int, Message> _messages) {
 	messages = _messages;
 }
 
+void Messenger::setReadyMessInMessageByFd(std::string str, int senderFd) {
+	std::map<int, Message>::iterator it = messages.find(senderFd);
+	std::string tmp = it->second.getReadyMess();
+	if (!tmp.empty())
+		tmp = "";
+	tmp = str;
+}
+
 std::map<int, Message> Messenger::getMessages() {
 	return messages;
 }
@@ -32,6 +40,14 @@ std::string Messenger::getRawMessageByFd(int senderFd) {
 		return it->second.getRawMessage();
 	return "";
 }
+
+std::string Messenger::getReadyMessInMessageByFd(int senderFd) {
+	std::map<int, Message>::iterator it = messages.find(senderFd);
+	if (it != messages.end())
+		return it->second.getReadyMess();
+	return "";
+}
+
 
 std::string Messenger::getCmdInMessageByFd(int senderFd) {
 	std::map<int, Message>::iterator it = messages.find(senderFd);
@@ -155,11 +171,38 @@ std::string Messenger::tostring(std::vector<std::string> &v)
     return os.str();
 }
 
+void	Messenger::sendMotd(User* sender) {
+	std::vector<std::string> vec = sender->getMotdFromServer();
+	std::string tmp = tostring(vec);
+	if (tmp.empty())
+		replyError(sender, ERR_NOMOTD, "", "");
+	else
+	{
+		std::string	msg = ":" + sender->getUserName() + " ";
+		std::stringstream	ss;
+		ss << RPL_MOTDSTART;
+		msg += ss.str() + " " + sender->getUserName() + " ";
+		msg += ":- " + sender->getServName() + " Message of the day - \r\n";
+
+		ss << RPL_MOTD; //????
+		msg += ss.str() + " " + sender->getUserName() + " ";
+		msg += ":- " + tmp + "\r\n";
+			
+		ss << RPL_ENDOFMOTD; //????
+		msg += ss.str() + " " + sender->getUserName() + " ";
+		msg += ":End of /MOTD command\r\n";
+
+		setReadyMessInMessageByFd(msg, sender->getUserFd());
+	}
+}
+
 void	Messenger::printWelcome(User* sender, std::map<int, Message>::iterator	it1, std::string name, int flag) {
 	// flag 1 - username ; 2 - pass; 3 - nick; 4 - realname
+	(void)it1;
 	if (checkRegistered(sender)) {
-		it1->second.setReadyMess(name + " " + "Пользователь " + name + " aka (" + \
-		sender->getRealName() + ") ворвался в чат!\r\n");
+		sendMotd(sender);
+		// it1->second.setReadyMess(name + " " + "Пользователь " + name + " aka (" +
+		// sender->getRealName() + ") ворвался в чат!\r\n");
 	}
 	else if (flag == 1) {
 		std::string msg = "ADMIN Ok! Changed USERNAME to " + name + "\r\n";
@@ -217,7 +260,7 @@ int	Messenger::userCmd(const std::string &msg, User* sender, std::map<int, User>
 	(*sender).setUserName(arr[0]);// arr[0] тк слово USER уже удалили
 
 	it1->second.setReadyMess(arr[0] + " " + "Пользователь " + arr[0] + " ворвался в чат!\r\n");
-	it1->second.setRawMessage(arr[0] + " " + "Пользователь " + arr[0] + " ворвался в чат!\r\n");
+	// it1->second.setRawMessage(arr[0] + " " + "Пользователь " + arr[0] + " ворвался в чат!\r\n");
 	if (arr[arr.size() - 1][0] == ':')
 		(*sender).setRealName(arr[arr.size() - 1].substr(1));
 	else
@@ -226,6 +269,34 @@ int	Messenger::userCmd(const std::string &msg, User* sender, std::map<int, User>
 	printWelcome(sender, it1, arr[0], flag);
 	return 0;
 }
+
+
+// int		Messenger::replyAnswer(User *user, int code, const std::string &str) {
+// 		std::string	msg = ":" + user->getUserName() + " ";
+// 		std::stringstream	ss;
+// 		ss << code;
+// 		msg += ss.str() + " " + user->getLogin() + " ";
+// 		switch (code)
+// 		{
+// 			case RPL_MOTDSTART:
+// 				msg += ":- " + user->getServName() + " Message of the day - \r\n";
+// 				// msg += ":- " + user->getServName() + " Message of the day - \n";
+// 				// break;
+// 			case RPL_MOTD:
+// 				// msg += ":- " + str + "\n";
+// 				msg += ":- " + str + "\r\n";
+// 				// break;
+// 			case RPL_ENDOFMOTD:
+// 				// msg += ":End of /MOTD command\n";
+// 				msg += ":End of /MOTD command\r\n";
+// 				// break;
+// 			default:
+// 				msg += "UNKNOWN REPLY\n";
+// 				break;
+// 		}
+// 		send(user->getUserFd(), msg.c_str(), msg.size(), MSG_NOSIGNAL);
+// 		return 0;
+// }
 
 
 int		Messenger::replyError(User *user, int err, const std::string &str, const std::string &arg) {
@@ -377,7 +448,8 @@ int		Messenger::replyError(User *user, int err, const std::string &str, const st
 		break;
 	}
 	// std::cout << "222повтор ника" << std::endl;
-	send(user->getUserFd(), msg.c_str(), msg.size(), MSG_NOSIGNAL);
+	setReadyMessInMessageByFd(msg, user->getUserFd());
+	// send(user->getUserFd(), msg.c_str(), msg.size(), MSG_NOSIGNAL);
 	// std::cout << "333повтор ника" << std::endl;
 	return (-1);
 }
@@ -390,3 +462,23 @@ void Messenger::deleteBot(int senderFd) {
 	}
 }
 
+
+int	Messenger::passCmd(const std::string &msg, User* sender) {
+	std::map<int, Message>::iterator	it1; // !!!
+	it1 = messages.find((*sender).getUserFd());
+	int flag = 0;
+	std::string currentPass = sender->getPassword();
+	std::cout << "DEFAULT username =  = " << sender->getUserName() << std::endl;
+	if (!currentPass.empty())
+		flag = 2;
+
+	std::vector<std::string> arr = stringSplit(msg, ' ');
+	if (arr.size() != 2)
+		return(replyError(sender, ERR_NEEDMOREPARAMS, tostring(arr), ""));
+	arr.erase(arr.begin()); 
+	if (!currentPass.empty() && arr[0] == currentPass)
+		return(replyError(sender, ERR_ALREADYREGISTRED, "", ""));
+	(*sender).setPassword(arr[0]);
+	printWelcome(sender, it1, arr[0], flag);
+	return (0);
+}

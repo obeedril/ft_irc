@@ -7,12 +7,26 @@ Server::Server(int port, const std::string &password) {
 	_configTokens.push_back(ADMIN_NAME);
 	_configTokens.push_back(ADMIN_PASS);
 	_configTokens.push_back(OPERATORS);
+
+
+	std::string		line;
+	std::ifstream	motdFile(PATH_TO_MOTD);
+	if (motdFile.is_open())
+	{
+		while (getline(motdFile, line))
+			_motd.push_back(line);
+		motdFile.close();
+	}
+
 };
 
 std::string	Server::getServName() {
 	return _serverName;
 }
 
+std::vector<std::string>	Server::getMotd() {
+	return _motd;
+}
 
 //   *** удаление пробелов, кавычек и ; ***
 void Server::newDeleteSpaces(std::string *str) {

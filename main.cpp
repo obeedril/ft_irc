@@ -12,6 +12,23 @@ void signalHandler(int signum) {
 	gFlagExit = 0; 
 }
 
+bool checkToOpen(void) {
+	FILE* fp = fopen(PATH_TO_CONFIG, "r+");
+	if (!fp) {
+		std::cerr << "\x1b[1;95m" << "> Can't open config file!\n" << "\x1b[0m";
+		return 1;
+	}
+	std::fclose(fp);
+
+	FILE* ff = fopen(PATH_TO_MOTD, "r+");
+	if (!ff) {
+		std::cerr << "\x1b[1;95m" << "> Can't open motd file!\n" << "\x1b[0m";
+		return 1;
+	}
+	std::fclose(ff);
+	return 0;
+}
+
 int main(int argc, const char* argv[]) {
 
 	if (argc != 3) {
@@ -29,20 +46,14 @@ int main(int argc, const char* argv[]) {
 	signal(SIGINT, signalHandler); 
 
 	Server irc_serv = Server(port, argv[1]);
-	FILE* fp = fopen(PATH_TO_CONFIG, "r+");
-	if (!fp) {
-		std::cerr << "\x1b[1;95m" << "> Can't open config file!\n" << "\x1b[0m";
-		return 0;
-	}
-	std::fclose(fp);
+	if (checkToOpen())
+		return 1;
 	try {
 		irc_serv.parseConfig();
 	}
 	catch (std::exception& e) {
 		std::cout << e.what() << std::endl;
 	}
-
-
 	Core core_irc = Core(port);
 	core_irc.setServ(&irc_serv);
 	std::cout << "\x1b[1;95m" << "> IRC server run!\n" << "\x1b[0m";

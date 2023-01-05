@@ -16,6 +16,7 @@ class Server
 		std::string								_password;
 		std::string								_admin;
 		std::map<std::string, std::string>		_operators;
+		std::vector<std::string>				_motd;
 		// std::vector<std::string> commands;
 
 		std::vector<std::string> splitLines(std::string path);
@@ -31,6 +32,7 @@ class Server
 		~Server() {};
 		void parseConfig();
 		std::string	getServName();
+		std::vector<std::string>	getMotd();
 };
 
 #endif
