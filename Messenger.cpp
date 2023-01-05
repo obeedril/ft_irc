@@ -181,6 +181,9 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 	}
 	else if ((str.find("BOT", 0) != std::string::npos || it_user->second.getBotDialog() == YES)
 				&& flag == true) {
+		deque_users.clear();
+		deque_users.push_back(userFd);
+		it->second.setDeque(deque_users);
 		it->second.setCmd("BOT");
 		it_user->second.setBotDialog(YES);
 		it->second.setRawMessage(initBot(userFd, it->second.getRawMessage()));
