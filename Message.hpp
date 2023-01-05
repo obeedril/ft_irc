@@ -14,7 +14,8 @@ private:
 	std::string receiver;
 	std::string restMess;
 	std::string prefix;
-   
+
+    std::vector<int> deque;
 
 public:
     Message();
@@ -31,6 +32,8 @@ public:
     std::string getRawMessage();
     std::string getReadyMess();
 
+    std::vector<int> getDeque();
+    void setDeque(std::vector<int> deque);
 };
 
 #endif
