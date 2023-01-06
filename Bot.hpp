@@ -6,13 +6,12 @@
 class Bot {
     private:
         User *my_client;
-        //int UserFd;
         int startGame;
         int gameNum;
         int bad_dialog;
         
-
         std::string message;
+        std::string file;
         t_bot_command bot_com;
 
     public:

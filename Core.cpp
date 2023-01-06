@@ -102,15 +102,18 @@ void	Core::error(int err_type) {
 };
 
 int		Core::writeToUser(int current_fd) {
-
 	std::vector<int> deque; 
 	deque = storage_messages->getDeq(current_fd);
-	std::string str = storage_messages->getRawMessageByFd(current_fd); // заменить на readyMess
-	std::cout << "str109 |" << str << "|" << std::endl;
-
+	std::string msg = storage_messages->getRawMessageByFd(current_fd); // заменить на readyMess
+	std::string systemMsg = storage_messages->getSystemMsg(current_fd);
+	std::cout << "msg: " << msg << std::endl;
+	std::cout << "systemMsg: " << systemMsg << std::endl;
+	if (systemMsg != "") {
+			send(current_fd, systemMsg.c_str(), systemMsg.length(), 0);
+	}
 	for(int i = 0; i < static_cast<int>(deque.size()); i++) {
 		if (FD_ISSET(deque[i], &write_)) {
-			send(deque[i], str.c_str(), str.length(), 0);
+			send(deque[i], msg.c_str(), msg.length(), 0);
 			storage_messages->deleteMessage(current_fd);
 
 		}
@@ -127,9 +130,9 @@ int		Core::readFromUser(int user_fd) {
 	char tmp[4048];
 	length_message = recv(user_fd, tmp, 42*4096, 0);
 	str.append(tmp);
-	std::cout << "RECV STR0 |" << str << "|" << std::endl;
+	//std::cout << "RECV STR0 |" << str << "|" << std::endl;
 	str = str.substr(0, str.find("\r\n", 0) + 2);
-	std::cout << "RECV STR1 |" << str << "|" << std::endl;
+	//std::cout << "RECV STR1 |" << str << "|" << std::endl;
 	if (length_message > 0){
 		new_message.setRawMessage(str);
 		storage_messages->insertMessage(user_fd, new_message);

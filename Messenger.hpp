@@ -8,7 +8,9 @@ class Messenger {
 private:
 		std::map<int, Message>  messages;
 		std::map<int, Bot>      map_robots;
-		std::map<int, User>			map_users;
+		std::map<int, User>		map_users;
+
+		ChannelsStorage			channels;
 
 public:
 
@@ -59,6 +61,8 @@ public:
 	void setRawMessInMessageByFd(std::string str, int senderFd); // удалить! это пока нет печати через readymess
     std::string getCmdInMessageByFd(int senderFd);
 
+	std::string getSystemMsg(int senderFd);
+	std::string findNameKick(Message mess);
 
 };
 

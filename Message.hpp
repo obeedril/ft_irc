@@ -16,6 +16,7 @@ private:
 	std::string prefix;
 
     std::vector<int> deque;
+    std::string msgForSender;
 
 public:
     Message();
@@ -37,6 +38,8 @@ public:
     std::vector<int> getDeque();
     void setDeque(std::vector<int> deque);
     // void clearDeque(std::vector<int> deque);
+    void setMessForSender(std::string msgForSender);
+    std::string getMessForSender();
 };
 
 #endif

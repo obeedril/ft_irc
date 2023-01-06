@@ -10,16 +10,14 @@ SRCS		= main.cpp \
 			User.cpp \
 			Messenger.cpp \
 			Message.cpp \
-			Bot.cpp
-#ChannelsStorage.cpp
+			Bot.cpp \
+			ChannelsStorage.cpp
 
 HEADERS		= Library.hpp
 
 OBJS		=	$(SRCS:.cpp=.o)
 
 CC			=	g++
-#CC			=	c++ 
-#!!!! заменить!!! 
 
 RM				= rm -Rf
 FLAGS			= -Wall -Wextra -Werror -g -std=c++98

@@ -1,7 +1,7 @@
 #include "Library.hpp"
 
 Messenger::Messenger() {
-
+	ChannelsStorage channels;
 }
 
 Messenger::~Messenger() {
@@ -45,8 +45,8 @@ std::map<int, Message> Messenger::getMessages() {
 std::string Messenger::getRawMessageByFd(int senderFd) {
 	std::map<int, Message>::iterator it = messages.find(senderFd);
 	if (it != messages.end()) {
-		std::cout << "senderFd " << senderFd << std::endl;
-		std::cout << "getRawMessageByFd INN:" << it->second.getRawMessage() << std::endl;
+		//std::cout << "senderFd " << senderFd << std::endl;
+		//std::cout << "getRawMessageByFd INN:" << it->second.getRawMessage() << std::endl;
 		return it->second.getRawMessage();
 	}
 	return "";
@@ -61,6 +61,12 @@ std::string Messenger::getReadyMessByFd(int senderFd) {
 	return "";
 }
 
+std::string Messenger::getSystemMsg(int senderFd) {
+	std::map<int, Message>::iterator it = messages.find(senderFd);
+	if (it != messages.end())
+		return it->second.getMessForSender();
+	return "";
+}
 
 std::string Messenger::getCmdInMessageByFd(int senderFd) {
 	std::map<int, Message>::iterator it = messages.find(senderFd);
@@ -176,16 +182,19 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 		it->second.setCmd("NOTICE");
 		std::cout << "cmd NOTICE" << std::endl;
 	}
-	else if (str.find("JOIN", 0) != std::string::npos && flag == true){
+	else if (str.find("JOIN", 0) != std::string::npos && flag == true) {
 		it->second.setCmd("JOIN");
+		dequeMaker(&it_user->second, ONE_USER);
+		it->second.setMessForSender(channels.joinToCannel(str, &it_user->second));
 		std::cout << "cmd JOIN" << std::endl;
 	}
-	else if (str.find("KICK", 0) != std::string::npos && flag == true){
+	else if (str.find("KICK", 0) != std::string::npos && flag == true) {
 		it->second.setCmd("KICK");
+		findNameKick(it->second);
+		it->second.setMessForSender(channels.kickUser(str, &it_user->second));
 		std::cout << "cmd KICK" << std::endl;
 	}
 	else if (str.find("CAP LS", 0) != std::string::npos) {
-
 		it->second.setCmd("CAP LS");
 		std::cout << "cmd CAP LS" << std::endl;
 		it->second.setRawMessage("\r\n");
@@ -195,9 +204,24 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 		dequeMaker(&it_user->second, ONE_USER);
 		it->second.setCmd("BOT");
 		it_user->second.setBotDialog(YES);
-		it->second.setRawMessage(initBot(userFd, it->second.getRawMessage()));
-		std::cout << "cmd BOT" << std::endl;
+		it->second.setMessForSender(initBot(userFd, it->second.getRawMessage()));
+		if (it_user->second.getBotDialog() == FINISH) {
+			std::cout << "deleteBot" << std::endl;
+			deleteBot(userFd);
+		}
 	}
+}
+
+std::string Messenger::findNameKick(Message mess) {
+	std::vector<int> deque; 
+	deque = mess.getDeque();
+	for(int i = 0; i < static_cast<int>(deque.size()); i++) {
+		std::map<int, User>::iterator it_user = map_users.find(deque[i]);
+		if (it_user != map_users.end()) {
+			return it_user->second.getUserName();
+		}
+	}
+	return "";
 }
 
 std::string Messenger::initBot(int user_fd, std::string msg) {
@@ -207,12 +231,9 @@ std::string Messenger::initBot(int user_fd, std::string msg) {
 
 	if (it1 == map_robots.end()) {
 		std::cout << "new BOT: " << msg << std::endl;
-		//it_user->second.setBotDialog(YES);
 		Bot new_bot(&it_user->second);
 		map_robots.insert(std::pair<int, Bot> (user_fd, new_bot));
-		std::cout << "BEFORE callBot" << std::endl;
 		new_bot.callBot(msg);
-		std::cout << "AFTER callBot" << std::endl;
 		tmp = new_bot.getMsg();
 		new_bot.setMsg("");
 	}
@@ -222,7 +243,6 @@ std::string Messenger::initBot(int user_fd, std::string msg) {
 		tmp = it1->second.getMsg();
 		it1->second.setMsg("");
 	}
-	std::cout << "END initBot" << std::endl;
 	return(tmp);
 }
 
@@ -318,8 +338,11 @@ void	Messenger::sendMotd(User* sender) {
 		ss << RPL_ENDOFMOTD; //????
 		msg += ss.str() + " " + sender->getUserName() + " ";
 		msg += ":End of /MOTD command\r\n";
-
-		send(sender->getUserFd(), msg.c_str(), msg.size(), MSG_NOSIGNAL); // ок ли????
+		std::map<int, Message>::iterator it = messages.find(sender->getUserFd());
+		if (it != messages.end()) {
+			it->second.setMessForSender(msg);
+		}
+		//send(sender->getUserFd(), msg.c_str(), msg.size(), MSG_NOSIGNAL); // ок ли????
 		// setReadyMessInMessageByFd(msg, sender->getUserFd());
 	}
 }
@@ -354,42 +377,45 @@ void	Messenger::printWelcome(User* sender, std::string str, int flag) {
 	}
 }
 
-	void Messenger::dequeMaker(User *user, int flag) {
-//формирует очередь получателей
-//flag 1 = for 1 user, 
-// flag 2 = to all except user in argument, 
-// flag 3 = to all, 
-// flag 4 = to channel except user in argument (NOT WORKS!!!!), 
-// flag 5 = to channel and user in argument (NOT WORKS!!!!)
-		std::map<int, Message>::iterator it = messages.find(user->getUserFd());
-		if (it->second.getDeque().size())
-			it->second.getDeque().clear();
-		std::vector<int> deque_users;
-		
-		if (flag == ONE_USER) {
-			deque_users.push_back(user->getUserFd());
-			it->second.setDeque(deque_users);
-		}
-		else if (flag == TO_ALL_BUT_NO_THIS_USER) {
-			for (std::map<int, User>::iterator it_u = map_users.begin(); it_u != map_users.end(); it_u++) {
-				if (it_u->first != user->getUserFd())
-					deque_users.push_back(it_u->first);
-				}
-			it->second.setDeque(deque_users);
-		}
-		else if (flag == TO_ALL) {
-			for (std::map<int, User>::iterator it_u = map_users.begin(); it_u != map_users.end(); it_u++)
-					deque_users.push_back(it_u->first);
-			it->second.setDeque(deque_users);
-		}
-		else if (flag == TO_CHANNEL_BUT_NO_THIS_USER) {
+void Messenger::dequeMaker(User *user, int flag) {
+	//формирует очередь получателей
+	//flag 1 = for 1 user, 
+	// flag 2 = to all except user in argument, 
+	// flag 3 = to all, 
+	// flag 4 = to channel except user in argument (NOT WORKS!!!!), 
+	// flag 5 = to channel and user in argument (NOT WORKS!!!!)
+	std::map<int, Message>::iterator it = messages.find(user->getUserFd());
+	if (it->second.getDeque().size())
+		it->second.getDeque().clear();
+	std::vector<int> deque_users;
+	
+	if (flag == ONE_USER) {
+		deque_users.push_back(user->getUserFd());
+		it->second.setDeque(deque_users);
+	}
+	else if (flag == TO_ALL_BUT_NO_THIS_USER) {
+		for (std::map<int, User>::iterator it_u = map_users.begin(); it_u != map_users.end(); it_u++) {
+			if (it_u->first != user->getUserFd())
+				deque_users.push_back(it_u->first);
+			}
+		it->second.setDeque(deque_users);
+	}
+	else if (flag == TO_ALL) {
+		for (std::map<int, User>::iterator it_u = map_users.begin(); it_u != map_users.end(); it_u++)
+				deque_users.push_back(it_u->first);
+		it->second.setDeque(deque_users);
+	}
+	else if (flag == TO_CHANNEL_BUT_NO_THIS_USER) {
 		// Написать реализацию, чтобы слало на канал, кроме самого юзера!!!
 
-		}
-			else if (flag == TO_CHANNEL) {
-		// Написать реализацию, чтобы слало на канал!!!
-		}
 	}
+	else if (flag == TO_CHANNEL) {
+		// Написать реализацию, чтобы слало на канал!!!
+	}
+	else if (flag == SYSTEM_MSG) {
+		it->second.setDeque(deque_users);
+	}
+}
 
 // NICK cmd
 int	Messenger::nickCmd(const std::string &msg, User* sender) {

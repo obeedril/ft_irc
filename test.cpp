@@ -37,20 +37,17 @@ int main(int argc, char **argv, char **env) {
 	std::string cmd_1("-X");
 	std::string cmd_2("GET");
 	std::string site("https://p.ya.ru/?via=f");
-	std::string redir(">");
-	std::string html("weather.html");
 
-	cmd = new char*[6];
-	for(int i = 0; i < 6; i++) {
+
+	cmd = new char*[4];
+	for(int i = 0; i < 4; i++) {
 		cmd[i] = NULL;
 	}
 	cmd[0] = strdup(curl.c_str());
 	cmd[1] = strdup(cmd_1.c_str());
 	cmd[2] = strdup(cmd_2.c_str());
 	cmd[3] = strdup(site.c_str());
-	cmd[4] = strdup(redir.c_str());
-	cmd[5] = strdup(html.c_str());
-	cmd[6] = NULL;
+	cmd[4] = NULL;
 	pid = fork();
 	if (pid != 0) {
 		waitpid(pid, NULL, 0);
@@ -61,7 +58,7 @@ int main(int argc, char **argv, char **env) {
 		}
 		exit(0);
 	}
-	for(int i = 0; i < 6; i++) {
+	for(int i = 0; i < 4; i++) {
 		free(cmd[i]);
 	}
 	delete cmd;
