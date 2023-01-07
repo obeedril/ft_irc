@@ -41,6 +41,7 @@
 #define TO_CHANNEL_BUT_NO_THIS_USER 4
 #define TO_CHANNEL 5
 #define SYSTEM_MSG 11
+#define LIST_OF_RECIEVERS 6
 
 // typedef struct s_message{
 // 	std::string cmd;
@@ -81,6 +82,36 @@ inline std::vector<std::string> splitString(std::string s, char del)
 			vector_string.push_back(word);
 	}
 	return(vector_string);
+}
+
+inline std::vector<std::string> splitString(std::string s, char del)
+{
+    std::stringstream ss(s);
+    std::string word;
+    std::vector<std::string> vector_string;
+    while (!ss.eof()) {
+        getline(ss, word, del);
+        vector_string.push_back(word);
+    }
+	return vector_string;
+}
+
+inline std::string strTrimBegin(std::string str, char ch){
+
+	int lenStr = 0;
+	lenStr = str.length();
+	char * cstr = new char [lenStr+1];
+  	std::strcpy (cstr, str.c_str());
+
+	int i = 0;
+	while (cstr[i] == 'ch' && cstr[i] != '\0')
+		i++;
+	if(i > 0)
+		str = str.substr(i, lenStr);
+	if (i == lenStr)
+		str = "";
+
+	return str;
 }
 
 typedef struct s_channel {

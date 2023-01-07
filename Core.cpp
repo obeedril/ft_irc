@@ -108,7 +108,9 @@ void	Core::error(int err_type) {
 int		Core::writeToUser(int current_fd) {
 	std::vector<int> deque; 
 	deque = storage_messages->getDeq(current_fd);
-	std::string msg = storage_messages->getRawMessageByFd(current_fd); // заменить на readyMess
+	// std::string msg = storage_messages->getRawMessageByFd(current_fd); 
+	std::cout << "ReadyMess CORE: " << storage_messages->getReadyMessByFd(current_fd) << std::endl;
+	std::string msg = storage_messages->getReadyMessByFd(current_fd); // заменить на readyMess
 	std::string systemMsg = storage_messages->getSystemMsg(current_fd);
 	std::cout << "msg: '" << msg <<  "'" << std::endl;
 	std::cout << "deque.size(): '" << deque.size() <<  "'" << std::endl;
@@ -134,6 +136,7 @@ int		Core::readFromUser(int user_fd) {
 	char tmp[4048];
 	length_message = recv(user_fd, tmp, 42*4096, 0);
 	str.append(tmp);
+
 	std::cout <<  "tmp: '" << tmp << "' " << std::endl;
 	std::cout <<  "str: '" << str << "' " << std::endl;
 	vec_mess = splitString(str, '\r');
@@ -151,6 +154,7 @@ int		Core::readFromUser(int user_fd) {
 		// new_message.setRawMessage(vec_mess[0]);
 		// storage_messages->insertMessage(user_fd, new_message);
 		// storage_messages->parsRecvStr(vec_mess[0], user_fd);
+
 	}
 	return (length_message);
 };

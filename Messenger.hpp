@@ -18,7 +18,7 @@ public:
 		~Messenger();
 	
 
-	void parserPrivmsg(Message mess);
+	void parserPrivmsg(Message &mess);
 	void setMessages(std::map<int, Message> _messages);
 	std::map<int, Message> getMessages();
 	void insertMessage(int senderFd, Message mess);
@@ -63,6 +63,8 @@ public:
 
 	std::string getSystemMsg(int senderFd);
 	std::string findNameKick(Message mess);
+
+	int getUserFdByLogin(std::string login);
 
 };
 
