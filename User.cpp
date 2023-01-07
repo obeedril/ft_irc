@@ -5,6 +5,14 @@ User::User(Server *new_irc_serv){
     _irc_serv = new_irc_serv;
 }
 
+User::User() {
+    channelHere;
+    login = ""; //nickname
+    userName = ""; //username
+    realName = ""; //realname
+    password = "";
+}
+
 User::~User(){}
 
 int User::getUserFd(){

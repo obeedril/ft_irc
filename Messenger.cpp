@@ -161,26 +161,26 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 	}
 	else if (str.find("NICK", 0) != std::string::npos) {
 		dequeMaker(&it_user->second, ONE_USER);
-		// if (nickCmd(it->second.getRawMessage(), &it_user->second) == 0)
-		// 	it->second.setCmd("NICK");
-		// else 
-		// 	it->second.setCmd("");
+		if (nickCmd(it->second.getRawMessage(), &it_user->second) == 0)
+			it->second.setCmd("NICK");
+		else 
+			it->second.setCmd("");
 		std::string mss = "";
-		mss.append("Hello!\n");
+		mss.append(":IRC-kitty Hello!\n");
 		//mss.append("@127.0.0.1 ");
 		//mss.append(vector_string[0] +  ":Rita\n");
-		it->second.setRawMessage(mss);
+		it->second.setReadyMess(mss);
 		std::cout << "'" << mss << "' " << std::endl;
 	}
 	else if (str.find("USER", 0) != std::string::npos) {
 		dequeMaker(&it_user->second, ONE_USER);
-		// if (userCmd(it->second.getRawMessage(), &it_user->second) == 0)
-		// 	it->second.setCmd("USER");
-		// else 
-		// 	it->second.setCmd("");
+		if (userCmd(it->second.getRawMessage(), &it_user->second) == 0)
+			it->second.setCmd("USER");
+		else 
+			it->second.setCmd("");
 		std::string mss = "";
 		mss.append(":IRC-kitty 001 Dlana :Welcome to the IRC-kitty IRC Network Dlana!Dlana@127.0.0.1\n");;
-		it->second.setRawMessage(mss);
+		it->second.setReadyMess(mss);
 		std::cout << "'" << mss << "' " << std::endl;
 	}
 	else if (str.find("QUIT", 0) != std::string::npos && flag == true){
@@ -199,6 +199,7 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 	else if (str.find("JOIN", 0) != std::string::npos && flag == true) {
 		it->second.setCmd("JOIN");
 		dequeMaker(&it_user->second, ONE_USER);
+		channels.getUsersNamesInThisChannel(str, &map_users);
 		it->second.setMessForSender(channels.joinToCannel(str, &it_user->second));
 		std::cout << "cmd JOIN" << std::endl;
 	}
@@ -212,7 +213,7 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 		it->second.setCmd("CAP LS");
 		std::cout << "cmd CAP LS" << std::endl;
 		dequeMaker(&it_user->second, ONE_USER);
-		it->second.setRawMessage(":IRC-kitty 451  :You have not registered\n:IRC-kitty 451  :You have not registered\n");
+		it->second.setReadyMess(":IRC-kitty CAP * LS :=PASS NICK USER PRIVMSG NOTICE JOIN KICK QUIT\n");
 	}
 	// else if (str.find("PING", 0) != std::string::npos) {
 	// 	it->second.setCmd("CAP LS");

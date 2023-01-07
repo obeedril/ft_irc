@@ -63,7 +63,6 @@ public:
 
 	std::string getSystemMsg(int senderFd);
 	std::string findNameKick(Message mess);
-
 };
 
 #endif

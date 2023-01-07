@@ -24,6 +24,8 @@ public:
 	std::string joinToCannel(std::string msg, User *user);
 	std::string	kickUser(std::string msg, User *user);
 
+	std::vector<std::string> getUsersNamesInThisChannel(std::string msg, std::map<int, User> *map_users);
+
 };
 
 #endif

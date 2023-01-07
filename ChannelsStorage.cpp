@@ -59,22 +59,19 @@ std::string	ChannelsStorage::joinToCannel(std::string msg, User *user) {
 		name_channel = vector_string[1];
 		topic = getTopic(name_channel);
 		owner = searchChannel(name_channel);
-		str.append(":IRC-kitty 331 ");
-		str.append(user->getUserName() +  " " + name_channel +  " " + topic + "\n");
 		if (owner == "") {
 			addNewChannel(name_channel, user);
-			owner = user->getUserName();
-			str.append(":IRC-kitty 353 ");
-			str.append(user->getUserName() + " = " + name_channel + " :@" + user->getUserName() + "\n");
+			std::cout << "searchChannel: '" << user->getUserName() << "' ";
+			owner = "Dlana";
 		}
-		else {
-			str.append(":IRC-kitty 353 ");
-			str.append(user->getUserName() + " = " + name_channel + " :@" + owner +  " " + user->getUserName() + "\n");
-		}
-		str.append(":IRC-kitty 366 " + user->getUserName() +  " " + name_channel +  " " + ":End of /NAMES list\n");
-		str.append(":" + owner + "!" + owner);
-		str.append("@127.0.0.1 ");
+		str.append(":" + owner + "!" + owner + "@127.0.0.1 ");
 		str.append(vector_string[0] + " :" + vector_string[1] + "\n");
+		//
+		str.append(":IRC-kitty 331 ");
+		str.append(user->getUserName() +  " " + name_channel +  " " + topic + "\n");
+		str.append(":IRC-kitty 353 ");
+		str.append(user->getUserName() + " = " + name_channel + " :@" + owner +  " " + user->getUserName() + "\n");
+		str.append(":IRC-kitty 366 " + user->getUserName() +  " " + name_channel +  " " + ":End of /NAMES list\n");
 		//:Dlana!Dlana@127.0.0.1 JOIN :#ggg
 		//str = str_1 + str_2 + str_3;
 		//SEND: :IRCat 331 B #SS :No topic is set
@@ -132,13 +129,44 @@ std::string	ChannelsStorage::kickUser(std::string msg, User *user) {
 	return(str);
 }
 
+std::vector<std::string> ChannelsStorage::getUsersNamesInThisChannel(std::string msg, std::map<int, User> *map_users) {
+	std::vector<std::string>	new_deque;
+	std::vector<std::string>	vector_string = splitString(msg, ' ');
+	std::string					owner;
+
+	owner = searchChannel(vector_string[1]);
+	for(std::map<int, User>::iterator it = map_users.begin(); it != map_users.end(); it++) {
+		if (it->second.getChannelHere() == vector_string[1]) {
+			new_deque.push_back(it->second.getUserName());
+		}
+	}
+	return new_deque;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //### KICK <a name="kick"></a>
 
 //**Параметры:** `<channel>` `<user>` `[<comment>]`
-
 
 // :Dlana!Dlana@127.0.0.1 JOIN :#www
 // :irc.ircnet.su 353 Dlana = #www :@Dlana
 // :irc.ircnet.su 366 Dlana #www :End of /NAMES list.
 
 // :irc.ircnet.su 001 Dlana :Welcome to the IrcNet.ru IRC Network Dlana!Dlana@127.0.0.1
+//https://github.com/clokep/irc-docs/blob/main/draft-mitchell-irc-capabilities-02.html
+
+//
+//nc -l 6667
+//nc irc.ircnet.ru 6667
