@@ -76,24 +76,59 @@ std::string Messenger::getCmdInMessageByFd(int senderFd) {
 }
 
 
-void Messenger::parserPrivmsg(Message mess){
+void Messenger::parserPrivmsg(Message &mess){
 	std::string tmp = "";
+	std::string recievers_str = "";
+	std::vector<std::string> tmp_list;
 	size_t len = mess.getRawMessage().length();
 	tmp = mess.getRawMessage().substr(mess.getCmd().length() + 1, len);
 
-	size_t pos = tmp.find(" ", 0);
-	if (pos == std::string::npos){
-		std::cout << "reciver is not identifire" << std::endl;
+	size_t pos = tmp.find(":", 0);
+	recievers_str = tmp.substr(0, pos);
+	std::cout << "recivers_str |" << recievers_str << "|" << std::endl;
+
+	tmp_list = splitString(recievers_str, ',');
+
+	// for(int i = 0; i < static_cast<int>(tmp_list.size()); i++) {
+    //     std::cout << "'" << tmp_list[i] << "' ";
+    // }
+	// std::cout << std::endl;
+
+	for(int i = 0; i < static_cast<int>(tmp_list.size()); i++) {
+       tmp_list[i] = strTrimBegin(tmp_list[i], ' ');
+    }
+
+
+//------------------------------------------------------
+    // for(int i = 0; i < static_cast<int>(tmp_list.size()); i++) {
+    //     std::cout << "'" << tmp_list[i] << "' ";
+    // }
+	// std::cout << std::endl;
+
+//------------------------------------------------------
+
+	mess.setListOfRecievers(tmp_list);
+
+	if (mess.getListOfRecievers().empty()){
+		std::cout << "recivers are not identifire" << std::endl;
 		return;
-	} 
-	mess.setReceiver(tmp.substr(0, pos));
-	mess.setReadyMess(tmp.substr(mess.getReceiver().length() + 1, len));
+	}
+	
+	// mess.setReadyMess(":Sender!Sender@127.0.0.1 PRIVMSG " +tmp.substr(pos + 1, len));
+	mess.setReadyMess(tmp.substr(pos + 1, len) + "\n");
+
+	//------------------------------------------------------
+    // for(int i = 0; i < static_cast<int>(mess.getListOfRecievers().size()); i++) {
+    //     std::cout << "'" << mess.getListOfRecievers()[i] << "' ";
+    // }
+	// std::cout << std::endl;
+
+//------------------------------------------------------
 
 	// ------------------------------
-	std::cout << "tmp |" << tmp << "|" << std::endl;
-	std::cout << "reciver |" << mess.getReceiver() << "|" << std::endl;
-	std::cout << "tmp |" << tmp << "|" << std::endl;
-	std::cout << "readyMess |" << mess.getReadyMess() << "|" << std::endl;
+	// std::cout << "tmp |" << tmp << "|" << std::endl;
+	// std::cout << "readyMess |" << mess.getReadyMess() << "|" << std::endl;
+	// std::cout << "rawMess |" << mess.getRawMessage() << "|" << std::endl;
 	// ------------------------------
 
 }
@@ -176,6 +211,7 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 	else if (str.find("PRIVMSG", 0) != std::string::npos && flag == true){
 		it->second.setCmd("PRIVMSG");
 		parserPrivmsg(it->second);
+		dequeMaker(&it_user->second, LIST_OF_RECIEVERS);
 		std::cout << "cmd PRIVMSG" << std::endl;
 	}
 	else if (str.find("NOTICE", 0) != std::string::npos && flag == true){
@@ -197,7 +233,7 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 	else if (str.find("CAP LS", 0) != std::string::npos) {
 		it->second.setCmd("CAP LS");
 		std::cout << "cmd CAP LS" << std::endl;
-		it->second.setRawMessage("\r\n");
+		it->second.setReadyMess("rrrr\n");
 	}
 	else if ((str.find("BOT", 0) != std::string::npos || it_user->second.getBotDialog() == YES)
 				&& flag == true) {
@@ -414,6 +450,20 @@ void Messenger::dequeMaker(User *user, int flag) {
 	}
 	else if (flag == SYSTEM_MSG) {
 		it->second.setDeque(deque_users);
+	}
+	else if (flag == LIST_OF_RECIEVERS){
+
+		int fd = 0;
+
+		std::vector<std::string>::iterator it_vec = it->second.getListOfRecievers().begin();
+		for(; it_vec != it->second.getListOfRecievers().end(); it_vec++){
+			fd = getUserFdByLogin(*it_vec);
+			if (fd != -1)
+				deque_users.push_back(fd);
+		}
+		
+		it->second.setDeque(deque_users);
+		// списку получателей
 	}
 }
 
@@ -638,3 +688,14 @@ int	Messenger::passCmd(const std::string &msg, User* sender) {
 	printWelcome(sender, arr[0], 2);
 	return (0);
 }
+
+int Messenger::getUserFdByLogin(std::string login){
+
+	std::map<int, User>::iterator it = map_users.begin();
+	for (; it != map_users.end(); it++){
+		if (login.compare(it->second.getLogin()) == 0)
+			return it->first;	
+	}
+	return -1;
+}
+
