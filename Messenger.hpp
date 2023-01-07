@@ -36,17 +36,21 @@ public:
 		int		replyError(User *user, int err, const std::string &str1, const std::string &str2);
 		std::vector<std::string> stringSplit(const std::string &line, char delimiter);
 		std::string tostring(std::vector<std::string> &v);
+		std::string tostring2(std::vector<std::string> &v);
 		std::string initBot(int user_fd, std::string msg);
 		void deleteBot(int senderFd);
     // void	printWelcome(User* sender, std::map<int, Message>::iterator	it1, std::string name, int flag);
 		void	printWelcome(User* sender, std::string name, int flag);
 
     void	sendMotd(User* sender);
+	std::string newMotd(User* sender);
 
 // PASS cmd
     int	passCmd(const std::string &msg, User* sender);
 // NICK cmd
 	int	nickCmd(const std::string &msg, User* sender);
+	int	whoAmICmd(User* sender);
+	// std::vector<std::string> stringSplit2(const std::string &line, std::string delimiter);
 
 		//    void setMess(Message _mess);
 		//    Message getMess();

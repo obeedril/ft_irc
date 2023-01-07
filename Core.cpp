@@ -109,7 +109,7 @@ int		Core::writeToUser(int current_fd) {
 	std::vector<int> deque; 
 	deque = storage_messages->getDeq(current_fd);
 	// std::string msg = storage_messages->getRawMessageByFd(current_fd); 
-	std::cout << "ReadyMess CORE: " << storage_messages->getReadyMessByFd(current_fd) << std::endl;
+	// std::cout << "ReadyMess CORE: " << storage_messages->getReadyMessByFd(current_fd) << std::endl;
 	std::string msg = storage_messages->getReadyMessByFd(current_fd); // заменить на readyMess
 	std::string systemMsg = storage_messages->getSystemMsg(current_fd);
 	std::cout << "msg: '" << msg <<  "'" << std::endl;
@@ -127,6 +127,28 @@ int		Core::writeToUser(int current_fd) {
 	return (0);
 };
 
+// std::vector<std::string> Core::stringSplit2(const std::string &line, std::string delimiter) { 
+// 	std::vector<std::string> vec;
+// 	std::string tmp = line; 
+// 	size_t posRN = line.find(delimiter);
+// 	if (posRN == std::string::npos)	{
+// 		std::cout <<  "No \r\n:" << std::endl;
+// 		vec.push_back(tmp);
+// 	}
+// 	else {
+// 	while (tmp.length() > 0 && posRN != std::string::npos) {
+// 		vec.push_back(tmp.substr(0, posRN));
+// 		std::cout <<  "tmp.substr(0, posRN:" << tmp.substr(0, posRN )<< "|" << std::endl;
+// 		tmp = tmp.substr(posRN);
+// 		posRN = line.find(delimiter);
+// 	}
+// 	}
+// 		for(int i = 0; i < static_cast<int>(vec.size()); i++) {
+// 		std::cout <<  ">>>vec: '" << vec[i] << "' " << std::endl;
+// 	}
+// 	return vec;
+// }
+
 int		Core::readFromUser(int user_fd) {
 	Message		new_message;
 	std::string	str = "";
@@ -137,12 +159,13 @@ int		Core::readFromUser(int user_fd) {
 	length_message = recv(user_fd, tmp, 42*4096, 0);
 	str.append(tmp);
 
-	std::cout <<  "tmp: '" << tmp << "' " << std::endl;
-	std::cout <<  "str: '" << str << "' " << std::endl;
-	vec_mess = splitString(str, '\r');
-	for(int i = 0; i < static_cast<int>(vec_mess.size()); i++) {
-		std::cout <<  "vec: '" << vec_mess[i] << "' " << std::endl;
-	}
+	// std::cout <<  "tmp: '" << tmp << "' " << std::endl;
+	// std::cout <<  "str: '" << str << "' " << std::endl;
+	// vec_mess = splitString(str, '\n'); // если надо работать с консоли!
+	vec_mess = splitString(str, '\r'); //так у Риты, но тогда команды не парсятся с консоли
+	// for(int i = 0; i < static_cast<int>(vec_mess.size()); i++) {
+	// 	std::cout <<  "vec: '" << vec_mess[i] << "' " << std::endl;
+	// }
 	count_mess = vec_mess.size();
 	// std::cout << "RECV STR0 |" << str << "|" << std::endl;
 	// int end = str.find("\n", 0);

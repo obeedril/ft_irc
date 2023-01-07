@@ -42,6 +42,7 @@ class Core {
 		std::string getServName();
 		void readFromVectorMessage(int user_fd);
 		// void check_message(int user_fd);
+		// std::vector<std::string> stringSplit2(const std::string &line, std::string delimiter) ;
 };
 
 #endif
