@@ -204,7 +204,7 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 		mss.append("Hello!\n");
 		//mss.append("@127.0.0.1 ");
 		//mss.append(vector_string[0] +  ":Rita\n");
-		it->second.setRawMessage(mss);
+		it->second.setReadyMess(mss);
 		std::cout << "'" << mss << "' " << std::endl;
 	}
 	else if (str.find("USER", 0) != std::string::npos) {
@@ -215,7 +215,7 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 		// 	it->second.setCmd("");
 		std::string mss = "";
 		mss.append(":IRC-kitty 001 Dlana :Welcome to the IRC-kitty IRC Network Dlana!Dlana@127.0.0.1\n");;
-		it->second.setRawMessage(mss);
+		it->second.setReadyMess(mss);
 		std::cout << "'" << mss << "' " << std::endl;
 	}
 	else if (str.find("QUIT", 0) != std::string::npos && flag == true){
