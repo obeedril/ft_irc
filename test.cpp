@@ -27,6 +27,27 @@
 
 #include <cmath> //для робота
 
+//:456!456@127.0.0.1 PRIVMSG 123 :Hello
+
+// :456!456@127.0.0.1 JOIN :#WE
+// :IRCat 331 456 #WE :No topic is set
+// :IRCat 353 456 = #WE :@456
+// :IRCat 366 456 #WE :End of /NAMES list
+
+
+//:123!123@127.0.0.1 JOIN :#WE
+
+//TOPIC #WE AAA
+//:456!456@127.0.0.1 TOPIC #WE :AAA
+
+//TOPIC #WE
+//:IRCat 332 456 #WE :AAA - показать топик
+
+
+//:456!456@127.0.0.1 KICK #WE 123 :456
+
+//:Roma!Roma@127.0.0.1 NOTICE Rita :ttt
+
 int main(int argc, char **argv, char **env) {
 	int fd;
 	std::ofstream f("weather.html", std::ofstream::out | std::ofstream::trunc);

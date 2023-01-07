@@ -184,6 +184,10 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 			// deque_users.push_back(it_u->first);
 	// }
 	// it->second.setDeque(deque_users);
+	std::vector<std::string> vector_string = splitString(str, ' ');
+	for(int i = 0; i < static_cast<int>(vector_string.size()); i++) {
+		std::cout << "'" << vector_string[i] << "' ";
+	}
 
 	if (str.find("PASS", 0) != std::string::npos) {
 		dequeMaker(&it_user->second, ONE_USER);
@@ -192,17 +196,27 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 	}
 	else if (str.find("NICK", 0) != std::string::npos) {
 		dequeMaker(&it_user->second, ONE_USER);
-		if (nickCmd(it->second.getRawMessage(), &it_user->second) == 0)
-			it->second.setCmd("NICK");
-		else 
-			it->second.setCmd("");
+		// if (nickCmd(it->second.getRawMessage(), &it_user->second) == 0)
+		// 	it->second.setCmd("NICK");
+		// else 
+		// 	it->second.setCmd("");
+		std::string mss = "";
+		mss.append("Hello!\n");
+		//mss.append("@127.0.0.1 ");
+		//mss.append(vector_string[0] +  ":Rita\n");
+		it->second.setRawMessage(mss);
+		std::cout << "'" << mss << "' " << std::endl;
 	}
 	else if (str.find("USER", 0) != std::string::npos) {
 		dequeMaker(&it_user->second, ONE_USER);
-		if (userCmd(it->second.getRawMessage(), &it_user->second) == 0)
-			it->second.setCmd("USER");
-		else 
-			it->second.setCmd("");
+		// if (userCmd(it->second.getRawMessage(), &it_user->second) == 0)
+		// 	it->second.setCmd("USER");
+		// else 
+		// 	it->second.setCmd("");
+		std::string mss = "";
+		mss.append(":IRC-kitty 001 Dlana :Welcome to the IRC-kitty IRC Network Dlana!Dlana@127.0.0.1\n");;
+		it->second.setRawMessage(mss);
+		std::cout << "'" << mss << "' " << std::endl;
 	}
 	else if (str.find("QUIT", 0) != std::string::npos && flag == true){
 		it->second.setCmd("QUIT");
@@ -233,8 +247,17 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 	else if (str.find("CAP LS", 0) != std::string::npos) {
 		it->second.setCmd("CAP LS");
 		std::cout << "cmd CAP LS" << std::endl;
-		it->second.setReadyMess("rrrr\n");
+
+		dequeMaker(&it_user->second, ONE_USER);
+		it->second.setReadyMess(":IRC-kitty 451  :You have not registered\n:IRC-kitty 451  :You have not registered\n");
+
 	}
+	// else if (str.find("PING", 0) != std::string::npos) {
+	// 	it->second.setCmd("CAP LS");
+	// 	std::cout << "cmd CAP LS" << std::endl;
+	// 	dequeMaker(&it_user->second, ONE_USER);
+	// 	it->second.setRawMessage(":IRC-kitty 451  :You have not registered\n");
+	// }
 	else if ((str.find("BOT", 0) != std::string::npos || it_user->second.getBotDialog() == YES)
 				&& flag == true) {
 		dequeMaker(&it_user->second, ONE_USER);
@@ -387,14 +410,14 @@ void	Messenger::printWelcome(User* sender, std::string str, int flag) {
 	// флаг 0 - вывод сообщение из аргумента, flag 1 - username ; 2 - pass; 3 - nick
 
 	if (flag == 0) {
-		std::string msg = ":" + sender->getServName() + " :" + str + "\r\n";
+		std::string msg = ":" + sender->getServName() + " :" + str + "\n";
 		setReadyMessInMessageByFd(msg, sender->getUserFd());
 		setRawMessInMessageByFd(msg, sender->getUserFd());
 	}
 	else if (flag == 1) {
 		// std::string msg = ":" + sender->getServName + " :Recieved USERNAME " + sender->getUserName() + "\r\n";
 		std::string msg = ":" + sender->getServName() + " User" + " Пользователь " + sender->getUserName() + \
-		" aka (" + sender->getRealName() + ") ворвался в чат!" + "\r\n";
+		" aka (" + sender->getRealName() + ") ворвался в чат!" + "\n";
 		dequeMaker(sender, TO_ALL);
 		setReadyMessInMessageByFd(msg, sender->getUserFd());
 		setRawMessInMessageByFd(msg, sender->getUserFd());
@@ -402,12 +425,12 @@ void	Messenger::printWelcome(User* sender, std::string str, int flag) {
 		sendMotd(sender);
 	}
 	else if (flag == 2) {
-		std::string msg = ":" + sender->getServName() + " User" + " Recieved a password" + "\r\n";
+		std::string msg = ":" + sender->getServName() + " User" + " Recieved a password" + "\n";
 		setReadyMessInMessageByFd(msg, sender->getUserFd());
 		setRawMessInMessageByFd(msg, sender->getUserFd());
 	}
 	else if (flag == 3) {
-		std::string msg = ":" + sender->getServName() + " User" + " Recieved NICK " + sender->getLogin() + "\r\n";
+		std::string msg = ":" + sender->getServName() + " User" + " Recieved NICK " + sender->getLogin() + "\n";
 		setReadyMessInMessageByFd(msg, sender->getUserFd());
 		setRawMessInMessageByFd(msg, sender->getUserFd());
 	}

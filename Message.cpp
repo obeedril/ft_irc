@@ -11,8 +11,8 @@
 	Message::~Message(){}
 
 	void Message::setRawMessage(std::string _rawMessage){
-		// rawMessage.clear();
-		// rawMessage = "";
+		rawMessage.clear();
+		rawMessage = "";
 		rawMessage = _rawMessage;
 	}
 

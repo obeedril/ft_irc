@@ -7,6 +7,7 @@ Core::Core(int port_) {
 	this->port = port_;
 	max = 0;
 	count_cli = 0;
+	count_mess = 0;
 	bzero(&id, sizeof(id));
 	FD_ZERO(&active_);
 
@@ -66,7 +67,10 @@ void	Core::run() {
 				break ;
 			}
 			else {
-				writeToUser(s);
+				for(int i = 0; i < count_mess; i++) {
+					writeToUser(s);
+					readFromVectorMessage(s);
+				}
 			}
 		}
 	}
@@ -108,10 +112,11 @@ int		Core::writeToUser(int current_fd) {
 	std::cout << "ReadyMess CORE: " << storage_messages->getReadyMessByFd(current_fd) << std::endl;
 	std::string msg = storage_messages->getReadyMessByFd(current_fd); // заменить на readyMess
 	std::string systemMsg = storage_messages->getSystemMsg(current_fd);
-	std::cout << "msg: " << msg << std::endl;
-	std::cout << "systemMsg: " << systemMsg << std::endl;
+	std::cout << "msg: '" << msg <<  "'" << std::endl;
+	std::cout << "deque.size(): '" << deque.size() <<  "'" << std::endl;
 	if (systemMsg != "") {
-			send(current_fd, systemMsg.c_str(), systemMsg.length(), 0);
+		std::cout << "systemMsg: " << systemMsg << std::endl;
+		send(current_fd, systemMsg.c_str(), systemMsg.length(), 0);
 	}
 	for(int i = 0; i < static_cast<int>(deque.size()); i++) {
 		if (FD_ISSET(deque[i], &write_)) {
@@ -124,23 +129,46 @@ int		Core::writeToUser(int current_fd) {
 
 int		Core::readFromUser(int user_fd) {
 	Message		new_message;
-	std::string	str;
-	std::string	cmd;
+	std::string	str = "";
+	std::string	cmd = "";
 	// std::map<int, User>::iterator it1 = map_users.find(user_fd);
 	length_message = 0;
 	char tmp[4048];
 	length_message = recv(user_fd, tmp, 42*4096, 0);
 	str.append(tmp);
-	//std::cout << "RECV STR0 |" << str << "|" << std::endl;
-	str = str.substr(0, str.find("\n", 0) - 1); // +2
-	//std::cout << "RECV STR1 |" << str << "|" << std::endl;
-	if (length_message > 0){
-		new_message.setRawMessage(str);
-		storage_messages->insertMessage(user_fd, new_message);
-		storage_messages->parsRecvStr(str, user_fd);
+
+	std::cout <<  "tmp: '" << tmp << "' " << std::endl;
+	std::cout <<  "str: '" << str << "' " << std::endl;
+	vec_mess = splitString(str, '\r');
+	for(int i = 0; i < static_cast<int>(vec_mess.size()); i++) {
+		std::cout <<  "vec: '" << vec_mess[i] << "' " << std::endl;
+	}
+	count_mess = vec_mess.size();
+	// std::cout << "RECV STR0 |" << str << "|" << std::endl;
+	// int end = str.find("\n", 0);
+	// std::cout << "end |" << end << "|" << std::endl;
+	// str = str.substr(0, end - 1);
+	// std::cout << "RECV STR1 |" << str << "|" << std::endl;
+	if (length_message > 0) {
+		readFromVectorMessage(user_fd);
+		// new_message.setRawMessage(vec_mess[0]);
+		// storage_messages->insertMessage(user_fd, new_message);
+		// storage_messages->parsRecvStr(vec_mess[0], user_fd);
+
 	}
 	return (length_message);
 };
+
+void Core::readFromVectorMessage(int user_fd) {
+	Message		new_message;
+
+	if (vec_mess.size() > 0) {
+		new_message.setRawMessage(vec_mess[0]);
+		storage_messages->insertMessage(user_fd, new_message);
+		storage_messages->parsRecvStr(vec_mess[0], user_fd);
+		vec_mess.erase(vec_mess.begin());
+	}
+}
 
 Messenger* Core::getStorage_messages(){
 	return storage_messages;
