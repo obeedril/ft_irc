@@ -13,7 +13,7 @@ SRCS		= main.cpp \
 			Bot.cpp \
 			ChannelsStorage.cpp
 
-HEADERS		= Library.hpp
+HEADERS		= Library.hpp 
 
 OBJS		=	$(SRCS:.cpp=.o)
 

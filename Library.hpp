@@ -1,5 +1,4 @@
-#ifndef LIBRARY_HPP
-# define LIBRARY_HPP
+#pragma once
 
 # include <sys/socket.h>
 # include <sys/wait.h>
@@ -51,12 +50,37 @@
 
 // } t_message;
 
+// template<typename T>
+// std::string toString(const T& value)
+// {
+//     std::ostringstream oss;
+//     oss << value;
+//     return oss.str();
+// }
+
 template<typename T>
 std::string toString(const T& value)
 {
-    std::ostringstream oss;
-    oss << value;
-    return oss.str();
+	std::ostringstream oss;
+	oss << value;
+	return oss.str();
+}
+
+inline std::vector<std::string> splitString(std::string s, char del)
+{
+	std::stringstream ss(s);
+	std::string word;
+	std::vector<std::string> vector_string;
+	while (!ss.eof()) {
+		getline(ss, word, del);
+		if (word[0] == '\n' && word.length() == 1)
+			continue;
+		else if (word[0] == '\n')
+			vector_string.push_back(word.substr(1));
+		else
+			vector_string.push_back(word);
+	}
+	return(vector_string);
 }
 
 typedef struct s_channel {
@@ -85,6 +109,7 @@ enum t_bot_command
 	FINISH
 };
 
+//# include "Utils.hpp"
 # include "Server.hpp"
 # include "ErrorsAndReplies.hpp"
 # include "User.hpp"
@@ -93,5 +118,3 @@ enum t_bot_command
 # include "ChannelsStorage.hpp"
 # include "Messenger.hpp"
 # include "Core.hpp"
-
-#endif
