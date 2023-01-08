@@ -175,6 +175,13 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 	std::map<int, User>::iterator it_user = map_users.find(userFd);
 	// bool flag = checkRegistered(userFd);
 	dequeMaker(&it_user->second, TO_ALL_BUT_NO_THIS_USER);
+	if (it_user->second.getPassword() == "" && str.find("PASS", 0) == std::string::npos) {
+		// std::cout << "'" << "ПУТСОЙ ПАСС!" << "' ";
+		dequeMaker(&it_user->second, ONE_USER);
+		stringOutputMaker(&it_user->second, 0, "Password is nessesary. Please enter your password first", "");
+		return ;
+	}
+
 	// flag = true; // >>>>>> del!!!!!!!!!
 	
 	// std::vector<int> deque_users;
@@ -191,8 +198,9 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 
 	if (str.find("PASS", 0) != std::string::npos) {
 		dequeMaker(&it_user->second, ONE_USER);
-		it->second.setCmd("PASS");
-		passCmd(it->second.getRawMessage(), &it_user->second);
+		// it->second.setCmd("PASS");
+		if (passCmd(it->second.getRawMessage(), &it_user->second) == 0)
+			it->second.setCmd("PASS");
 	}
 	else if (str.find("NICK", 0) != std::string::npos) {
 		dequeMaker(&it_user->second, ONE_USER);
@@ -313,12 +321,6 @@ std::string Messenger::initBot(int user_fd, std::string msg) {
 
 
 int	Messenger::userCmd(const std::string &msg, User* sender) {
-	if (sender->getLogin() == "") {
-		printWelcome(sender, "Please enter your PASS and NICK before USER-command", 0);
-		setReadyMessInMessageByFd(msg, sender->getUserFd());
-		// setRawMessInMessageByFd(msg, sender->getUserFd());
-		return 1;
-	}
 	if (sender->getUserName() != "") {
 		return(replyError(sender, ERR_ALREADYREGISTRED, "", ""));
 	}
@@ -331,13 +333,18 @@ int	Messenger::userCmd(const std::string &msg, User* sender) {
 	// int userFd = it1->first;// !!!
 
 	std::vector<std::string> arr = stringSplit(msg, ' ');
-	arr.erase(arr.begin()); // удаляем из команды элемент USER
+	// std::vector<std::string> arr = splitString2(msg, ' ');
+
 	// std::cout << "arr[0]полсе делита = " << arr[0] << std::endl;
-	if (arr.size() < 4) {
-		return(replyError(sender, ERR_NEEDMOREPARAMS, tostring(arr), ""));
+	if (arr.size() < 5) {
+		// return(replyError(sender, ERR_NEEDMOREPARAMS, tostring(arr), ""));
+		return(stringOutputMaker(sender, ERR_NEEDMOREPARAMS, "Not enough parameters", "USER"));
+			// replyError(sender, ERR_NEEDMOREPARAMS, tostring(arr), ""));
 	}
+	arr.erase(arr.begin()); // удаляем из команды элемент USER
 	if (sender->getUserName() != "" && arr[0] == sender->getUserName()) {
-		return(replyError(sender, ERR_ALREADYREGISTRED, "", ""));
+		// return(replyError(sender, ERR_ALREADYREGISTRED, "", ""));
+		return(stringOutputMaker(sender, ERR_ALREADYREGISTRED, "You may not reregister", ""));
 	}
 	(*sender).setUserName(arr[0]);// arr[0] тк слово USER уже удалили
 
@@ -348,26 +355,6 @@ int	Messenger::userCmd(const std::string &msg, User* sender) {
 	printWelcome(sender, arr[0], 1);
 	return 0;
 }
-
-// std::vector<std::string> Messenger::stringSplit2(const std::string &line, std::string delimiter) { 
-// 	std::vector<std::string> vec;
-// 	std::string tmp = line; 
-// 	size_t posRN = line.find(delimiter);
-// 	if (posRN == std::string::npos)	{
-// 		vec.push_back(tmp);
-// 	}
-// 	else {
-// 	while (tmp.length() > 0 && posRN != std::string::npos) {
-// 		vec.push_back(tmp.substr(0, posRN));
-// 		tmp = tmp.substr(posRN);
-// 		posRN = line.find(delimiter);
-// 	}
-// 	}
-// 		for(int i = 0; i < static_cast<int>(vec.size()); i++) {
-// 		std::cout <<  ">>>vec: '" << vec[i] << "' " << std::endl;
-// 	}
-// 	return vec;
-// }
 
 std::vector<std::string> Messenger::stringSplit(const std::string &line, char delimiter) {
 	// size_t posRN = line.find("\r\n");
@@ -638,6 +625,24 @@ std::cout << "<<<<<sender->getUserName()>>>>>" << sender->getUserName() <<"|"<< 
 	(*sender).setLogin(arr[0]);
 	printWelcome(sender, arr[0], 3);
 	return (0);
+}
+
+int Messenger::stringOutputMaker(User *user, int err, const std::string &description, const std::string &command) {
+	// добавляет логин, код ошибки и имя сервера, кладет в rawMessage
+	std::string	msg = ":" + user->getServName() + " ";
+	std::stringstream	ss;
+	if (err != 0)
+	{ 
+		ss << err;
+		msg += ss.str() + " ";
+	}
+	msg += user->getLogin();
+	if (command != "")
+		msg += " "  + command;
+	if (description != "")
+		msg += " :"  + description + "\n";
+	setReadyMessInMessageByFd(msg, user->getUserFd());
+	return 0;
 }
 
 // делает сообщение об ошибке

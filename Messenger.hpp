@@ -50,6 +50,7 @@ public:
 // NICK cmd
 	int	nickCmd(const std::string &msg, User* sender);
 	int	whoAmICmd(User* sender);
+	int stringOutputMaker(User *user, int err, const std::string &str, const std::string &command);
 	// std::vector<std::string> stringSplit2(const std::string &line, std::string delimiter);
 
 		//    void setMess(Message _mess);
