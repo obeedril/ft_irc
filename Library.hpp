@@ -25,6 +25,7 @@
 # include <csignal>
 # include <ctime>
 # include <iomanip>
+#include <cstring>
 
 #include <cmath> //для робота
 #include <stdlib.h> //itoa
@@ -96,10 +97,24 @@ inline std::vector<std::string> splitString2(std::string s, char del) //здес
 		std::cout << "word = |" << word << "|" << std::endl;
 		if (word[0] == '\n' && word.length() == 1)
 			continue;
-		else if (word[0] == '\n')
-			vector_string.push_back(word.substr(1));
-		else
-			vector_string.push_back(word.substr(0, word.length() - 1));
+		else if (word[0] == ':')
+			break;
+		else {
+			size_t pos = word.find("\n");
+			if (pos != std::string::npos) {
+				word = word.substr(0, pos);
+			}
+			vector_string.push_back(word);
+		}
+		
+		// else if (word[0] == '\n')
+		// 	vector_string.push_back(word.substr(1));
+		// else if (word[0] == '\r' && word.length() > 1 && word[1] == '\n')
+		// 	vector_string.push_back(word.substr(2));
+		// else if (word[word.length() -1] == '\n')
+		// 	vector_string.push_back(word.substr(0, word.length() - 1));
+		// else
+		// 	vector_string.push_back(word.substr(0, word.length()));
 	}
 	return(vector_string);
 }

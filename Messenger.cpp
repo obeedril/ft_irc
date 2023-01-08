@@ -576,7 +576,11 @@ void Messenger::dequeMaker(User *user, int flag) {
 
 
 int	Messenger::whoAmICmd(User* sender) {
-	std::string tmp = "";
+	std::stringstream	ss;
+	ss << sender->getUserFd();
+	std::string tmp = "Your fd is " + ss.str() + "\n";
+	// tmp += static_cast<std::string>(sender->getUserFd());
+	// tmp += "\n";
 	if (sender->getLogin().length() > 0)
 		tmp += "Your Nick is " + sender->getLogin() + "\n";
 	else
@@ -786,9 +790,10 @@ int		Messenger::replyError(User *user, int err, const std::string &str, const st
 	// case ERR_USERSDONTMATCH:
 	// 	msg += " :Cant change mode for other users\n";
 	// 	break;
-	default:
-		msg += "UNKNOWN ERROR\n";
-		break;
+
+	// default:
+	// 	msg += "UNKNOWN ERROR\n";
+	// 	break;
 	}
 	// std::cout << "222повтор ника" << std::endl;
 	dequeMaker(user, ONE_USER); //мб излишне. на всякий пожарный
@@ -811,7 +816,17 @@ void Messenger::deleteBot(int senderFd) {
 int	Messenger::passCmd(const std::string &msg, User* sender) {
 	std::string currentPass = sender->getPassword();
 	std::vector<std::string> arr = splitString2(msg, ' ');
-	if (arr.size() != 2)
+
+			for(int i = 0; i < static_cast<int>(arr.size()); i++) {
+		std::cout <<  ">>111>arr in pass: '" << arr[i] << "' " << std::endl;
+	}
+	// 	std::vector<std::string> arr2 = splitString2(msg, ' ');
+
+	// 		for(int i = 0; i < static_cast<int>(arr2.size()); i++) {
+	// 	std::cout <<  ">>>222arr in pass: '" << arr2[i] << "' " << std::endl;
+	// }
+
+	if (arr.size() == 1 || *(arr[1].begin()) == '\n' || *(arr[1].begin()) == '\r')
 		return(replyError(sender, ERR_NEEDMOREPARAMS, "PASS", ""));
 	arr.erase(arr.begin());
 	if (arr[0].find(":") == 0)
@@ -819,7 +834,7 @@ int	Messenger::passCmd(const std::string &msg, User* sender) {
 	if (currentPass != "" && arr[0] == currentPass)
 		return(replyError(sender, ERR_ALREADYREGISTRED, "PASS", ""));
 	(*sender).setPassword(arr[0]);
-	printWelcome(sender, arr[0], 2);
+	// printWelcome(sender, arr[0], 2);
 	return (0);
 }
 
