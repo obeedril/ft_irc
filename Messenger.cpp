@@ -133,15 +133,6 @@ void Messenger::parserPrivmsg(Message &mess){
 
 }
 
-bool Messenger::checkRegistered(int userFd) {
-	std::map<int, User>::iterator it_user = map_users.find(userFd);
-	if (it_user->second.getLogin() != ""
-			&& it_user->second.getUserName() != ""
-			&& it_user->second.getPassword() != "") 
-		it_user->second.setRegistFlag(true);
-	return(it_user->second.getRegistFlag());
-}
-
 std::vector<int> Messenger::getDeq(int senderFd) {
 	std::vector<int> tmp;
 	std::map<int, Message>::iterator it = messages.find(senderFd);
@@ -173,12 +164,12 @@ int  Messenger::getUserFd(int Fd) {
 void Messenger::parsRecvStr(std::string str, int userFd) {
 	std::map<int, Message>::iterator it = messages.find(userFd);
 	std::map<int, User>::iterator it_user = map_users.find(userFd);
-	// bool flag = checkRegistered(userFd);
 	dequeMaker(&it_user->second, TO_ALL_BUT_NO_THIS_USER);
 	if (it_user->second.getPassword() == "" && str.find("PASS", 0) == std::string::npos) {
 		// чтобы без проля нельзя было логиниться
 		dequeMaker(&it_user->second, ONE_USER);
-		stringOutputMaker(&it_user->second, 0, "Password is nessesary. Please enter your password first", "");
+		it->second.setCmd("");
+		stringOutputMaker(&it_user->second, 464, "Password is nessesary. Please enter your password first", "");
 		return ;
 	}
 
@@ -204,7 +195,8 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 	}
 	else if (str.find("NICK", 0) != std::string::npos) {
 		dequeMaker(&it_user->second, ONE_USER);
-		nickCmd(it->second.getRawMessage(), &it_user->second);
+		if (nickCmd(it->second.getRawMessage(), &it_user->second) == 0)
+			it->second.setCmd("NICK");
 		// 	it->second.setCmd("NICK");
 		// else 
 		// 	it->second.setCmd("");
@@ -280,6 +272,17 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 			deleteBot(userFd);
 		}
 	}
+	else if (it_user->second.getRegistFlag() == 1){
+		std::stringstream	ss;
+		ss << ERR_UNKNOWNCOMMAND;
+		std::string	msg = ":" + it_user->second.getServName() + " " + ss.str();
+		std::vector<std::string> vec = splitString2(str, ' ');
+		// std::string tmp = splitString2(str, ' ');
+		msg += " " + it_user->second.getUserName() + " " +  *(vec.begin()) + " :Unknown command\n";
+		it->second.setMessForSender(msg);
+	}
+		
+
 }
 
 std::string Messenger::findNameKick(Message mess) {
@@ -335,12 +338,11 @@ int	Messenger::userCmd(const std::string &msg, User* sender) {
 		// return(replyError(sender, ERR_ALREADYREGISTRED, "", ""));
 		return(stringOutputMaker(sender, ERR_ALREADYREGISTRED, "You may not reregister", ""));
 	}
-	if (sender->getRegistFlag() == 0) {
+	(*sender).setUserName(arr[0]);// arr[0] тк слово USER уже удалили
+	if (sender->getRegistFlag() == 0 && sender->getLogin() != "") {
 		sender->setRegistFlag(true);
 		sendMotd(sender);
 	}
-	(*sender).setUserName(arr[0]);// arr[0] тк слово USER уже удалили
-
 	if (arr[arr.size() - 1][0] == ':')
 		(*sender).setRealName(arr[arr.size() - 1].substr(1));
 	else
@@ -406,9 +408,9 @@ void Messenger::sendMotd(User* sender) {
 	std::string	msg = ":" + sender->getServName() + " ";
 	std::stringstream	ss;
 	ss << RLP_REGIST_OK;
-	msg += ss.str() + " " + sender->getLogin() + " ";
+	msg += "00" + ss.str() + " " + sender->getLogin() + " ";
 	ss.str( "" );
-	msg += ":Welcome to IRC, "
+	msg += ":Welcome to IRC, ";
 	msg += sender->getLogin() + "!" + sender->getUserName() + "@" + HOST + "\n";
 	// -----начало мотд
 	msg += ":" + sender->getServName() + " ";
@@ -521,28 +523,28 @@ int	Messenger::whoAmICmd(User* sender) {
 // NICK cmd
 int	Messenger::nickCmd(const std::string &msg, User* sender) {
 	std::vector<std::string> arr = splitString2(msg, ' ');
-	if (arr.size() < 2)
-		return(stringOutputMaker(sender, ERR_NONICKNAMEGIVEN, "No nickname given", ""));
+	if (arr.size() == 1 || *(arr[1].begin()) == '\n' || *(arr[1].begin()) == '\r')
+		return(stringOutputMaker(sender, ERR_NONICKNAMEGIVEN, "No nickname given", "") + 1);
 	arr.erase(arr.begin()); 
 
 	if (map_users.size() > 1) { // включается ли сюда сам юзер если он еще не зареган? это влияет на эту проверку
 		for (std::map<int, User>::iterator it_u = map_users.begin(); it_u != map_users.end(); it_u++)
 		{
 			if (arr[0] == it_u->second.getLogin() && it_u->second.getUserFd() != sender->getUserFd())
-				return(stringOutputMaker(sender, ERR_NICKNAMEINUSE, "Nickname is already in use", "")); // не тестила на реальном серваке!
+				return(stringOutputMaker(sender, ERR_NICKNAMEINUSE, "Nickname is already in use", "") + 1); // не тестила на реальном серваке!
 		}
 	}
 		if (arr[0] == sender->getLogin())
 				// return(1);
-				return(stringOutputMaker(sender, 0, "You entered your current nick", ""));
-		else if (sender->getUserName() == "") {
+				return(stringOutputMaker(sender, 0, "You entered your current nick", "") + 1);
+		else if (sender->getUserName() == "" && sender->getLogin() != "") {
 				// return(1);
-				stringOutputMaker(sender, 0, "User changed nick", "");	
+				stringOutputMaker(sender, 0, "User changed nick", "NICK");	
 		}
 		else if (sender->getUserName() != "") {
 			std::string	msg = ":" + sender->getLogin() + "!" + sender->getUserName() + "@" + HOST + " NICK :" + arr[0];
 			setReadyMessInMessageByFd(msg, sender->getUserFd()); // всем ли давать рассылку о смене ника? влияет ли то, были ли он ранее до конца зареган?
-			if (sender->getRegistFlag() == 0) {
+			if (sender->getRegistFlag() == 0 && sender->getUserName() != "") {
 				sender->setRegistFlag(true);
 				sendMotd(sender);
 			}
@@ -583,13 +585,13 @@ int	Messenger::passCmd(const std::string &msg, User* sender) {
 
 	if (arr.size() == 1 || *(arr[1].begin()) == '\n' || *(arr[1].begin()) == '\r')
 		// return(replyError(sender, ERR_NEEDMOREPARAMS, "PASS", ""));
-		return(stringOutputMaker(sender, ERR_NEEDMOREPARAMS, "Not enough parameters", "PASS"));
+		return(stringOutputMaker(sender, ERR_NEEDMOREPARAMS, "Not enough parameters", "PASS") + 1);
 	arr.erase(arr.begin());
 	if (arr[0].find(":") == 0)
 		arr[0] = arr[0].substr(1);
 	if (currentPass != "" && arr[0] == currentPass)
 		// return(replyError(sender, ERR_ALREADYREGISTRED, "PASS", ""));
-		return(stringOutputMaker(sender, ERR_ALREADYREGISTRED, "You may not reregister", "PASS"));
+		return(stringOutputMaker(sender, ERR_ALREADYREGISTRED, "You may not reregister", "") + 1);
 
 	(*sender).setPassword(arr[0]);
 	return (0);

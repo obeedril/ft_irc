@@ -24,7 +24,6 @@ public:
 	void insertMessage(int senderFd, Message mess);
 	void deleteMessage(int senderFd);
 	std::string getRawMessageByFd(int senderFd);
-	bool checkRegistered(int userFd);
 	std::string getReadyMessByFd(int senderFd);
 
 	void parsRecvStr(std::string str, int userFd);
@@ -47,7 +46,7 @@ public:
 // NICK cmd
 	int	nickCmd(const std::string &msg, User* sender);
 	int	whoAmICmd(User* sender);
-	int stringOutputMaker(User *user, int err, const std::string &str, const std::string &command);
+	int stringOutputMaker(User *user, int err, const std::string &description, const std::string &command);
 	// std::vector<std::string> stringSplit2(const std::string &line, std::string delimiter);
 
 		//    void setMess(Message _mess);
