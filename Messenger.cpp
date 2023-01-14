@@ -162,16 +162,18 @@ int  Messenger::getUserFd(int Fd) {
 }
 
 void Messenger::parsRecvStr(std::string str, int userFd) {
-	std::map<int, Message>::iterator it = messages.find(userFd);
-	std::map<int, User>::iterator it_user = map_users.find(userFd);
-	dequeMaker(&it_user->second, TO_ALL_BUT_NO_THIS_USER);
-	if (it_user->second.getPassword() == "" && str.find("PASS", 0) == std::string::npos) {
-		// чтобы без проля нельзя было логиниться
-		dequeMaker(&it_user->second, ONE_USER);
-		it->second.setCmd("");
-		stringOutputMaker(&it_user->second, 464, "Password is nessesary. Please enter your password first", "");
-		return ;
-	}
+    std::map<int, Message>::iterator it = messages.find(userFd);
+    std::map<int, User>::iterator it_user = map_users.find(userFd);
+    dequeMaker(&it_user->second, TO_ALL_BUT_NO_THIS_USER);
+    if (it_user->second.getPassword() == "" && str.find("PASS", 0) == std::string::npos
+        && str.find("CAP LS", 0) == std::string::npos && str.find("PING", 0) == std::string::npos
+        && str.find("CAP END", 0) == std::string::npos) {
+        // чтобы без проля нельзя было логиниться
+        dequeMaker(&it_user->second, ONE_USER);
+        it->second.setCmd("");
+        stringOutputMaker(&it_user->second, 464, "Password is nessesary. Please enter your password first", "");
+        return ;
+    }
 
 	// flag = true; // >>>>>> del!!!!!!!!!
 	

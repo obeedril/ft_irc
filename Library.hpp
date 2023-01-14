@@ -77,7 +77,7 @@ inline std::vector<std::string> splitString(std::string s, char del)
 	std::vector<std::string> vector_string;
 	while (!ss.eof()) {
 		getline(ss, word, del);
-		if (word[0] == '\n' && word.length() == 1)
+		if ((word[0] == '\n' && word.length() == 1) || word.length())
 			continue;
 		else if (word[0] == '\n')
 			vector_string.push_back(word.substr(1));
