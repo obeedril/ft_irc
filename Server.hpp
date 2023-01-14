@@ -33,6 +33,10 @@ class Server
 		void parseConfig();
 		std::string	getServName();
 		std::vector<std::string>	getMotd();
+
+		std::string	getAdminPass();
+		std::string	getAdminLogin();
+		std::map<std::string, std::string>	getOperatorsMap();
 };
 
 #endif

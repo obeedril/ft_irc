@@ -1,6 +1,7 @@
 #include "Library.hpp"
 
-Messenger::Messenger() {
+Messenger::Messenger(std::string server) {
+	serverName = server;
 	ChannelsStorage channels();
 }
 
@@ -20,6 +21,10 @@ void Messenger::deleteMessage(int senderFd) {
 
 void Messenger::setMessages(std::map<int, Message> _messages) {
 	messages = _messages;
+}
+
+std::string Messenger::getServerName() {
+	return serverName;
 }
 
 void Messenger::setReadyMessInMessageByFd(std::string str, int senderFd) {
@@ -171,7 +176,10 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 		// чтобы без проля нельзя было логиниться
 		dequeMaker(&it_user->second, ONE_USER);
 		it->second.setCmd("");
-		stringOutputMaker(&it_user->second, 464, "Password is nessesary. Please enter your password first", "");
+		// it->second.setMessForSender(&it_user->second, 464, "Password is nessesary. Please enter your password first", "");
+		stringOutputMaker(&it_user->second, ERR_PASSWDMISMATCH, "Password is nessesary. Please enter your password first", "");
+		it->second.setMessForSender(getReadyMessByFd(it_user->second.getUserFd()));
+		setReadyMessInMessageByFd("", it_user->second.getUserFd());
 		return ;
 	}
 
@@ -375,7 +383,30 @@ std::string Messenger::tostring2(std::vector<std::string> &v)
     return os.str();
 }
 
+void	Messenger::checkAdmin(User* sender) {
+	if (sender->getLogin() == sender->getServ()->getAdminLogin() && sender->getPassword() == sender->getServ()->getAdminPass())
+		sender->setIsAdminServer(true);
+	std::map<std::string, std::string>::iterator itStart= sender->getServ()->getOperatorsMap().begin();
+	std::map<std::string, std::string>::iterator itEnd = sender->getServ()->getOperatorsMap().end();
+	for (; itStart != itEnd; itStart++) {
+		if (sender->getLogin() == itStart->second && sender->getPassword() == itStart->first) {
+			sender->setIsOperatorServer(true);
+			break;
+		}
+
+	}
+
+if (sender->getIsAdminServer())
+	std::cout << "!!!! >>>>>>> HELLO, MASTER! You're serverAdmin" << std::endl;
+else if (sender->getIsOperatorServer())
+	std::cout << "!!!! >>>>>>> HELLO, BUDDY! You're serverOperator" << std::endl;
+else
+	std::cout << "!!!! >>>>>>> HELLO, HOLOP" << std::endl;
+}
+
+
 void	Messenger::sendMotd(User* sender) {
+	// checkAdmin(sender); // не работает!
 	std::vector<std::string> vec = sender->getMotdFromServer();
 	std::string tmp = tostring2(vec);
 	if (tmp.empty()) {
@@ -385,7 +416,7 @@ void	Messenger::sendMotd(User* sender) {
 	}
 
 	//--- отправка кода 001
-	std::string	msg = ":" + sender->getServName() + " ";
+	std::string	msg = ":" + serverName + " ";
 	std::stringstream	ss;
 	ss << RLP_REGIST_OK;
 	msg += "00" + ss.str() + " " + sender->getLogin() + " ";
@@ -393,17 +424,17 @@ void	Messenger::sendMotd(User* sender) {
 	msg += ":Welcome to IRC, ";
 	msg += sender->getLogin() + "!" + sender->getUserName() + "@" + HOST + "\n";
 	// -----начало мотд
-	msg += ":" + sender->getServName() + " ";
+	msg += ":" + serverName + " ";
 	ss << RPL_MOTDSTART;
-	msg += ss.str() + " " + sender->getLogin() + " :- " + sender->getServName() + " Message of the day - \n";
+	msg += ss.str() + " " + sender->getLogin() + " :- " + serverName + " Message of the day - \n";
 	ss.str( "" );
 	// -----сам мотд
-	msg += ":" + sender->getServName() + " ";
+	msg += ":" + serverName + " ";
 	ss << RPL_MOTD; //????
 	msg += ss.str() + " " + sender->getLogin() + " :- " + tmp + "\n";
 	ss.str( "" );
 	// -----конец мотд
-	msg += ":" + sender->getServName() + " ";
+	msg += ":" + serverName + " ";
 	ss << RPL_ENDOFMOTD; //????
 	msg += ss.str() + " " + sender->getLogin() + " :End of /MOTD command" + "\n";
 	// return msg;
@@ -535,7 +566,7 @@ int	Messenger::nickCmd(const std::string &msg, User* sender) {
 
 int Messenger::stringOutputMaker(User *user, int err, const std::string &description, const std::string &command) {
 	// добавляет логин, код ошибки и имя сервера, кладет в rawMessage
-	std::string	msg = ":" + user->getServName() + " ";
+	std::string	msg = ":" + serverName + " ";
 	std::stringstream	ss;
 	if (err != 0)
 	{ 
@@ -546,7 +577,8 @@ int Messenger::stringOutputMaker(User *user, int err, const std::string &descrip
 	if (command != "")
 		msg += " "  + command;
 	if (description != "")
-		msg += " :"  + description + "\n";
+		msg += " :"  + description;
+	msg += "\n";
 	setReadyMessInMessageByFd(msg, user->getUserFd());
 	return 0;
 }

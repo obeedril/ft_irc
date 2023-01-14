@@ -213,3 +213,14 @@ void Server::deleteSpaces(std::string *str) {
 	if (i <= (*str).size()) // строго меньше??
 		*str = (*str).substr(0, i + 1);
 }
+
+std::string	Server::getAdminPass() {
+	return _password;
+}
+std::string	Server::getAdminLogin() {
+	return _admin;
+
+}
+std::map<std::string, std::string>	Server::getOperatorsMap() {
+	return _operators;
+}

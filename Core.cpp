@@ -1,8 +1,9 @@
 # include "Library.hpp"
 
-Core::Core(int port_) {
+Core::Core(int port_, Server *serv) {
 
-	storage_messages = new Messenger();
+	_irc_serv = serv;
+	storage_messages = new Messenger(_irc_serv->getServName());
 	listen_sock = 0;
 	this->port = port_;
 	max = 0;
@@ -124,11 +125,12 @@ int		Core::writeToUser(int current_fd) {
 	}
 	for(int i = 0; i < static_cast<int>(deque.size()); i++) {
 		if (FD_ISSET(deque[i], &write_)) {
+			// std::cout << ">>>> --- BERFORE SEND msg.c_str() = |" << msg.c_str() << "|" << std::endl;
 			send(deque[i], msg.c_str(), msg.length(), 0);
 		}
 	}
 	storage_messages->deleteMessage(current_fd);
-	std::cout << "DELETE msg!!!" << std::endl;
+	// std::cout << "DELETE msg!!!" << std::endl;
 	return (0);
 };
 
@@ -183,8 +185,8 @@ Messenger* Core::getStorage_messages(){
 
 void Core::setServ(Server *newServ) {
 	_irc_serv = newServ;
-}
+}	
 
-std::string Core::getServName() {
-	return _irc_serv->getServName();
+Server * Core::getServ(void) {
+	return _irc_serv;;
 }
