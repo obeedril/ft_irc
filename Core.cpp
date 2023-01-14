@@ -70,10 +70,11 @@ void	Core::run() {
 			}
 			else {
 				writeToUser(s);
-				while(count_mess > 0) {
-					readFromVectorMessage(s);
-					writeToUser(s);
-				}
+				vec_mess.clear();
+				// while(count_mess > 0) {
+				// 	readFromVectorMessage(s);
+				// 	writeToUser(s);
+				// }
 			}
 		}
 	}
@@ -144,7 +145,7 @@ int		Core::readFromUser(int user_fd) {
 	// std::cout <<  "tmp: '" << tmp << "' " << std::endl;
 	// std::cout <<  "str: '" << str << "' " << std::endl;
 	// vec_mess = splitString(str, '\n'); // если надо работать с консоли!
-	vec_mess = splitString(str, '\r'); //так у Риты, но тогда команды не парсятся с консоли
+	vec_mess = splitString2(str, '\r'); //так у Риты, но тогда команды не парсятся с консоли
 	// for(int i = 0; i < static_cast<int>(vec_mess.size()); i++) {
 	// 	std::cout <<  "vec: '" << vec_mess[i] << "' " << std::endl;
 	// }
@@ -166,7 +167,6 @@ int		Core::readFromUser(int user_fd) {
 
 void Core::readFromVectorMessage(int user_fd) {
 	Message		new_message;
-
 	if (vec_mess.size() > 0) {
 		new_message.setRawMessage(vec_mess[0]);
 		storage_messages->insertMessage(user_fd, new_message);

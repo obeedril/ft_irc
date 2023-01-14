@@ -79,8 +79,10 @@ bool ChannelsStorage::foundUserInThisChannel(std::string name_channel, User *use
     std::list<User*> list_users;
   
     list_users = getChannelByName(name_channel).list_users;
-    if (std::find(list_users.begin(), list_users.end(), user) != list_users.end()) {
-      return(true);
+    for(std::list<User*>::iterator it = list_users.begin(); it != list_users.end(); it++) {
+       if((*it)->getUserFd() == user->getUserFd()) {
+        return(true);
+       }
     }
   return(false);
 }
@@ -110,10 +112,10 @@ std::string	ChannelsStorage::joinToCannel(std::string msg, User *user) {
     if (foundUserInThisChannel(name_channel, user) == false) {
       addNewChannel(name_channel);
       addUserToChannel(name_channel, user);
-      //Join to channel Success
-  		str.append(":" + user_n + "!" + user_n + "@127.0.0.1 ");
-  		str.append("JOIN :" + name_channel + "\n");
     }
+    //Join to channel Success
+    str.append(":" + user_n + "!" + user_n + "@127.0.0.1 ");
+  	str.append("JOIN :" + name_channel + "\n");
 		//Get Topic
     topic = getTopic(name_channel);
 		str.append(":IRC-kitty 331 " + user_n +  " " + name_channel +  " :" + topic + "\n");
@@ -237,6 +239,18 @@ void ChannelsStorage::updateChannels(User *user, std::string new_user_name, int 
 //   }
 }
 
+std::vector<int> ChannelsStorage::getDequeByChannel(std::string name_channel, User *user) {
+  std::list<User*> list_users;
+  std::vector<int> vector;
+  if(foundUserInThisChannel(name_channel, user) == true) {
+    list_users = getChannelByName(name_channel).list_users;
+    list_users.pop_front(); //
+    for(std::list<User*>::iterator it = list_users.begin(); it != list_users.end(); it++) {
+        vector.push_back((*it)->getUserFd());
+    }
+  }
+  return(vector);
+}
 
 
 //### KICK `<channel>` `<user>` `[<comment>]`

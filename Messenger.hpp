@@ -11,6 +11,7 @@ private:
 		std::map<int, User>		map_users;
 
 		ChannelsStorage			channels;
+		
 
 public:
 

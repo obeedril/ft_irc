@@ -164,6 +164,10 @@ int  Messenger::getUserFd(int Fd) {
 void Messenger::parsRecvStr(std::string str, int userFd) {
 	std::map<int, Message>::iterator it = messages.find(userFd);
 	std::map<int, User>::iterator it_user = map_users.find(userFd);
+	if (it == messages.end() || it_user == map_users.end()) {
+		write(2, "Iterator ERROR!\n", 17);
+		exit(1);
+	}
 	dequeMaker(&it_user->second, TO_ALL_BUT_NO_THIS_USER);
 	if (it_user->second.getPassword() == "" && str.find("PASS", 0) == std::string::npos 
 		&& str.find("CAP LS", 0) == std::string::npos && str.find("PING", 0) == std::string::npos
@@ -174,20 +178,6 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 		stringOutputMaker(&it_user->second, 464, "Password is nessesary. Please enter your password first", "");
 		return ;
 	}
-
-	// flag = true; // >>>>>> del!!!!!!!!!
-	
-	// std::vector<int> deque_users;
-	//std::map<int, User>::iterator it_u = map_users.begin();
-	// for (std::map<int, User>::iterator it_u = map_users.begin(); it_u != map_users.end(); it_u++) {
-		// if (it_u->first != userFd)
-			// deque_users.push_back(it_u->first);
-	// }
-	// it->second.setDeque(deque_users);
-	std::vector<std::string> vector_string = splitString(str, ' ');
-	// for(int i = 0; i < static_cast<int>(vector_string.size()); i++) {
-	// 	std::cout << "'" << vector_string[i] << "' ";
-	// }
 
 	if (str.find("PASS", 0) != std::string::npos) {
 		dequeMaker(&it_user->second, ONE_USER);
@@ -220,19 +210,36 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 		// it->second.setReadyMess(mss);
 		// std::cout << "'" << mss << "' " << std::endl;
 	}
-	else if (str.find("QUIT", 0) != std::string::npos){
+	else if (str.find("QUIT", 0) != std::string::npos) {
 		it->second.setCmd("QUIT");
 		std::cout << "cmd QUIT" << std::endl;
 	}
-	else if (str.find("WHOAMI", 0) != std::string::npos){
+	else if (str.find("WHOAMI", 0) != std::string::npos) {
 		dequeMaker(&it_user->second, ONE_USER);
 		whoAmICmd(&it_user->second);
 	}
 	else if (str.find("PRIVMSG", 0) != std::string::npos){
 		it->second.setCmd("PRIVMSG");
-		parserPrivmsg(it->second);
-		dequeMaker(&it_user->second, LIST_OF_RECIEVERS);
+		//parserPrivmsg(it->second);
+		//dequeMaker(&it_user->second, LIST_OF_RECIEVERS);
+		std::vector<std::string> vec_msg = splitString(str, ' ');
+		if(vec_msg.size() >= 2 && channels.getChannelByName(vec_msg[1]).name == vec_msg[1]) {
+			it->second.setDeque(channels.getDequeByChannel(vec_msg[1], &it_user->second));
+		}
+		else {
+			if(vec_msg.size() >= 2 && getUserFdByLogin(vec_msg[1]) != -1) {
+				dequeMaker(getUser(getUserFdByLogin(vec_msg[1])), ONE_USER);
+			}
+			else {
+				it->second.setReadyMess(":ERROR!\n");
+			}
+		}
 		std::cout << "cmd PRIVMSG" << std::endl;
+		if(vec_msg.size() >= 3) {
+			std::string tmp = "";
+			tmp.append(vec_msg[1] + "\n");
+			it->second.setReadyMess(tmp);
+		}
 	}
 	else if (str.find("NOTICE", 0) != std::string::npos){
 		it->second.setCmd("NOTICE");
@@ -273,17 +280,16 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 			deleteBot(userFd);
 		}
 	}
-	else if (it_user->second.getRegistFlag() == 1){
-		std::stringstream	ss;
-		ss << ERR_UNKNOWNCOMMAND;
-		std::string	msg = ":" + it_user->second.getServName() + " " + ss.str();
-		std::vector<std::string> vec = splitString2(str, ' ');
-		// std::string tmp = splitString2(str, ' ');
-		msg += " " + it_user->second.getUserName() + " " +  *(vec.begin()) + " :Unknown command\n";
-		it->second.setMessForSender(msg);
-	}
-		
-
+	// else if (it_user->second.getRegistFlag() == 1) {
+	// 	std::cout << "ERROR 288 Messenger!" << std::endl;
+	// 	std::stringstream	ss;
+	// 	ss << ERR_UNKNOWNCOMMAND;
+	// 	std::string	msg = ":" + it_user->second.getServName() + " " + ss.str();
+	// 	std::vector<std::string> vec = splitString2(str, ' ');
+	// 	// std::string tmp = splitString2(str, ' ');
+	// 	msg += " " + it_user->second.getUserName() + " " + " :Unknown command\n";
+	// 	//it->second.setMessForSender("421 :Unknown command\n");
+	// }
 }
 
 std::string Messenger::findNameKick(Message mess) {
@@ -456,9 +462,10 @@ void Messenger::dequeMaker(User *user, int flag) {
 	}
 	else if (flag == TO_CHANNEL_BUT_NO_THIS_USER) {
 		// Написать реализацию, чтобы слало на канал, кроме самого юзера!!!
-
+		deque_users = channels.getDequeByChannel("#kvirc", user);
 	}
 	else if (flag == TO_CHANNEL) {
+		deque_users = channels.getDequeByChannel("#kvirc", user); //заменить msg!!!!!!!!!!!!!
 		// Написать реализацию, чтобы слало на канал!!!
 	}
 	else if (flag == ANOTHER_ONE_USER) {
