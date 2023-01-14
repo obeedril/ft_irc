@@ -6,7 +6,7 @@ User::User(Server *new_irc_serv){
 }
 
 User::User() {
-    channelHere;
+    channelHere = "";
     login = ""; //nickname
     userName = ""; //username
     realName = ""; //realname
