@@ -167,7 +167,7 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 	dequeMaker(&it_user->second, TO_ALL_BUT_NO_THIS_USER);
 	if (it_user->second.getPassword() == "" && str.find("PASS", 0) == std::string::npos 
 		&& str.find("CAP LS", 0) == std::string::npos && str.find("PING", 0) == std::string::npos
-		&& str.find("CAP END", 0) == std::string::npos) {
+		&& str.find("CAP END", 0) == std::string::npos && str.find("WHOAMI", 0) == std::string::npos) {
 		// чтобы без проля нельзя было логиниться
 		dequeMaker(&it_user->second, ONE_USER);
 		it->second.setCmd("");
@@ -273,17 +273,6 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 			deleteBot(userFd);
 		}
 	}
-	else if (it_user->second.getRegistFlag() == 1){
-		std::stringstream	ss;
-		ss << ERR_UNKNOWNCOMMAND;
-		std::string	msg = ":" + it_user->second.getServName() + " " + ss.str();
-		std::vector<std::string> vec = splitString2(str, ' ');
-		// std::string tmp = splitString2(str, ' ');
-		msg += " " + it_user->second.getUserName() + " " +  *(vec.begin()) + " :Unknown command\n";
-		it->second.setMessForSender(msg);
-	}
-		
-
 }
 
 std::string Messenger::findNameKick(Message mess) {
