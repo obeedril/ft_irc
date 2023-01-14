@@ -76,35 +76,61 @@ std::string Messenger::getCmdInMessageByFd(int senderFd) {
 }
 
 
-void Messenger::parserPrivmsg(Message mess){
+void Messenger::parserPrivmsg(Message &mess){
 	std::string tmp = "";
+	std::string recievers_str = "";
+	std::vector<std::string> tmp_list;
 	size_t len = mess.getRawMessage().length();
 	tmp = mess.getRawMessage().substr(mess.getCmd().length() + 1, len);
 
-	size_t pos = tmp.find(" ", 0);
-	if (pos == std::string::npos){
-		std::cout << "reciver is not identifire" << std::endl;
+	size_t pos = tmp.find(":", 0);
+	recievers_str = tmp.substr(0, pos);
+	// std::cout << "recivers_str |" << recievers_str << "|" << std::endl;
+
+	tmp_list = splitString(recievers_str, ',');
+
+	// for(int i = 0; i < static_cast<int>(tmp_list.size()); i++) {
+    //     std::cout << "'" << tmp_list[i] << "' ";
+    // }
+	// std::cout << std::endl;
+
+	for(int i = 0; i < static_cast<int>(tmp_list.size()); i++) {
+       tmp_list[i] = strTrimBegin(tmp_list[i], ' ');
+    }
+
+
+//------------------------------------------------------
+    // for(int i = 0; i < static_cast<int>(tmp_list.size()); i++) {
+    //     std::cout << "'" << tmp_list[i] << "' ";
+    // }
+	// std::cout << std::endl;
+
+//------------------------------------------------------
+
+	mess.setListOfRecievers(tmp_list);
+
+	if (mess.getListOfRecievers().empty()){
+		// std::cout << "recivers are not identifire" << std::endl;
 		return;
-	} 
-	mess.setReceiver(tmp.substr(0, pos));
-	mess.setReadyMess(tmp.substr(mess.getReceiver().length() + 1, len));
+	}
+	
+	// mess.setReadyMess(":Sender!Sender@127.0.0.1 PRIVMSG " +tmp.substr(pos + 1, len));
+	mess.setReadyMess(tmp.substr(pos + 1, len) + "\n");
+
+	//------------------------------------------------------
+    // for(int i = 0; i < static_cast<int>(mess.getListOfRecievers().size()); i++) {
+    //     std::cout << "'" << mess.getListOfRecievers()[i] << "' ";
+    // }
+	// std::cout << std::endl;
+
+//------------------------------------------------------
 
 	// ------------------------------
-	std::cout << "tmp |" << tmp << "|" << std::endl;
-	std::cout << "reciver |" << mess.getReceiver() << "|" << std::endl;
-	std::cout << "tmp |" << tmp << "|" << std::endl;
-	std::cout << "readyMess |" << mess.getReadyMess() << "|" << std::endl;
+	// std::cout << "tmp |" << tmp << "|" << std::endl;
+	// std::cout << "readyMess |" << mess.getReadyMess() << "|" << std::endl;
+	// std::cout << "rawMess |" << mess.getRawMessage() << "|" << std::endl;
 	// ------------------------------
 
-}
-
-bool Messenger::checkRegistered(int userFd) {
-	std::map<int, User>::iterator it_user = map_users.find(userFd);
-	if (it_user->second.getLogin() != ""
-			&& it_user->second.getUserName() != ""
-			&& it_user->second.getPassword() != "") 
-		it_user->second.setRegistFlag(true);
-	return(it_user->second.getRegistFlag());
 }
 
 std::vector<int> Messenger::getDeq(int senderFd) {
@@ -138,9 +164,16 @@ int  Messenger::getUserFd(int Fd) {
 void Messenger::parsRecvStr(std::string str, int userFd) {
 	std::map<int, Message>::iterator it = messages.find(userFd);
 	std::map<int, User>::iterator it_user = map_users.find(userFd);
-	bool flag = checkRegistered(userFd);
 	dequeMaker(&it_user->second, TO_ALL_BUT_NO_THIS_USER);
-	flag = true; // >>>>>> del!!!!!!!!!
+	if (it_user->second.getPassword() == "" && str.find("PASS", 0) == std::string::npos) {
+		// чтобы без проля нельзя было логиниться
+		dequeMaker(&it_user->second, ONE_USER);
+		it->second.setCmd("");
+		stringOutputMaker(&it_user->second, 464, "Password is nessesary. Please enter your password first", "");
+		return ;
+	}
+
+	// flag = true; // >>>>>> del!!!!!!!!!
 	
 	// std::vector<int> deque_users;
 	//std::map<int, User>::iterator it_u = map_users.begin();
@@ -150,60 +183,67 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 	// }
 	// it->second.setDeque(deque_users);
 	std::vector<std::string> vector_string = splitString(str, ' ');
-	for(int i = 0; i < static_cast<int>(vector_string.size()); i++) {
-		std::cout << "'" << vector_string[i] << "' ";
-	}
+	// for(int i = 0; i < static_cast<int>(vector_string.size()); i++) {
+	// 	std::cout << "'" << vector_string[i] << "' ";
+	// }
 
 	if (str.find("PASS", 0) != std::string::npos) {
 		dequeMaker(&it_user->second, ONE_USER);
-		it->second.setCmd("PASS");
-		passCmd(it->second.getRawMessage(), &it_user->second);
+		// it->second.setCmd("PASS");
+		if (passCmd(it->second.getRawMessage(), &it_user->second) == 0)
+			it->second.setCmd("PASS");
 	}
 	else if (str.find("NICK", 0) != std::string::npos) {
 		dequeMaker(&it_user->second, ONE_USER);
 		if (nickCmd(it->second.getRawMessage(), &it_user->second) == 0)
 			it->second.setCmd("NICK");
-		else 
-			it->second.setCmd("");
-		std::string mss = "";
-		mss.append(":IRC-kitty Hello!\n");
+		// 	it->second.setCmd("NICK");
+		// else 
+		// 	it->second.setCmd("");
+		// std::string mss = "";
+		// mss.append("Hello!\n");
 		//mss.append("@127.0.0.1 ");
 		//mss.append(vector_string[0] +  ":Rita\n");
-		it->second.setReadyMess(mss);
-		std::cout << "'" << mss << "' " << std::endl;
+		// it->second.setReadyMess(mss);
+		// std::cout << "'" << mss << "' " << std::endl;
 	}
 	else if (str.find("USER", 0) != std::string::npos) {
 		dequeMaker(&it_user->second, ONE_USER);
-		if (userCmd(it->second.getRawMessage(), &it_user->second) == 0)
-			it->second.setCmd("USER");
-		else 
-			it->second.setCmd("");
-		std::string mss = "";
-		mss.append(":IRC-kitty 001 Dlana :Welcome to the IRC-kitty IRC Network Dlana!Dlana@127.0.0.1\n");;
-		it->second.setReadyMess(mss);
-		std::cout << "'" << mss << "' " << std::endl;
+		userCmd(it->second.getRawMessage(), &it_user->second);
+		// 	it->second.setCmd("USER");
+		// else 
+		// 	it->second.setCmd("");
+		// std::string mss = "";
+		// mss.append(":IRC-kitty 001 Dlana :Welcome to the IRC-kitty IRC Network Dlana!Dlana@127.0.0.1\n");;
+		// it->second.setReadyMess(mss);
+		// std::cout << "'" << mss << "' " << std::endl;
 	}
-	else if (str.find("QUIT", 0) != std::string::npos && flag == true){
+	else if (str.find("QUIT", 0) != std::string::npos){
 		it->second.setCmd("QUIT");
 		std::cout << "cmd QUIT" << std::endl;
 	}
-	else if (str.find("PRIVMSG", 0) != std::string::npos && flag == true){
+	else if (str.find("WHOAMI", 0) != std::string::npos){
+		dequeMaker(&it_user->second, ONE_USER);
+		whoAmICmd(&it_user->second);
+	}
+	else if (str.find("PRIVMSG", 0) != std::string::npos){
 		it->second.setCmd("PRIVMSG");
 		parserPrivmsg(it->second);
+		dequeMaker(&it_user->second, LIST_OF_RECIEVERS);
 		std::cout << "cmd PRIVMSG" << std::endl;
 	}
-	else if (str.find("NOTICE", 0) != std::string::npos && flag == true){
+	else if (str.find("NOTICE", 0) != std::string::npos){
 		it->second.setCmd("NOTICE");
 		std::cout << "cmd NOTICE" << std::endl;
 	}
-	else if (str.find("JOIN", 0) != std::string::npos && flag == true) {
+	else if (str.find("JOIN", 0) != std::string::npos) {
 		it->second.setCmd("JOIN");
 		dequeMaker(&it_user->second, ONE_USER);
 		channels.getUsersNamesInThisChannel(str, &map_users);
 		it->second.setMessForSender(channels.joinToCannel(str, &it_user->second));
 		std::cout << "cmd JOIN" << std::endl;
 	}
-	else if (str.find("KICK", 0) != std::string::npos && flag == true) {
+	else if (str.find("KICK", 0) != std::string::npos) {
 		it->second.setCmd("KICK");
 		findNameKick(it->second);
 		it->second.setMessForSender(channels.kickUser(str, &it_user->second));
@@ -211,9 +251,11 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 	}
 	else if (str.find("CAP LS", 0) != std::string::npos) {
 		it->second.setCmd("CAP LS");
-		std::cout << "cmd CAP LS" << std::endl;
+		// std::cout << "cmd CAP LS" << std::endl;
+
 		dequeMaker(&it_user->second, ONE_USER);
 		it->second.setReadyMess(":IRC-kitty CAP * LS :=PASS NICK USER PRIVMSG NOTICE JOIN KICK QUIT\n");
+
 	}
 	// else if (str.find("PING", 0) != std::string::npos) {
 	// 	it->second.setCmd("CAP LS");
@@ -221,8 +263,7 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 	// 	dequeMaker(&it_user->second, ONE_USER);
 	// 	it->second.setRawMessage(":IRC-kitty 451  :You have not registered\n");
 	// }
-	else if ((str.find("BOT", 0) != std::string::npos || it_user->second.getBotDialog() == YES)
-				&& flag == true) {
+	else if (str.find("BOT", 0) != std::string::npos || it_user->second.getBotDialog() == YES) {
 		dequeMaker(&it_user->second, ONE_USER);
 		it->second.setCmd("BOT");
 		it_user->second.setBotDialog(YES);
@@ -232,6 +273,17 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 			deleteBot(userFd);
 		}
 	}
+	else if (it_user->second.getRegistFlag() == 1){
+		std::stringstream	ss;
+		ss << ERR_UNKNOWNCOMMAND;
+		std::string	msg = ":" + it_user->second.getServName() + " " + ss.str();
+		std::vector<std::string> vec = splitString2(str, ' ');
+		// std::string tmp = splitString2(str, ' ');
+		msg += " " + it_user->second.getUserName() + " " +  *(vec.begin()) + " :Unknown command\n";
+		it->second.setMessForSender(msg);
+	}
+		
+
 }
 
 std::string Messenger::findNameKick(Message mess) {
@@ -273,41 +325,35 @@ std::string Messenger::initBot(int user_fd, std::string msg) {
 
 
 int	Messenger::userCmd(const std::string &msg, User* sender) {
-	if (sender->getLogin() == "") {
-		printWelcome(sender, "Please enter your PASS and NICK before USER-command", 0);
-		setReadyMessInMessageByFd(msg, sender->getUserFd());
-		setRawMessInMessageByFd(msg, sender->getUserFd());
-		return 1;
-	}
-	// std::cout << "it1->second.getMessage() = " << msg << std::endl;
-	std::map<int, Message>::iterator	it1; // !!!
-	it1 = messages.find((*sender).getUserFd());
-	// int flag = 0;
-	// if (!sender->getUserName().empty())
-	// 	flag = 1;
-	// int userFd = it1->first;// !!!
+	if (sender->getUserName() != "")
+		// return(replyError(sender, ERR_ALREADYREGISTRED, "", ""));
+		return(stringOutputMaker(sender, ERR_ALREADYREGISTRED, "You may not reregister", "USER"));
 
-	std::vector<std::string> arr = stringSplit(msg, ' ');
-	arr.erase(arr.begin()); // удаляем из команды элемент USER
-	// std::cout << "arr[0]полсе делита = " << arr[0] << std::endl;
-	if (arr.size() < 4) {
-		return(replyError(sender, ERR_NEEDMOREPARAMS, tostring(arr), ""));
+	std::vector<std::string> arr = stringSplitForUserCmd(msg, ' ');
+	if (arr.size() < 5) {
+		// return(replyError(sender, ERR_NEEDMOREPARAMS, tostring(arr), ""));
+		return(stringOutputMaker(sender, ERR_NEEDMOREPARAMS, "Not enough parameters", "USER"));
 	}
+	arr.erase(arr.begin()); // удаляем из команды элемент USER
 	if (sender->getUserName() != "" && arr[0] == sender->getUserName()) {
-		return(replyError(sender, ERR_ALREADYREGISTRED, "", ""));
+		// return(replyError(sender, ERR_ALREADYREGISTRED, "", ""));
+		return(stringOutputMaker(sender, ERR_ALREADYREGISTRED, "You may not reregister", ""));
 	}
 	(*sender).setUserName(arr[0]);// arr[0] тк слово USER уже удалили
-
+	if (sender->getRegistFlag() == 0 && sender->getLogin() != "") {
+		sender->setRegistFlag(true);
+		sendMotd(sender);
+	}
 	if (arr[arr.size() - 1][0] == ':')
 		(*sender).setRealName(arr[arr.size() - 1].substr(1));
 	else
 		(*sender).setRealName(arr[arr.size() - 1]);
-	printWelcome(sender, arr[0], 1);
 	return 0;
 }
 
-std::vector<std::string> Messenger::stringSplit(const std::string &line, char delimiter) {
-	size_t posRN = line.find("\r\n");
+std::vector<std::string> Messenger::stringSplitForUserCmd(const std::string &line, char delimiter) {
+	// size_t posRN = line.find("\r\n");
+		size_t posRN = line.find("\r");
 	std::string tmp;
 	if (posRN != std::string::npos) {
 		tmp = line.substr(0, posRN);
@@ -342,61 +388,39 @@ std::string Messenger::tostring(std::vector<std::string> &v)
 
 void	Messenger::sendMotd(User* sender) {
 	std::vector<std::string> vec = sender->getMotdFromServer();
-	std::string tmp = tostring(vec);
-	if (tmp.empty())
-		replyError(sender, ERR_NOMOTD, "", "");
-	else
-	{
-		std::string	msg = ":" + sender->getUserName() + " ";
-		std::stringstream	ss;
-		ss << RPL_MOTDSTART;
-		msg += ss.str() + " " + sender->getUserName() + " ";
-		msg += ":- " + sender->getServName() + " Message of the day - \r\n";
-		ss.str( "" );
-		ss << RPL_MOTD; //????
-		msg += ss.str() + " " + sender->getUserName() + " ";
-		msg += ":- " + tmp + "\r\n";
-		ss.str( "" );
-		ss << RPL_ENDOFMOTD; //????
-		msg += ss.str() + " " + sender->getUserName() + " ";
-		msg += ":End of /MOTD command\r\n";
-		std::map<int, Message>::iterator it = messages.find(sender->getUserFd());
-		if (it != messages.end()) {
-			it->second.setMessForSender(msg);
-		}
-		//send(sender->getUserFd(), msg.c_str(), msg.size(), MSG_NOSIGNAL); // ок ли????
-		// setReadyMessInMessageByFd(msg, sender->getUserFd());
+	std::string tmp = tostring2(vec);
+	if (tmp.empty()) {
+		// replyError(sender, ERR_NOMOTD, "", "");
+		stringOutputMaker(sender, ERR_NOMOTD, "MOTD File is missing", ""); // по идее здесь не дб логина в строке, но сейчас она печатается
+		return;
 	}
-}
 
-void	Messenger::printWelcome(User* sender, std::string str, int flag) {
-	// флаг 0 - вывод сообщение из аргумента, flag 1 - username ; 2 - pass; 3 - nick
-
-	if (flag == 0) {
-		std::string msg = ":" + sender->getServName() + " :" + str + "\n";
-		setReadyMessInMessageByFd(msg, sender->getUserFd());
-		setRawMessInMessageByFd(msg, sender->getUserFd());
-	}
-	else if (flag == 1) {
-		// std::string msg = ":" + sender->getServName + " :Recieved USERNAME " + sender->getUserName() + "\r\n";
-		std::string msg = ":" + sender->getServName() + " User" + " Пользователь " + sender->getUserName() + \
-		" aka (" + sender->getRealName() + ") ворвался в чат!" + "\n";
-		dequeMaker(sender, TO_ALL);
-		setReadyMessInMessageByFd(msg, sender->getUserFd());
-		setRawMessInMessageByFd(msg, sender->getUserFd());
-
-		sendMotd(sender);
-	}
-	else if (flag == 2) {
-		std::string msg = ":" + sender->getServName() + " User" + " Recieved a password" + "\n";
-		setReadyMessInMessageByFd(msg, sender->getUserFd());
-		setRawMessInMessageByFd(msg, sender->getUserFd());
-	}
-	else if (flag == 3) {
-		std::string msg = ":" + sender->getServName() + " User" + " Recieved NICK " + sender->getLogin() + "\n";
-		setReadyMessInMessageByFd(msg, sender->getUserFd());
-		setRawMessInMessageByFd(msg, sender->getUserFd());
-	}
+	//--- отправка кода 001
+	std::string	msg = ":" + sender->getServName() + " ";
+	std::stringstream	ss;
+	ss << RLP_REGIST_OK;
+	msg += "00" + ss.str() + " " + sender->getLogin() + " ";
+	ss.str( "" );
+	msg += ":Welcome to IRC, ";
+	msg += sender->getLogin() + "!" + sender->getUserName() + "@" + HOST + "\n";
+	// -----начало мотд
+	msg += ":" + sender->getServName() + " ";
+	ss << RPL_MOTDSTART;
+	msg += ss.str() + " " + sender->getLogin() + " :- " + sender->getServName() + " Message of the day - \n";
+	ss.str( "" );
+	// -----сам мотд
+	msg += ":" + sender->getServName() + " ";
+	ss << RPL_MOTD; //????
+	msg += ss.str() + " " + sender->getLogin() + " :- " + tmp + "\n";
+	ss.str( "" );
+	// -----конец мотд
+	msg += ":" + sender->getServName() + " ";
+	ss << RPL_ENDOFMOTD; //????
+	msg += ss.str() + " " + sender->getLogin() + " :End of /MOTD command" + "\n";
+	// return msg;
+	// setReadyMessInMessageByFd(msg, sender->getUserFd());
+	std::map<int, Message>::iterator it = messages.find(sender->getUserFd());
+	it->second.setMessForSender(msg);
 }
 
 void Messenger::dequeMaker(User *user, int flag) {
@@ -406,26 +430,29 @@ void Messenger::dequeMaker(User *user, int flag) {
 	// flag 3 = to all, 
 	// flag 4 = to channel except user in argument (NOT WORKS!!!!), 
 	// flag 5 = to channel and user in argument (NOT WORKS!!!!)
+	// flag 6 = ANOTHER_ONE_USER 6 - for privmsg
 	std::map<int, Message>::iterator it = messages.find(user->getUserFd());
+	std::map<int, User>::iterator it_u = map_users.begin();
 	if (it->second.getDeque().size())
 		it->second.getDeque().clear();
 	std::vector<int> deque_users;
 	
 	if (flag == ONE_USER) {
 		deque_users.push_back(user->getUserFd());
-		it->second.setDeque(deque_users);
 	}
 	else if (flag == TO_ALL_BUT_NO_THIS_USER) {
-		for (std::map<int, User>::iterator it_u = map_users.begin(); it_u != map_users.end(); it_u++) {
-			if (it_u->first != user->getUserFd())
+		for (; it_u != map_users.end(); it_u++) {
+			if (it_u->first != user->getUserFd() && it_u->second.getRegistFlag() == true)
 				deque_users.push_back(it_u->first);
 			}
-		it->second.setDeque(deque_users);
+		// it->second.setDeque(deque_users);
 	}
 	else if (flag == TO_ALL) {
-		for (std::map<int, User>::iterator it_u = map_users.begin(); it_u != map_users.end(); it_u++)
+		for (; it_u != map_users.end(); it_u++) {
+			if (it_u->second.getRegistFlag() == true)
 				deque_users.push_back(it_u->first);
-		it->second.setDeque(deque_users);
+		}
+		// it->second.setDeque(deque_users);
 	}
 	else if (flag == TO_CHANNEL_BUT_NO_THIS_USER) {
 		// Написать реализацию, чтобы слало на канал, кроме самого юзера!!!
@@ -434,211 +461,106 @@ void Messenger::dequeMaker(User *user, int flag) {
 	else if (flag == TO_CHANNEL) {
 		// Написать реализацию, чтобы слало на канал!!!
 	}
-	else if (flag == SYSTEM_MSG) {
-		it->second.setDeque(deque_users);
+	else if (flag == ANOTHER_ONE_USER) {
+		if (it_u->second.getRegistFlag() == true)
+				deque_users.push_back(it_u->first);
+		// Написать реализацию, чтобы слало на канал!!!
 	}
+	else if (flag == SYSTEM_MSG) {
+		// it->second.setDeque(deque_users);
+	}
+	else if (flag == LIST_OF_RECIEVERS){
+
+		int fd = 0;
+
+		std::vector<std::string>::iterator it_vec = it->second.getListOfRecievers().begin();
+		for(; it_vec != it->second.getListOfRecievers().end(); it_vec++){
+			fd = getUserFdByLogin(*it_vec);
+			if (fd != -1)
+				deque_users.push_back(fd);
+		}
+		
+		// it->second.setDeque(deque_users);
+		// списку получателей
+	}
+	it->second.setDeque(deque_users);
+}
+
+// whoAmICmd cmd
+int	Messenger::whoAmICmd(User* sender) {
+	std::stringstream	ss;
+	ss << sender->getUserFd();
+	std::string tmp = "Your fd is " + ss.str() + "\n";
+	if (sender->getLogin().length() > 0)
+		tmp += "Your Nick is " + sender->getLogin() + "\n";
+	else
+		tmp += "No Nick\n";
+
+	if (sender->getUserName().length() > 0)
+		tmp += "Your UserName is " + sender->getUserName() + "\n";
+	else
+		tmp += "No UserName\n";
+
+	tmp += "Your Password is " + sender->getPassword() + "\n"; // убрать!!!!
+	if (sender->getRegistFlag() == true) {
+		tmp += "Your current Channel is " + sender->getChannelHere() + "\n";
+	}
+	else
+		tmp += "Watch out! You're NOT registred yet\n";
+	setReadyMessInMessageByFd(tmp, sender->getUserFd());
+	return 0;
 }
 
 // NICK cmd
 int	Messenger::nickCmd(const std::string &msg, User* sender) {
-	if (sender->getPassword() == "") {
-		printWelcome(sender, "Please enter your PASS before NICK-command", 0);
-		setReadyMessInMessageByFd(msg, sender->getUserFd());
-		setRawMessInMessageByFd(msg, sender->getUserFd());
-		return 1;
-	}
-
-	std::map<int, Message>::iterator	it1; // !!!
-	it1 = messages.find((*sender).getUserFd());
-	std::vector<std::string> arr = stringSplit(msg, ' ');
-
+	std::vector<std::string> arr = splitString2(msg, ' ');
+	if (arr.size() == 1 || *(arr[1].begin()) == '\n' || *(arr[1].begin()) == '\r')
+		return(stringOutputMaker(sender, ERR_NONICKNAMEGIVEN, "No nickname given", "") + 1);
 	arr.erase(arr.begin()); 
 
-std::cout << "<<<<<sender->getLogin()>>>>>" << sender->getLogin() <<"|"<< std::endl;
-std::cout << "<<<<<sender->getPassword()>>>>>" << sender->getPassword() <<"|"<< std::endl;
-std::cout << "<<<<<sender->getUserName()>>>>>" << sender->getUserName() <<"|"<< std::endl;
-
-	// if (sender->getLogin() != "" && arr[0] == sender->getLogin())
-	// 	return(replyError(sender, ERR_ERRONEUSNICKNAME, arr[0], ""));
-
-	if (map_users.size() > 1) {
-		std::map<int, User>::iterator it_u = map_users.begin();
-		for (; it_u != map_users.end(); it_u++)
+	if (map_users.size() > 1) { // включается ли сюда сам юзер если он еще не зареган? это влияет на эту проверку
+		for (std::map<int, User>::iterator it_u = map_users.begin(); it_u != map_users.end(); it_u++)
 		{
 			if (arr[0] == it_u->second.getLogin() && it_u->second.getUserFd() != sender->getUserFd())
-				return(replyError(sender, ERR_NICKNAMEINUSE, arr[0], arr[0]));
-			else if (arr[0] == it_u->second.getLogin() && it_u->second.getUserFd() == sender->getUserFd())
-				return(1);
+				return(stringOutputMaker(sender, ERR_NICKNAMEINUSE, "Nickname is already in use", "") + 1); // не тестила на реальном серваке!
 		}
 	}
+		if (arr[0] == sender->getLogin())
+				// return(1);
+				return(stringOutputMaker(sender, 0, "You entered your current nick", "") + 1);
+		else if (sender->getUserName() == "" && sender->getLogin() != "") {
+				// return(1);
+				stringOutputMaker(sender, 0, "User changed nick", "NICK");	
+		}
+		else if (sender->getUserName() != "") {
+			std::string	msg = ":" + sender->getLogin() + "!" + sender->getUserName() + "@" + HOST + " NICK :" + arr[0];
+			setReadyMessInMessageByFd(msg, sender->getUserFd()); // всем ли давать рассылку о смене ника? влияет ли то, были ли он ранее до конца зареган?
+			if (sender->getRegistFlag() == 0 && sender->getUserName() != "") {
+				sender->setRegistFlag(true);
+				sendMotd(sender);
+			}
+		}
 	(*sender).setLogin(arr[0]);
-	printWelcome(sender, arr[0], 3);
 	return (0);
 }
 
-// делает сообщение об ошибке
-int		Messenger::replyError(User *user, int err, const std::string &str, const std::string &arg) {
-	// std::string	msg = ":" + user.getServName() + " ";
-	// std::cout << "1111повтор ника" << std::endl;
+int Messenger::stringOutputMaker(User *user, int err, const std::string &description, const std::string &command) {
+	// добавляет логин, код ошибки и имя сервера, кладет в rawMessage
 	std::string	msg = ":" + user->getServName() + " ";
 	std::stringstream	ss;
-	ss << err;
-	msg += ss.str() + " " + user->getLogin();
-	// std::cout << "msg = " << msg << std::endl;
-	(void)arg; // ?????
-
-	switch (err)
-	{
-	// case ERR_NOSUCHNICK:
-	// 	msg += " " + str + " :No such nick/channel\n";
-	// 	break;
-	// case ERR_NOSUCHSERVER:
-	// 	msg += " " + str + " :No such server\n";
-	// 	break;
-	// case ERR_NOSUCHCHANNEL:
-	// 	msg += " " + str + " :No such channel\n";
-	// 	break;
-	// case ERR_CANNOTSENDTOCHAN:
-	// 	msg += " " + str + " :Cannot send to channel\n";
-	// 	break;
-	// case ERR_TOOMANYCHANNELS:
-	// 	msg += " " + str + " :You have joined too many channels\n";
-	// 	break;
-	// case ERR_WASNOSUCHNICK:
-	// 	msg += " " + str + " :There was no such nickname\n";
-	// 	break;
-	// case ERR_TOOMANYTARGETS:
-	// 	msg += " " + str + " :Duplicate recipients. No str delivered\n";
-	// 	break;
-	// case ERR_NOORIGIN:
-	// 	msg += " :No origin specified\n";
-	// 	break;
-	// case ERR_NORECIPIENT:
-	// 	msg += " :No recipient given (" + str + ")\n";
-	// 	break;
-	// case ERR_NOTEXTTOSEND:
-	// 	msg += " :No text to send\n";
-	// 	break;
-	// case ERR_NOTOPLEVEL:
-	// 	msg += " " + str + " :No toplevel domain specified\n";
-	// 	break;
-	// case ERR_WILDTOPLEVEL:
-	// 	msg += " " + str + " :Wildcard in toplevel domain\n";
-	// 	break;
-	case ERR_UNKNOWNCOMMAND:
-		msg += " " + str + " :Unknown command\n";
-		break;
-	case ERR_NOMOTD:
-		msg += " :MOTD File is missing\n";
-		break;
-	// case ERR_NOADMININFO:
-	// 	msg += " " + str + " :No administrative info available\n";
-	// 	break;
-	// case ERR_FILEERROR:
-	// 	msg += " :File error doing \n" + str + " on " + arg + "\n";
-	// 	break;
-	// case ERR_NONICKNAMEGIVEN:
-	// 	msg += " :No nickname given\n";
-	// 	break;
-	// case ERR_ERRONEUSNICKNAME:
-	// 	msg += ss.str() + " " + user->getLogin();
-	// 	msg += " " + str + " :Erroneus nickname\n";
-	// 	// msg = ":" + user->getServName() + " 432" + " default " +  user->getLogin() + "\r\r\r\r\r\r :Erroneus nickname\n";
-	// 	// std::cout << ">> >>>>>> msg = " << msg << std::endl;
-
-	// 	break;
-	case ERR_NICKNAMEINUSE:
-		msg += ss.str() + " " + str;
-		msg += " " + str + " :Nickname is already in use\n";
-		break;
-	// case ERR_NICKCOLLISION:
-	// 	msg += " " + str + " :Nickname collision KILL\n";
-	// 	break;
-	// case ERR_USERNOTINCHANNEL:
-	// 	msg += " " + str + " " + arg + " :They aren't on that channel\n";
-	// 	break;
-	// case ERR_NOTONCHANNEL:
-	// 	msg += " " + str + " :You're not on that channel\n";
-	// 	break;
-	// case ERR_USERONCHANNEL:
-	// 	msg += " " + str + " " + arg + " :is already on channel\n";
-	// 	break;
-	// case ERR_NOLOGIN:
-	// 	msg += " " + str + " :User not logged in\n";
-	// 	break;
-	// case ERR_SUMMONDISABLED:
-	// 	msg += " :SUMMON has been disabled\n";
-	// 	break;
-	// case ERR_USERSDISABLED:
-	// 	msg += " :USERS has been disabled\n";
-	// 	break;
-	// case ERR_NOTREGISTERED:
-	// 	msg += " :You have not registered\n";
-	// 	break;
-	case ERR_NEEDMOREPARAMS:
-		msg += " " + str + " :Not enough parameters\n";
-		break;
-	case ERR_ALREADYREGISTRED:
-		msg += " :You may not reregister\n";
-		break;
-	// case ERR_NOPERMFORHOST:
-	// 	msg += " :Your host isn't among the privileged\n";
-	// 	break;
-	// case ERR_PASSWDMISMATCH:
-	// 	msg += " :Password incorrect\n";
-	// 	break;
-	// case ERR_YOUREBANNEDCREEP:
-	// 	msg += " :You are banned from this server\n";
-	// 	break;
-	// case ERR_KEYSET:
-	// 	msg += " " + str + " :Channel key already set\n";
-	// 	break;
-	// case ERR_CHANNELISFULL:
-	// 	msg += " " + str + " :Cannot join channel (+l)\n";
-	// 	break;
-	// case ERR_UNKNOWNMODE:
-	// 	msg += " " + str + " :is unknown mode char to me\n";
-	// 	break;
-	// case ERR_INVITEONLYCHAN:
-	// 	msg += " " + str + " :Cannot join channel (+i)\n";
-	// 	break;
-	// case ERR_BANNEDFROMCHAN:
-	// 	msg += " " + str + " :Cannot join channel (+b)\n";
-	// 	break;
-	// case ERR_BADCHANNELKEY:
-	// 	msg += " " + str + " :Cannot join channel (+k)\n";
-	// 	break;
-	// case ERR_NOPRIVILEGES:
-	// 	msg += " :Permission Denied- You're not an IRC operator\n";
-	// 	break;
-	// case ERR_CHANOPRIVSNEEDED:
-	// 	msg += " " + str + " :You're not channel operator\n";
-	// 	break;
-	// case ERR_CANTKILLSERVER:
-	// 	msg += " :You cant kill a server!\n";
-	// 	break;
-	// case ERR_NOOPERHOST:
-	// 	msg += " :No O-lines for your host\n";
-	// 	break;
-	// case ERR_UMODEUNKNOWNFLAG:
-	// 	msg += " :Unknown MODE flag\n";
-	// 	break;
-	// case ERR_USERSDONTMATCH:
-	// 	msg += " :Cant change mode for other users\n";
-	// 	break;
-	default:
-		msg += "UNKNOWN ERROR\n";
-		break;
+	if (err != 0)
+	{ 
+		ss << err;
+		msg += ss.str() + " ";
 	}
-	// std::cout << "222повтор ника" << std::endl;
-	dequeMaker(user, ONE_USER); //мб излишне. на всякий пожарный
+	msg += user->getLogin();
+	if (command != "")
+		msg += " "  + command;
+	if (description != "")
+		msg += " :"  + description + "\n";
 	setReadyMessInMessageByFd(msg, user->getUserFd());
-	setRawMessInMessageByFd(msg, user->getUserFd());
-	// send(user->getUserFd(), msg.c_str(), msg.size(), MSG_NOSIGNAL);
-	std::cout << ">> msg = " << msg << std::endl;
-	return (-1);
+	return 0;
 }
-
 
 void Messenger::deleteBot(int senderFd) {
 	std::map<int, Bot>::iterator it = map_robots.find(senderFd);
@@ -650,13 +572,29 @@ void Messenger::deleteBot(int senderFd) {
 // PASS cmd
 int	Messenger::passCmd(const std::string &msg, User* sender) {
 	std::string currentPass = sender->getPassword();
-	std::vector<std::string> arr = stringSplit(msg, ' ');
-	if (arr.size() != 2)
-		return(replyError(sender, ERR_NEEDMOREPARAMS, "", ""));
-	arr.erase(arr.begin()); 
+	std::vector<std::string> arr = splitString2(msg, ' ');
+
+	if (arr.size() == 1 || *(arr[1].begin()) == '\n' || *(arr[1].begin()) == '\r')
+		// return(replyError(sender, ERR_NEEDMOREPARAMS, "PASS", ""));
+		return(stringOutputMaker(sender, ERR_NEEDMOREPARAMS, "Not enough parameters", "PASS") + 1);
+	arr.erase(arr.begin());
+	if (arr[0].find(":") == 0)
+		arr[0] = arr[0].substr(1);
 	if (currentPass != "" && arr[0] == currentPass)
-		return(replyError(sender, ERR_ALREADYREGISTRED, "", ""));
+		// return(replyError(sender, ERR_ALREADYREGISTRED, "PASS", ""));
+		return(stringOutputMaker(sender, ERR_ALREADYREGISTRED, "You may not reregister", "") + 1);
+
 	(*sender).setPassword(arr[0]);
-	printWelcome(sender, arr[0], 2);
 	return (0);
 }
+
+int Messenger::getUserFdByLogin(std::string login){
+
+	std::map<int, User>::iterator it = map_users.begin();
+	for (; it != map_users.end(); it++){
+		if (login.compare(it->second.getLogin()) == 0)
+			return it->first;	
+	}
+	return -1;
+}
+

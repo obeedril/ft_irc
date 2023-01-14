@@ -25,6 +25,7 @@
 # include <csignal>
 # include <ctime>
 # include <iomanip>
+#include <cstring>
 
 #include <cmath> //для робота
 #include <stdlib.h> //itoa
@@ -40,7 +41,10 @@
 #define TO_ALL 3
 #define TO_CHANNEL_BUT_NO_THIS_USER 4
 #define TO_CHANNEL 5
+#define ANOTHER_ONE_USER 6
 #define SYSTEM_MSG 11
+#define LIST_OF_RECIEVERS 6
+#define HOST "127.0.0.1"
 
 // typedef struct s_message{
 // 	std::string cmd;
@@ -81,6 +85,56 @@ inline std::vector<std::string> splitString(std::string s, char del)
 			vector_string.push_back(word);
 	}
 	return(vector_string);
+}
+
+inline std::vector<std::string> splitString2(std::string s, char del) //здесь вырезаны лишний \n в конце
+{
+	std::stringstream ss(s);
+	std::string word;
+	std::vector<std::string> vector_string;
+	while (!ss.eof()) {
+		getline(ss, word, del);
+		std::cout << "word = |" << word << "|" << std::endl;
+		if (word[0] == '\n' && word.length() == 1)
+			continue;
+		else if (word[0] == ':')
+			break;
+		else {
+			size_t pos = word.find("\n");
+			if (pos != std::string::npos) {
+				word = word.substr(0, pos);
+			}
+			vector_string.push_back(word);
+		}
+		
+		// else if (word[0] == '\n')
+		// 	vector_string.push_back(word.substr(1));
+		// else if (word[0] == '\r' && word.length() > 1 && word[1] == '\n')
+		// 	vector_string.push_back(word.substr(2));
+		// else if (word[word.length() -1] == '\n')
+		// 	vector_string.push_back(word.substr(0, word.length() - 1));
+		// else
+		// 	vector_string.push_back(word.substr(0, word.length()));
+	}
+	return(vector_string);
+}
+
+inline std::string strTrimBegin(std::string str, char ch){
+
+	int lenStr = 0;
+	lenStr = str.length();
+	char * cstr = new char [lenStr+1];
+  	std::strcpy (cstr, str.c_str());
+
+	int i = 0;
+	while (cstr[i] == ch && cstr[i] != '\0')
+		i++;
+	if(i > 0)
+		str = str.substr(i, lenStr);
+	if (i == lenStr)
+		str = "";
+
+	return str;
 }
 
 typedef struct s_channel {

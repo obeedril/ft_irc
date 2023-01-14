@@ -19,7 +19,7 @@
 #define ERR_NOMOTD				422
 // #define ERR_NOADMININFO			423
 // #define ERR_FILEERROR			424
-// #define ERR_NONICKNAMEGIVEN		431
+#define ERR_NONICKNAMEGIVEN		431
 // #define ERR_ERRONEUSNICKNAME	432
 #define ERR_NICKNAMEINUSE		433
 // #define ERR_NICKCOLLISION		436
@@ -47,6 +47,7 @@
 // #define ERR_NOOPERHOST			491
 // #define ERR_UMODEUNKNOWNFLAG	501
 // #define ERR_USERSDONTMATCH		502
+#define RLP_REGIST_OK		001
 
 // #define RPL_NONE				300
 // #define RPL_USERHOST			302
@@ -122,5 +123,152 @@
 // #define RPL_ADMINLOC1			257
 // #define RPL_ADMINLOC2			258
 // #define RPL_ADMINEMAIL			259
+
+/*
+
+	switch (err)
+	{
+	// case ERR_NOSUCHNICK:
+	// 	msg += " " + str + " :No such nick/channel\n";
+	// 	break;
+	// case ERR_NOSUCHSERVER:
+	// 	msg += " " + str + " :No such server\n";
+	// 	break;
+	// case ERR_NOSUCHCHANNEL:
+	// 	msg += " " + str + " :No such channel\n";
+	// 	break;
+	// case ERR_CANNOTSENDTOCHAN:
+	// 	msg += " " + str + " :Cannot send to channel\n";
+	// 	break;
+	// case ERR_TOOMANYCHANNELS:
+	// 	msg += " " + str + " :You have joined too many channels\n";
+	// 	break;
+	// case ERR_WASNOSUCHNICK:
+	// 	msg += " " + str + " :There was no such nickname\n";
+	// 	break;
+	// case ERR_TOOMANYTARGETS:
+	// 	msg += " " + str + " :Duplicate recipients. No str delivered\n";
+	// 	break;
+	// case ERR_NOORIGIN:
+	// 	msg += " :No origin specified\n";
+	// 	break;
+	// case ERR_NORECIPIENT:
+	// 	msg += " :No recipient given (" + str + ")\n";
+	// 	break;
+	// case ERR_NOTEXTTOSEND:
+	// 	msg += " :No text to send\n";
+	// 	break;
+	// case ERR_NOTOPLEVEL:
+	// 	msg += " " + str + " :No toplevel domain specified\n";
+	// 	break;
+	// case ERR_WILDTOPLEVEL:
+	// 	msg += " " + str + " :Wildcard in toplevel domain\n";
+	// 	break;
+	case ERR_UNKNOWNCOMMAND:
+		msg += " " + str + " :Unknown command\n";
+		break;
+	case ERR_NOMOTD:
+		msg += " :MOTD File is missing\n";
+		break;
+	// case ERR_NOADMININFO:
+	// 	msg += " " + str + " :No administrative info available\n";
+	// 	break;
+	// case ERR_FILEERROR:
+	// 	msg += " :File error doing \n" + str + " on " + arg + "\n";
+	// 	break;
+	case ERR_NONICKNAMEGIVEN:
+		msg += " :No nickname given\n";
+		break;
+	// case ERR_ERRONEUSNICKNAME:
+	// 	msg += ss.str() + " " + user->getLogin();
+	// 	msg += " " + str + " :Erroneus nickname\n";
+	// 	// msg = ":" + user->getServName() + " 432" + " default " +  user->getLogin() + "\r\r\r\r\r\r :Erroneus nickname\n";
+	// 	// std::cout << ">> >>>>>> msg = " << msg << std::endl;
+
+	// 	break;
+	case ERR_NICKNAMEINUSE:
+		msg += " " + str + " :Nickname is already in use\n";
+		break;
+	// case ERR_NICKCOLLISION:
+	// 	msg += " " + str + " :Nickname collision KILL\n";
+	// 	break;
+	// case ERR_USERNOTINCHANNEL:
+	// 	msg += " " + str + " " + arg + " :They aren't on that channel\n";
+	// 	break;
+	// case ERR_NOTONCHANNEL:
+	// 	msg += " " + str + " :You're not on that channel\n";
+	// 	break;
+	// case ERR_USERONCHANNEL:
+	// 	msg += " " + str + " " + arg + " :is already on channel\n";
+	// 	break;
+	// case ERR_NOLOGIN:
+	// 	msg += " " + str + " :User not logged in\n";
+	// 	break;
+	// case ERR_SUMMONDISABLED:
+	// 	msg += " :SUMMON has been disabled\n";
+	// 	break;
+	// case ERR_USERSDISABLED:
+	// 	msg += " :USERS has been disabled\n";
+	// 	break;
+	// case ERR_NOTREGISTERED:
+	// 	msg += " :You have not registered\n";
+	// 	break;
+	case ERR_NEEDMOREPARAMS:
+		msg += " " + str + " :Not enough parameters\n";
+		break;
+	case ERR_ALREADYREGISTRED:
+		msg += " :You may not reregister\n";
+		break;
+	// case ERR_NOPERMFORHOST:
+	// 	msg += " :Your host isn't among the privileged\n";
+	// 	break;
+	// case ERR_PASSWDMISMATCH:
+	// 	msg += " :Password incorrect\n";
+	// 	break;
+	// case ERR_YOUREBANNEDCREEP:
+	// 	msg += " :You are banned from this server\n";
+	// 	break;
+	// case ERR_KEYSET:
+	// 	msg += " " + str + " :Channel key already set\n";
+	// 	break;
+	// case ERR_CHANNELISFULL:
+	// 	msg += " " + str + " :Cannot join channel (+l)\n";
+	// 	break;
+	// case ERR_UNKNOWNMODE:
+	// 	msg += " " + str + " :is unknown mode char to me\n";
+	// 	break;
+	// case ERR_INVITEONLYCHAN:
+	// 	msg += " " + str + " :Cannot join channel (+i)\n";
+	// 	break;
+	// case ERR_BANNEDFROMCHAN:
+	// 	msg += " " + str + " :Cannot join channel (+b)\n";
+	// 	break;
+	// case ERR_BADCHANNELKEY:
+	// 	msg += " " + str + " :Cannot join channel (+k)\n";
+	// 	break;
+	// case ERR_NOPRIVILEGES:
+	// 	msg += " :Permission Denied- You're not an IRC operator\n";
+	// 	break;
+	// case ERR_CHANOPRIVSNEEDED:
+	// 	msg += " " + str + " :You're not channel operator\n";
+	// 	break;
+	// case ERR_CANTKILLSERVER:
+	// 	msg += " :You cant kill a server!\n";
+	// 	break;
+	// case ERR_NOOPERHOST:
+	// 	msg += " :No O-lines for your host\n";
+	// 	break;
+	// case ERR_UMODEUNKNOWNFLAG:
+	// 	msg += " :Unknown MODE flag\n";
+	// 	break;
+	// case ERR_USERSDONTMATCH:
+	// 	msg += " :Cant change mode for other users\n";
+	// 	break;
+
+	// default:
+	// 	msg += "UNKNOWN ERROR\n";
+	// 	break;
+	}
+*/
 
 #endif

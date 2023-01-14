@@ -18,13 +18,12 @@ public:
 		~Messenger();
 	
 
-	void parserPrivmsg(Message mess);
+	void parserPrivmsg(Message &mess);
 	void setMessages(std::map<int, Message> _messages);
 	std::map<int, Message> getMessages();
 	void insertMessage(int senderFd, Message mess);
 	void deleteMessage(int senderFd);
 	std::string getRawMessageByFd(int senderFd);
-	bool checkRegistered(int userFd);
 	std::string getReadyMessByFd(int senderFd);
 
 	void parsRecvStr(std::string str, int userFd);
@@ -34,19 +33,21 @@ public:
 		// USER cmd
 		int		userCmd(const std::string &msg, User* sender);
 		int		replyError(User *user, int err, const std::string &str1, const std::string &str2);
-		std::vector<std::string> stringSplit(const std::string &line, char delimiter);
+		std::vector<std::string> stringSplitForUserCmd(const std::string &line, char delimiter);
 		std::string tostring(std::vector<std::string> &v);
+		std::string tostring2(std::vector<std::string> &v);
 		std::string initBot(int user_fd, std::string msg);
 		void deleteBot(int senderFd);
-    // void	printWelcome(User* sender, std::map<int, Message>::iterator	it1, std::string name, int flag);
-		void	printWelcome(User* sender, std::string name, int flag);
 
-    void	sendMotd(User* sender);
+	void sendMotd(User* sender);
 
 // PASS cmd
     int	passCmd(const std::string &msg, User* sender);
 // NICK cmd
 	int	nickCmd(const std::string &msg, User* sender);
+	int	whoAmICmd(User* sender);
+	int stringOutputMaker(User *user, int err, const std::string &description, const std::string &command);
+	// std::vector<std::string> stringSplit2(const std::string &line, std::string delimiter);
 
 		//    void setMess(Message _mess);
 		//    Message getMess();
@@ -63,6 +64,9 @@ public:
 
 	std::string getSystemMsg(int senderFd);
 	std::string findNameKick(Message mess);
+
+	int getUserFdByLogin(std::string login);
+
 };
 
 #endif

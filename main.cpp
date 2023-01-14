@@ -20,12 +20,12 @@ bool checkToOpen(void) {
 	}
 	std::fclose(fp);
 
-	FILE* ff = fopen(PATH_TO_MOTD, "r+");
-	if (!ff) {
-		std::cerr << "\x1b[1;95m" << "> Can't open motd file!\n" << "\x1b[0m";
-		return 1;
-	}
-	std::fclose(ff);
+	// FILE* ff = fopen(PATH_TO_MOTD, "r+");
+	// if (!ff) {
+	// 	std::cerr << "\x1b[1;95m" << "> Can't open motd file!\n" << "\x1b[0m";
+	// 	return 1;
+	// }
+	// std::fclose(ff);
 	return 0;
 }
 

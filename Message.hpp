@@ -18,6 +18,8 @@ private:
     std::vector<int> deque;
     std::string msgForSender;
 
+    std::vector<std::string> listOfRecievers;
+
 public:
     Message();
     ~Message();
@@ -28,6 +30,8 @@ public:
     void setRestMess(std::string _restMess);
     void setPrefix(std::string _prefix);
     void setReceiver(std::string _receiver);
+    void setListOfRecievers(std::vector<std::string> _listOfRecievers);
+    std::vector<std::string> getListOfRecievers();
     std::string getCmd();
     std::string getRestMess();
     std::string getPrefix();
@@ -38,8 +42,9 @@ public:
     std::vector<int> getDeque();
     void setDeque(std::vector<int> deque);
     // void clearDeque(std::vector<int> deque);
-    void setMessForSender(std::string msgForSender);
+    void setMessForSender(std::string msgForSender); // for system messages
     std::string getMessForSender();
+    // void addReciever();
 };
 
 #endif
