@@ -45,6 +45,8 @@
 #define SYSTEM_MSG 11
 #define LIST_OF_RECIEVERS 6
 #define HOST "127.0.0.1"
+#define CHANGE_NICK 777
+#define DELETE_USER 999
 
 // typedef struct s_message{
 // 	std::string cmd;
@@ -77,7 +79,7 @@ inline std::vector<std::string> splitString(std::string s, char del)
 	std::vector<std::string> vector_string;
 	while (!ss.eof()) {
 		getline(ss, word, del);
-		if (word[0] == '\n' && word.length() == 1)
+		if ((word[0] == '\n' && word.length() == 1) || word.length() == 0)
 			continue;
 		else if (word[0] == '\n')
 			vector_string.push_back(word.substr(1));
@@ -97,8 +99,8 @@ inline std::vector<std::string> splitString2(std::string s, char del) //здес
 		std::cout << "word = |" << word << "|" << std::endl;
 		if (word[0] == '\n' && word.length() == 1)
 			continue;
-		else if (word[0] == ':')
-			break;
+		// else if (word[0] == ':')
+		// 	break;
 		else {
 			size_t pos = word.find("\n");
 			if (pos != std::string::npos) {
@@ -116,6 +118,7 @@ inline std::vector<std::string> splitString2(std::string s, char del) //здес
 		// else
 		// 	vector_string.push_back(word.substr(0, word.length()));
 	}
+	std::cout << "word exit" << std::endl;
 	return(vector_string);
 }
 
@@ -137,11 +140,6 @@ inline std::string strTrimBegin(std::string str, char ch){
 	return str;
 }
 
-typedef struct s_channel {
-	std::string name;
-	std::string topic;
-	std::string owner;
-} t_channel;
 
 typedef struct s_message{
 	std::string cmd;
@@ -153,11 +151,11 @@ typedef struct s_message{
 enum t_bot_command
 {
 	HELLO_BOT,
-    PLAY,
-    WEATHER,
-    BYE_BOT,
-    READY,
-    NO_COMM,
+	PLAY,
+	WEATHER,
+	BYE_BOT,
+	READY,
+	NO_COMM,
 	YES,
 	NO,
 	FINISH
@@ -167,6 +165,14 @@ enum t_bot_command
 # include "Server.hpp"
 # include "ErrorsAndReplies.hpp"
 # include "User.hpp"
+
+typedef struct s_channel {
+	std::string name;
+	std::string topic;
+	std::list<std::string> banned_users;
+	std::list<User*> list_users;
+} t_channel;
+
 # include "Message.hpp"
 # include "Bot.hpp"
 # include "ChannelsStorage.hpp"

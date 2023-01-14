@@ -1,7 +1,7 @@
 #include "Library.hpp"
 
 Messenger::Messenger() {
-	ChannelsStorage channels;
+	ChannelsStorage channels();
 }
 
 Messenger::~Messenger() {
@@ -165,7 +165,9 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 	std::map<int, Message>::iterator it = messages.find(userFd);
 	std::map<int, User>::iterator it_user = map_users.find(userFd);
 	dequeMaker(&it_user->second, TO_ALL_BUT_NO_THIS_USER);
-	if (it_user->second.getPassword() == "" && str.find("PASS", 0) == std::string::npos) {
+	if (it_user->second.getPassword() == "" && str.find("PASS", 0) == std::string::npos 
+		&& str.find("CAP LS", 0) == std::string::npos && str.find("PING", 0) == std::string::npos
+		&& str.find("CAP END", 0) == std::string::npos) {
 		// чтобы без проля нельзя было логиниться
 		dequeMaker(&it_user->second, ONE_USER);
 		it->second.setCmd("");
@@ -244,7 +246,6 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 	}
 	else if (str.find("KICK", 0) != std::string::npos) {
 		it->second.setCmd("KICK");
-		findNameKick(it->second);
 		it->second.setMessForSender(channels.kickUser(str, &it_user->second));
 		std::cout << "cmd KICK" << std::endl;
 	}
@@ -376,26 +377,16 @@ words.push_back( tmp.substr( initialPos, std::max( pos, tmp.size() ) - initialPo
     return words;
 }
 
-std::string Messenger::tostring(std::vector<std::string> &v)
-{
-    std::stringstream os;
-	for (std::vector<std::string>::iterator iter = v.begin(); iter < v.end(); iter++) {
-		os << *iter;
-	}
-    return os.str();
-}
-
 std::string Messenger::tostring2(std::vector<std::string> &v)
 {
     std::stringstream os;
 	for (std::vector<std::string>::iterator iter = v.begin(); iter < v.end(); iter++) {
 		os << *iter;
-		os << "\n";
 	}
     return os.str();
 }
 
-void Messenger::sendMotd(User* sender) {
+void	Messenger::sendMotd(User* sender) {
 	std::vector<std::string> vec = sender->getMotdFromServer();
 	std::string tmp = tostring2(vec);
 	if (tmp.empty()) {
@@ -581,8 +572,7 @@ void Messenger::deleteBot(int senderFd) {
 // PASS cmd
 int	Messenger::passCmd(const std::string &msg, User* sender) {
 	std::string currentPass = sender->getPassword();
-	std::vector<std::string> arr = splitString2(msg, ' ');
-
+	std::vector<std::string> arr = splitString2(msg, ' '); //splitString2 не работает =(
 	if (arr.size() == 1 || *(arr[1].begin()) == '\n' || *(arr[1].begin()) == '\r')
 		// return(replyError(sender, ERR_NEEDMOREPARAMS, "PASS", ""));
 		return(stringOutputMaker(sender, ERR_NEEDMOREPARAMS, "Not enough parameters", "PASS") + 1);
@@ -597,13 +587,33 @@ int	Messenger::passCmd(const std::string &msg, User* sender) {
 	return (0);
 }
 
-int Messenger::getUserFdByLogin(std::string login){
-
-	std::map<int, User>::iterator it = map_users.begin();
-	for (; it != map_users.end(); it++){
+int Messenger::getUserFdByLogin(std::string login) {
+	for (std::map<int, User>::iterator it = map_users.begin(); it != map_users.end(); it++) {
 		if (login.compare(it->second.getLogin()) == 0)
 			return it->first;	
 	}
 	return -1;
+}
+
+User *Messenger::getUser(int fd) {
+	User *tmp = new User();
+	std::map<int, User>::iterator it = map_users.find(fd);
+	if (it != map_users.end()) {
+		return(&it->second);
+	}
+	return(tmp);
+}
+
+int Messenger::deleteUser(int fd) {
+	std::map<int, User>::iterator it = map_users.find(fd);
+	if (it != map_users.end()) {
+		map_users.erase(fd);
+		return 0;
+	}
+	return -1;
+}
+
+ChannelsStorage	Messenger::getChannels(){
+	return channels;
 }
 
