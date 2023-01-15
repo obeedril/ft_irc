@@ -70,6 +70,7 @@ public:
 	std::string findNameKick(Message mess);
 
 	ChannelsStorage	getChannels();
+	bool  checkLagcheck(std::string str);
 
 };
 

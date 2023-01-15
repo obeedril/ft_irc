@@ -78,8 +78,8 @@
 // #define RPL_ENDOFNAMES			366
 // #define RPL_LINKS				364
 // #define RPL_ENDOFLINKS			365
-// #define RPL_BANLIST				367
-// #define RPL_ENDOFBANLIST		368
+#define RPL_BANLIST				367
+#define RPL_ENDOFBANLIST		368
 // #define RPL_INFO				371
 // #define RPL_ENDOFINFO			374
 #define RPL_MOTDSTART			375

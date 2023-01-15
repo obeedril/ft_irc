@@ -17,6 +17,7 @@ public:
 	std::map<std::string, t_channel> getChannels();
 	std::string joinToCannel(std::string msg, User *user);
 	std::string	kickUser(std::string msg, User *user);
+	std::string	modeChannel(std::string msg, User *user);
 	std::string	addTopicToCannel(std::string msg, User *user);
 	//Topic
 	void setTopic(std::string channel_name, std::string topic);
@@ -24,15 +25,19 @@ public:
 	//Users
 	bool addUserToChannel(std::string channel_name, User *user);
 	bool checkIfThisUserBanned(std::string channel_name, std::string user_name);
-	bool foundUserInThisChannel(std::string name_channel, User *user);
+	bool foundUserInThisChannel(std::string name_channel, std::string user_name);
 	bool  bannedUserInThisChannel(std::string channel_name, User *user);
 	std::string getOwnerChannel(std::string channel_name);
+	User *getUserInThisChannel(std::string name_channel, std::string user_name);
 	//Channel
 	bool addNewChannel(std::string channel_name);
 	t_channel getChannelByName(std::string channel_name);
 	//Update
 	void updateChannels(User *user, std::string new_user_name, int command);
+	//Deque
 	std::vector<int> getDequeByChannel(std::string name_channel, User *user);
+	std::vector<int> getDequeByAllInChannel(std::string name_channel, User *user);
+
 };
 
 #endif

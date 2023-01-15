@@ -48,6 +48,7 @@
 #define HOST "127.0.0.1"
 #define CHANGE_NICK 777
 #define DELETE_USER 999
+#define KICK_IN_CHANNEL 888
 
 // typedef struct s_message{
 // 	std::string cmd;

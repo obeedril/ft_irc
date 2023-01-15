@@ -151,9 +151,22 @@ int  Messenger::getUserFd(int Fd) {
 	return (it1->second.getUserFd());
 }
 
+bool  Messenger::checkLagcheck(std::string msg) {
+	write(1, "START------------\n", 14);
+	if (msg.find("LAGCHECK") != std::string::npos) {
+		write(1, "------------\n", 14);
+		return(true);
+	}
+	return(false);
+}
+
 void Messenger::parsRecvStr(std::string str, int userFd) {
 	std::map<int, Message>::iterator it = messages.find(userFd);
 	std::map<int, User>::iterator it_user = map_users.find(userFd);
+	if (checkLagcheck(str) == true) {
+		it->second.setMessForSender("LAGCHECK OK!\n");
+		return ;
+	}
 	// std::locale loc;
 	// std::cout << "STR  " << str << std::endl;
 	// std::string uppStr = "";
@@ -233,11 +246,6 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 		parserPrivmsg(it->second, it_user->second);
 		dequeMaker(&it_user->second, LIST_OF_RECIEVERS);
 		std::cout << "cmd PRIVMSG" << std::endl;
-		if(vec_msg.size() >= 3) {
-			std::string tmp = "";
-			tmp.append(vec_msg[1] + "\n");
-			it->second.setReadyMess(tmp);
-		}
 	}
 	else if (str.find("NOTICE", 0) != std::string::npos){
 		it->second.setCmd("NOTICE");
@@ -253,16 +261,22 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 	}
 	else if (str.find("KICK", 0) != std::string::npos) {
 		it->second.setCmd("KICK");
-		it->second.setMessForSender(channels.kickUser(str, &it_user->second));
+		dequeMaker(&it_user->second, TO_CHANNEL);
+		it->second.setReadyMess(channels.kickUser(str, &it_user->second));
 		std::cout << "cmd KICK" << std::endl;
 	}
 	else if (str.find("CAP LS", 0) != std::string::npos) {
 		it->second.setCmd("CAP LS");
 		// std::cout << "cmd CAP LS" << std::endl;
-
 		dequeMaker(&it_user->second, ONE_USER);
 		it->second.setReadyMess(":IRC-kitty CAP * LS :=PASS NICK USER PRIVMSG NOTICE JOIN KICK QUIT\n");
-
+	}
+	else if (str.find("MODE", 0) != std::string::npos) {
+		it->second.setCmd("MODE");
+		//MODE #kvirc b
+		// std::cout << "cmd CAP LS" << std::endl;
+		dequeMaker(&it_user->second, TO_CHANNEL);
+		it->second.setReadyMess(channels.modeChannel(str, &it_user->second));                   
 	}
 	// else if (str.find("PING", 0) != std::string::npos) {
 	// 	it->second.setCmd("CAP LS");
@@ -452,10 +466,10 @@ void Messenger::dequeMaker(User *user, int flag) {
 	}
 	else if (flag == TO_CHANNEL_BUT_NO_THIS_USER) {
 		// Написать реализацию, чтобы слало на канал, кроме самого юзера!!!
-		deque_users = channels.getDequeByChannel("#kvirc", user);
+		deque_users = channels.getDequeByChannel(it->second.getChannel(), user);
 	}
 	else if (flag == TO_CHANNEL) {
-		deque_users = channels.getDequeByChannel("#kvirc", user); //заменить msg!!!!!!!!!!!!!
+		deque_users = channels.getDequeByAllInChannel(it->second.getChannel(), user); //заменить msg!!!!!!!!!!!!!
 		// Написать реализацию, чтобы слало на канал!!!
 	}
 	else if (flag == ANOTHER_ONE_USER) {
