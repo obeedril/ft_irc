@@ -70,10 +70,7 @@ void	Core::run() {
 			}
 			else {
 				writeToUser(s);
-				while(count_mess > 0) {
-					readFromVectorMessage(s);
-					writeToUser(s);
-				}
+				vec_mess.clear();
 			}
 		}
 	}
