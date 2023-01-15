@@ -45,7 +45,7 @@ int main(int argc, const char* argv[]) {
 	}
 	signal(SIGINT, signalHandler); 
 
-	Server irc_serv = Server(port, argv[1]);
+	Server irc_serv = Server(port, argv[2]);
 	if (checkToOpen())
 		return 1;
 	try {

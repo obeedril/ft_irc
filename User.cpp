@@ -3,13 +3,20 @@
 User::User(Server *new_irc_serv){
     flagRegistred = false;
     _irc_serv = new_irc_serv;
+    channelHere = "";
+    login = ""; //nickname
+    userName = "";
+    realName = "";
+    password = "";
+    isAdminServer = false;
+    isOperatorServer = false;
 }
 
 User::User() {
     channelHere = "";
     login = ""; //nickname
-    userName = ""; //username
-    realName = ""; //realname
+    userName = "";
+    realName = "";
     password = "";
 }
 

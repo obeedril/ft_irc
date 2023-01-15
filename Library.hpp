@@ -34,7 +34,7 @@
 #define PATH_TO_MOTD "welcome.motd"
 #define SERV_NAME "serverName"
 #define ADMIN_NAME "adminName"
-#define ADMIN_PASS "adminPass"
+// #define ADMIN_PASS "adminPass"
 #define OPERATORS "operators"
 #define ONE_USER 1
 #define TO_ALL_BUT_NO_THIS_USER 2

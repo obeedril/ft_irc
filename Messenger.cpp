@@ -384,24 +384,20 @@ std::string Messenger::tostring2(std::vector<std::string> &v)
 }
 
 void	Messenger::checkAdmin(User* sender) {
-	if (sender->getLogin() == sender->getServ()->getAdminLogin() && sender->getPassword() == sender->getServ()->getAdminPass())
-		sender->setIsAdminServer(true);
-	std::map<std::string, std::string>::iterator itStart= sender->getServ()->getOperatorsMap().begin();
-	std::map<std::string, std::string>::iterator itEnd = sender->getServ()->getOperatorsMap().end();
+
+	if (sender->getLogin() == sender->getServ()->getAdminLogin() && sender->getPassword() == sender->getServ()->getArgPass())
+			sender->setIsAdminServer(true);
+	else 
+		sender->setIsAdminServer(false);
+	std::map<std::string, std::string>::const_iterator itStart= sender->getServ()->getOperatorsMap().begin();
+	std::map<std::string, std::string>::const_iterator itEnd = sender->getServ()->getOperatorsMap().end();
 	for (; itStart != itEnd; itStart++) {
-		if (sender->getLogin() == itStart->second && sender->getPassword() == itStart->first) {
+		if (sender->getLogin() == itStart->first && sender->getPassword() == itStart->second) {
 			sender->setIsOperatorServer(true);
-			break;
+			return ;
 		}
-
 	}
-
-if (sender->getIsAdminServer())
-	std::cout << "!!!! >>>>>>> HELLO, MASTER! You're serverAdmin" << std::endl;
-else if (sender->getIsOperatorServer())
-	std::cout << "!!!! >>>>>>> HELLO, BUDDY! You're serverOperator" << std::endl;
-else
-	std::cout << "!!!! >>>>>>> HELLO, HOLOP" << std::endl;
+	sender->setIsOperatorServer(false);
 }
 
 
@@ -521,7 +517,18 @@ int	Messenger::whoAmICmd(User* sender) {
 	else
 		tmp += "No UserName\n";
 
-	tmp += "Your Password is " + sender->getPassword() + "\n"; // убрать!!!!
+	if (sender->getPassword().length() > 0)
+		tmp += "Your Password is " + sender->getPassword() + "\n";
+	else
+		tmp += "No Password\n";
+
+	tmp += "Am I a ServerAdmin?  ";
+	tmp += sender->getIsAdminServer() ? "yes" : "no";
+	tmp += "\n";
+	tmp += "Am I a ServerOperator?  ";
+	tmp += sender->getIsOperatorServer() ? "yes" : "no";
+	tmp += "\n";
+
 	if (sender->getRegistFlag() == true) {
 		tmp += "Your current Channel is " + sender->getChannelHere() + "\n";
 	}
@@ -550,17 +557,20 @@ int	Messenger::nickCmd(const std::string &msg, User* sender) {
 				return(stringOutputMaker(sender, 0, "You entered your current nick", "") + 1);
 		else if (sender->getUserName() == "" && sender->getLogin() != "") {
 				// return(1);
-				stringOutputMaker(sender, 0, "User changed nick", "NICK");	
+				stringOutputMaker(sender, 0, "User changed nick", "NICK");
+				checkAdmin(sender); // не работает!	
 		}
 		else if (sender->getUserName() != "") {
-			std::string	msg = ":" + sender->getLogin() + "!" + sender->getUserName() + "@" + HOST + " NICK :" + arr[0];
+			std::string	msg = ":" + sender->getLogin() + "!" + sender->getUserName() + "@" + HOST + " NICK :" + arr[0] + "\n";
 			setReadyMessInMessageByFd(msg, sender->getUserFd()); // всем ли давать рассылку о смене ника? влияет ли то, были ли он ранее до конца зареган?
 			if (sender->getRegistFlag() == 0 && sender->getUserName() != "") {
 				sender->setRegistFlag(true);
 				sendMotd(sender);
 			}
+			// checkAdmin(sender); // не работает!
 		}
 	(*sender).setLogin(arr[0]);
+	checkAdmin(sender); // не работает!	
 	return (0);
 }
 
@@ -605,6 +615,7 @@ int	Messenger::passCmd(const std::string &msg, User* sender) {
 		return(stringOutputMaker(sender, ERR_ALREADYREGISTRED, "You may not reregister", "") + 1);
 
 	(*sender).setPassword(arr[0]);
+	checkAdmin(sender);
 	return (0);
 }
 

@@ -2,10 +2,9 @@
 
 Server::Server(int port, const std::string &password) {
 	_port = port;
-	_password = password;
+	_argvPass = password;
 	_configTokens.push_back(SERV_NAME);
 	_configTokens.push_back(ADMIN_NAME);
-	_configTokens.push_back(ADMIN_PASS);
 	_configTokens.push_back(OPERATORS);
 
 
@@ -67,10 +66,6 @@ void Server::parseConfig() {
 			_admin = (*end).substr(index + 1);
 			newDeleteSpaces(&_admin);
 		}
-		else if (sub == ADMIN_PASS) {
-			_password = (*end).substr(index + 1);
-			newDeleteSpaces(&_password);
-		}
 		else if (sub == OPERATORS)
 			while (*(++end) != "}") {
 				size_t indexMap = (*end).find(":");
@@ -85,18 +80,6 @@ void Server::parseConfig() {
 		}
 		end++;
 		}
-
-		//checking
-
-std::cout << "admin = " <<_admin << "; pass = " << _password  << "; servname = " << _serverName << std::endl << ">>>>Operator - pass: " << std::endl;
-
-  std::map<std::string ,std::string> :: iterator itss;
-    for(itss=_operators.begin();itss !=_operators.end();++itss)
-      {
-       std::cout << itss->first << ' ' <<itss->second << std::endl;
-      }
-
-	  // ens check
 
 	config.clear();
 }
@@ -210,17 +193,22 @@ void Server::deleteSpaces(std::string *str) {
 			--i;
 	}
 
-	if (i <= (*str).size()) // строго меньше??
+	if (i <= (*str).size())
 		*str = (*str).substr(0, i + 1);
 }
 
-std::string	Server::getAdminPass() {
-	return _password;
+std::string	Server::getArgPass() {
+	return _argvPass;
 }
+
+std::string	Server::getConfigPass() {
+	return _configPass;
+}
+
 std::string	Server::getAdminLogin() {
 	return _admin;
 
 }
-std::map<std::string, std::string>	Server::getOperatorsMap() {
+const std::map<std::string, std::string>&	Server::getOperatorsMap() {
 	return _operators;
 }
