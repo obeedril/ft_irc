@@ -32,6 +32,7 @@ public:
 	t_channel getChannelByName(std::string channel_name);
 	//Update
 	void updateChannels(User *user, std::string new_user_name, int command);
+	std::vector<int> getDequeByChannel(std::string name_channel, User *user);
 };
 
 #endif

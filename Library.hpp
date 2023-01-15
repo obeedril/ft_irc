@@ -25,7 +25,8 @@
 # include <csignal>
 # include <ctime>
 # include <iomanip>
-#include <cstring>
+# include <cstring>
+# include <locale>
 
 #include <cmath> //для робота
 #include <stdlib.h> //itoa

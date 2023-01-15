@@ -18,7 +18,7 @@ public:
 		~Messenger();
 	
 
-	void parserPrivmsg(Message &mess);
+	void parserPrivmsg(Message &mess, User &user);
 	void setMessages(std::map<int, Message> _messages);
 	std::map<int, Message> getMessages();
 	void insertMessage(int senderFd, Message mess);

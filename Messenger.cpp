@@ -76,60 +76,49 @@ std::string Messenger::getCmdInMessageByFd(int senderFd) {
 }
 
 
-void Messenger::parserPrivmsg(Message &mess){
+void Messenger::parserPrivmsg(Message &mess, User &user){
 	std::string tmp = "";
-	std::string recievers_str = "";
-	std::vector<std::string> tmp_list;
+	std::string receivers_str = "";
+	
 	size_t len = mess.getRawMessage().length();
 	tmp = mess.getRawMessage().substr(mess.getCmd().length() + 1, len);
 
-	size_t pos = tmp.find(":", 0);
-	recievers_str = tmp.substr(0, pos);
+	size_t pos = tmp.find(":", 0); //
+	receivers_str = tmp.substr(0, pos);
 	// std::cout << "recivers_str |" << recievers_str << "|" << std::endl;
 
-	tmp_list = splitString(recievers_str, ',');
+	mess.setReceiver(strTrimBegin(receivers_str, ' '));
 
-	// for(int i = 0; i < static_cast<int>(tmp_list.size()); i++) {
-    //     std::cout << "'" << tmp_list[i] << "' ";
-    // }
-	// std::cout << std::endl;
+	mess.setReadyMess(tmp.substr(pos + 1, len) + "\n");
+	tmp = "";
 
-	for(int i = 0; i < static_cast<int>(tmp_list.size()); i++) {
-       tmp_list[i] = strTrimBegin(tmp_list[i], ' ');
-    }
+//-------исправить
+
+if(mess.getReadyMess() != "" && mess.getReceiver() != "") {
+	//:456!456@127.0.0.1 PRIVMSG 123 :Hello
+	tmp.append(":" + user.getLogin() + "!" + user.getLogin() + "@127.0.0.1 ");
+	tmp.append("PRIVMSG " + mess.getReceiver() + " :" + mess.getReadyMess() + "\n");
+	mess.setReadyMess(tmp);
+} else {
+	mess.setReadyMess("");
+	tmp.append(":IRC-kitty " + toString(ERR_NEEDMOREPARAMS) + " " + mess.getCmd() + " :Not enough parameters\n");
+	mess.setMessForSender(tmp);
+}
+
+//-------//-------------------
 
 
-//------------------------------------------------------
-    // for(int i = 0; i < static_cast<int>(tmp_list.size()); i++) {
-    //     std::cout << "'" << tmp_list[i] << "' ";
-    // }
-	// std::cout << std::endl;
 
-//------------------------------------------------------
-
-	mess.setListOfRecievers(tmp_list);
-
-	if (mess.getListOfRecievers().empty()){
-		// std::cout << "recivers are not identifire" << std::endl;
-		return;
-	}
 	
 	// mess.setReadyMess(":Sender!Sender@127.0.0.1 PRIVMSG " +tmp.substr(pos + 1, len));
-	mess.setReadyMess(tmp.substr(pos + 1, len) + "\n");
-
-	//------------------------------------------------------
-    // for(int i = 0; i < static_cast<int>(mess.getListOfRecievers().size()); i++) {
-    //     std::cout << "'" << mess.getListOfRecievers()[i] << "' ";
-    // }
-	// std::cout << std::endl;
+	// mess.setReadyMess(tmp.substr(pos + 1, len) + "\n");
 
 //------------------------------------------------------
 
-	// ------------------------------
-	// std::cout << "tmp |" << tmp << "|" << std::endl;
-	// std::cout << "readyMess |" << mess.getReadyMess() << "|" << std::endl;
-	// std::cout << "rawMess |" << mess.getRawMessage() << "|" << std::endl;
-	// ------------------------------
+
+	std::cout << "tmp |" << tmp << "|" << std::endl;
+	std::cout << "readyMess |" << mess.getReadyMess() << "|" << std::endl;
+	std::cout << "rawMess |" << mess.getRawMessage() << "|" << std::endl;
 
 }
 
@@ -164,6 +153,16 @@ int  Messenger::getUserFd(int Fd) {
 void Messenger::parsRecvStr(std::string str, int userFd) {
 	std::map<int, Message>::iterator it = messages.find(userFd);
 	std::map<int, User>::iterator it_user = map_users.find(userFd);
+	// std::locale loc;
+	// std::cout << "STR  " << str << std::endl;
+	// std::string uppStr = "";
+	// char* charStr = 0;
+	// for (std::string::size_type i=0; i<str.length(); ++i)
+    // 	charStr[i] = std::toupper(str[i],loc);
+	// uppStr.append(charStr);
+
+	// std::cout << "STR UPPEND " << uppStr << std::endl;
+
 	dequeMaker(&it_user->second, TO_ALL_BUT_NO_THIS_USER);
 	if (it_user->second.getPassword() == "" && str.find("PASS", 0) == std::string::npos 
 		&& str.find("CAP LS", 0) == std::string::npos && str.find("PING", 0) == std::string::npos
@@ -184,7 +183,7 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 			// deque_users.push_back(it_u->first);
 	// }
 	// it->second.setDeque(deque_users);
-	std::vector<std::string> vector_string = splitString(str, ' ');
+	// std::vector<std::string> vector_string = splitString(str, ' ');
 	// for(int i = 0; i < static_cast<int>(vector_string.size()); i++) {
 	// 	std::cout << "'" << vector_string[i] << "' ";
 	// }
@@ -230,12 +229,14 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 	}
 	else if (str.find("PRIVMSG", 0) != std::string::npos){
 		it->second.setCmd("PRIVMSG");
-		parserPrivmsg(it->second);
+		parserPrivmsg(it->second, it_user->second);
 		dequeMaker(&it_user->second, LIST_OF_RECIEVERS);
 		std::cout << "cmd PRIVMSG" << std::endl;
 	}
 	else if (str.find("NOTICE", 0) != std::string::npos){
 		it->second.setCmd("NOTICE");
+		parserPrivmsg(it->second, it_user->second);
+		dequeMaker(&it_user->second, LIST_OF_RECIEVERS);
 		std::cout << "cmd NOTICE" << std::endl;
 	}
 	else if (str.find("JOIN", 0) != std::string::npos) {
@@ -460,14 +461,43 @@ void Messenger::dequeMaker(User *user, int flag) {
 	}
 	else if (flag == LIST_OF_RECIEVERS){
 
-		int fd = 0;
+		std::string receiver = it->second.getReceiver();
 
-		std::vector<std::string>::iterator it_vec = it->second.getListOfRecievers().begin();
-		for(; it_vec != it->second.getListOfRecievers().end(); it_vec++){
-			fd = getUserFdByLogin(*it_vec);
-			if (fd != -1)
-				deque_users.push_back(fd);
-		}
+		//std::vector<std::string> vec_msg = splitString(str, ' ');
+        if(channels.getChannelByName(receiver).name == receiver) {
+            it->second.setDeque(channels.getDequeByChannel(receiver, &it_u->second));
+        }
+        else {
+            if(getUserFdByLogin(receiver) != -1) {
+                std::vector<int> tmp_vector;
+                tmp_vector.push_back(getUserFdByLogin(receiver));
+                it->second.setDeque(tmp_vector);
+            }
+            else {
+				std::vector<int> tmp_vector;
+                tmp_vector.push_back(it_u->second.getUserFd());
+                it->second.setDeque(tmp_vector);
+            }
+        }
+  
+//--------------------------------------------------------------
+		// int fd = 0;
+
+		// std::vector<std::string>::iterator it_vec = it->second.getListOfRecievers().begin();
+
+		// for(int i = 0; i < static_cast<int>(it->second.getListOfRecievers().size()); i++) {
+		// 	std::cout << "'" << it->second.getListOfRecievers()[i] << "' ";
+		// }
+		// std::cout << std::endl;
+
+
+
+		// for(; it_vec != it->second.getListOfRecievers().end(); it_vec++){
+		// 	fd = getUserFdByLogin(*it_vec);
+		// 	if (fd != -1){
+		// 		deque_users.push_back(fd);
+		// 	}
+		// }
 		
 		// it->second.setDeque(deque_users);
 		// списку получателей

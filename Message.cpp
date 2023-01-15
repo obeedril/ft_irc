@@ -79,10 +79,3 @@
 		return msgForSender;
 	}
 
-	void Message::setListOfRecievers(std::vector<std::string> _listOfRecievers){
-		listOfRecievers = _listOfRecievers;
-	}
-
-    std::vector<std::string> Message::getListOfRecievers(){
-		return listOfRecievers;
-	}
