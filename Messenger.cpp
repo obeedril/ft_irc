@@ -73,6 +73,7 @@ std::string Messenger::getCmdInMessageByFd(int senderFd) {
 	if (it != messages.end())
 		return it->second.getCmd();
 	return "";
+	
 }
 
 
