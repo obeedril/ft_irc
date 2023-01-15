@@ -61,15 +61,18 @@ void	Core::run() {
 				write(2, "Users not found\n", 26);
 				return ; ////!!!!
 			}
-			if (length_message <= 0) {
+			else if (length_message <= 0) {
 				FD_CLR(s, &active_);
 				close(s);
+				storage_messages->getChannels().updateChannels(storage_messages->getUser(s), "", DELETE_USER);
+				storage_messages->deleteUser(s);
 				break ;
 			}
 			else {
-				for(int i = 0; i < count_mess; i++) {
-					writeToUser(s);
+				writeToUser(s);
+				while(count_mess > 0) {
 					readFromVectorMessage(s);
+					writeToUser(s);
 				}
 			}
 		}
@@ -112,8 +115,9 @@ int		Core::writeToUser(int current_fd) {
 	// std::cout << "ReadyMess CORE: " << storage_messages->getReadyMessByFd(current_fd) << std::endl;
 	std::string msg = storage_messages->getReadyMessByFd(current_fd); // заменить на readyMess
 	std::string systemMsg = storage_messages->getSystemMsg(current_fd);
-	std::cout << "msg: '" << msg <<  "'" << std::endl;
-	std::cout << "deque.size(): '" << deque.size() <<  "'" << std::endl;
+	if (msg != "") {
+		std::cout << "msg: '" << msg <<  "'" << std::endl;
+	}
 	if (systemMsg != "") {
 		std::cout << "systemMsg: " << systemMsg << std::endl;
 		send(current_fd, systemMsg.c_str(), systemMsg.length(), 0);
@@ -124,30 +128,9 @@ int		Core::writeToUser(int current_fd) {
 		}
 	}
 	storage_messages->deleteMessage(current_fd);
+	std::cout << "DELETE msg!!!" << std::endl;
 	return (0);
 };
-
-// std::vector<std::string> Core::stringSplit2(const std::string &line, std::string delimiter) { 
-// 	std::vector<std::string> vec;
-// 	std::string tmp = line; 
-// 	size_t posRN = line.find(delimiter);
-// 	if (posRN == std::string::npos)	{
-// 		std::cout <<  "No \r\n:" << std::endl;
-// 		vec.push_back(tmp);
-// 	}
-// 	else {
-// 	while (tmp.length() > 0 && posRN != std::string::npos) {
-// 		vec.push_back(tmp.substr(0, posRN));
-// 		std::cout <<  "tmp.substr(0, posRN:" << tmp.substr(0, posRN )<< "|" << std::endl;
-// 		tmp = tmp.substr(posRN);
-// 		posRN = line.find(delimiter);
-// 	}
-// 	}
-// 		for(int i = 0; i < static_cast<int>(vec.size()); i++) {
-// 		std::cout <<  ">>>vec: '" << vec[i] << "' " << std::endl;
-// 	}
-// 	return vec;
-// }
 
 int		Core::readFromUser(int user_fd) {
 	Message		new_message;
@@ -158,11 +141,10 @@ int		Core::readFromUser(int user_fd) {
 	char tmp[4048];
 	length_message = recv(user_fd, tmp, 42*4096, 0);
 	str.append(tmp);
-
 	// std::cout <<  "tmp: '" << tmp << "' " << std::endl;
 	// std::cout <<  "str: '" << str << "' " << std::endl;
-	// vec_mess = splitString(str, '\n'); // если надо работать с консоли!
-	vec_mess = splitString(str, '\r'); //так у Риты, но тогда команды не парсятся с консоли
+	vec_mess = splitString2(str, '\r'); // если надо работать с консоли!
+	// vec_mess = splitString(str, '\r'); //так у Риты, но тогда команды не парсятся с консоли
 	// for(int i = 0; i < static_cast<int>(vec_mess.size()); i++) {
 	// 	std::cout <<  "vec: '" << vec_mess[i] << "' " << std::endl;
 	// }
@@ -171,7 +153,7 @@ int		Core::readFromUser(int user_fd) {
 	// int end = str.find("\n", 0);
 	// std::cout << "end |" << end << "|" << std::endl;
 	// str = str.substr(0, end - 1);
-	// std::cout << "RECV STR1 |" << str << "|" << std::endl;
+	std::cout << "RECV STR: |" << str << "|" << std::endl;
 	if (length_message > 0) {
 		readFromVectorMessage(user_fd);
 		// new_message.setRawMessage(vec_mess[0]);
@@ -190,6 +172,7 @@ void Core::readFromVectorMessage(int user_fd) {
 		storage_messages->insertMessage(user_fd, new_message);
 		storage_messages->parsRecvStr(vec_mess[0], user_fd);
 		vec_mess.erase(vec_mess.begin());
+		count_mess--;
 	}
 }
 

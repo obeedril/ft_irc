@@ -19,6 +19,7 @@ class User {
 
     public:
         User(Server *new_irc_serv);
+        User();
         ~User();
         int getUserFd();
         bool getIsAdminHere();
