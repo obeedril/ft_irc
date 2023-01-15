@@ -144,8 +144,8 @@ int		Core::readFromUser(int user_fd) {
 	str.append(tmp);
 	// std::cout <<  "tmp: '" << tmp << "' " << std::endl;
 	// std::cout <<  "str: '" << str << "' " << std::endl;
-	// vec_mess = splitString(str, '\n'); // если надо работать с консоли!
-	vec_mess = splitString2(str, '\r'); //так у Риты, но тогда команды не парсятся с консоли
+	vec_mess = splitString2(str, '\r'); // если надо работать с консоли!
+	// vec_mess = splitString(str, '\r'); //так у Риты, но тогда команды не парсятся с консоли
 	// for(int i = 0; i < static_cast<int>(vec_mess.size()); i++) {
 	// 	std::cout <<  "vec: '" << vec_mess[i] << "' " << std::endl;
 	// }

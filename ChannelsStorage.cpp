@@ -244,9 +244,10 @@ std::vector<int> ChannelsStorage::getDequeByChannel(std::string name_channel, Us
   std::vector<int> vector;
   if(foundUserInThisChannel(name_channel, user) == true) {
     list_users = getChannelByName(name_channel).list_users;
-    list_users.pop_front(); //
     for(std::list<User*>::iterator it = list_users.begin(); it != list_users.end(); it++) {
-        vector.push_back((*it)->getUserFd());
+        if(user->getUserFd() != (*it)->getUserFd()) {
+          vector.push_back((*it)->getUserFd());
+        }
     }
   }
   return(vector);

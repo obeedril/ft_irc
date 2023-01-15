@@ -25,7 +25,8 @@
 # include <csignal>
 # include <ctime>
 # include <iomanip>
-#include <cstring>
+# include <cstring>
+# include <locale>
 
 #include <cmath> //для робота
 #include <stdlib.h> //itoa
@@ -72,7 +73,8 @@ std::string toString(const T& value)
 	return oss.str();
 }
 
-inline std::vector<std::string> splitString(std::string s, char del)
+inline std::vector<std::string> splitString(std::string s, char del) // вырезаем ДО и ПОСЛЕ /n - это нужно 
+  //при считывании из RECV 
 {
 	std::stringstream ss(s);
 	std::string word;
@@ -85,6 +87,7 @@ inline std::vector<std::string> splitString(std::string s, char del)
 			vector_string.push_back(word.substr(1));
 		else
 			vector_string.push_back(word);
+		std::cout << ">>> word = |" << *(vector_string.end() - 1) << "|" << "  size = " << vector_string.size() << "|" << std::endl;
 	}
 	return(vector_string);
 }
@@ -94,19 +97,25 @@ inline std::vector<std::string> splitString2(std::string s, char del) //здес
 	std::stringstream ss(s);
 	std::string word;
 	std::vector<std::string> vector_string;
+	size_t flag = 0;
 	while (!ss.eof()) {
 		getline(ss, word, del);
 		std::cout << "word = |" << word << "|" << std::endl;
 		if (word[0] == '\n' && word.length() == 1)
 			continue;
-		// else if (word[0] == ':')
+		// else if (word[0] == ':' && flag = true)
+		// 	break;
+				// else if (word[0] == ':' && flag = true)
 		// 	break;
 		else {
+			// if (word[0] == ':' && flag > 1)
+			// 	break;
 			size_t pos = word.find("\n");
 			if (pos != std::string::npos) {
 				word = word.substr(0, pos);
 			}
 			vector_string.push_back(word);
+			++flag;
 		}
 		
 		// else if (word[0] == '\n')
