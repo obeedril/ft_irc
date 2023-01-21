@@ -1,8 +1,9 @@
 # include "Library.hpp"
 
-Core::Core(int port_) {
+Core::Core(int port_, Server *serv) {
 
-	storage_messages = new Messenger();
+	_irc_serv = serv;
+	storage_messages = new Messenger(_irc_serv->getServName());
 	listen_sock = 0;
 	this->port = port_;
 	max = 0;
@@ -61,11 +62,13 @@ void	Core::run() {
 				write(2, "Users not found\n", 26);
 				return ; ////!!!!
 			}
-			else if (length_message <= 0) {
+			else if (length_message <= 0 || storage_messages->getCmdInMessageByFd(s) == "QUIT") {
 				FD_CLR(s, &active_);
 				close(s);
 				storage_messages->getChannels().updateChannels(storage_messages->getUser(s), "", DELETE_USER);
 				storage_messages->deleteUser(s);
+				if (storage_messages->getCmdInMessageByFd(s) == "QUIT")
+					writeToUser(s);
 				break ;
 			}
 			else {
@@ -90,11 +93,7 @@ int		Core::createNewSocket() {
 
 	new_user.setUserName("");
 	new_user.setBotDialog(NO);
-	storage_messages->addUser(user_fd, new_user); //map_users.insert(std::pair<int, User> (user_fd, new_user));
-
-	//new_user.count_cli = count_cli;
-	//id[user_fd] = count_cli;
-	//count_cli++;
+	storage_messages->addUser(user_fd, new_user);
 	FD_SET(user_fd, &active_);
 	return (0);
 };
@@ -108,9 +107,7 @@ void	Core::error(int err_type) {
 int		Core::writeToUser(int current_fd) {
 	std::vector<int> deque; 
 	deque = storage_messages->getDeq(current_fd);
-	// std::string msg = storage_messages->getRawMessageByFd(current_fd); 
-	// std::cout << "ReadyMess CORE: " << storage_messages->getReadyMessByFd(current_fd) << std::endl;
-	std::string msg = storage_messages->getReadyMessByFd(current_fd); // заменить на readyMess
+	std::string msg = storage_messages->getReadyMessByFd(current_fd);
 	std::string systemMsg = storage_messages->getSystemMsg(current_fd);
 	if (msg != "") {
 		std::cout << "msg: '" << msg <<  "'" << std::endl;
@@ -125,7 +122,6 @@ int		Core::writeToUser(int current_fd) {
 		}
 	}
 	storage_messages->deleteMessage(current_fd);
-	std::cout << "DELETE msg!!!" << std::endl;
 	return (0);
 };
 
@@ -133,30 +129,15 @@ int		Core::readFromUser(int user_fd) {
 	Message		new_message;
 	std::string	str = "";
 	std::string	cmd = "";
-	// std::map<int, User>::iterator it1 = map_users.find(user_fd);
 	length_message = 0;
 	char tmp[4048];
 	length_message = recv(user_fd, tmp, 42*4096, 0);
 	str.append(tmp);
-	// std::cout <<  "tmp: '" << tmp << "' " << std::endl;
-	// std::cout <<  "str: '" << str << "' " << std::endl;
-	vec_mess = splitString2(str, '\r'); // если надо работать с консоли!
-	// vec_mess = splitString(str, '\r'); //так у Риты, но тогда команды не парсятся с консоли
-	// for(int i = 0; i < static_cast<int>(vec_mess.size()); i++) {
-	// 	std::cout <<  "vec: '" << vec_mess[i] << "' " << std::endl;
-	// }
+	vec_mess = splitString2(str, '\r');
 	count_mess = vec_mess.size();
-	// std::cout << "RECV STR0 |" << str << "|" << std::endl;
-	// int end = str.find("\n", 0);
-	// std::cout << "end |" << end << "|" << std::endl;
-	// str = str.substr(0, end - 1);
 	std::cout << "RECV STR: |" << str << "|" << std::endl;
 	if (length_message > 0) {
 		readFromVectorMessage(user_fd);
-		// new_message.setRawMessage(vec_mess[0]);
-		// storage_messages->insertMessage(user_fd, new_message);
-		// storage_messages->parsRecvStr(vec_mess[0], user_fd);
-
 	}
 	return (length_message);
 };
@@ -179,8 +160,8 @@ Messenger* Core::getStorage_messages(){
 
 void Core::setServ(Server *newServ) {
 	_irc_serv = newServ;
-}
+}	
 
-std::string Core::getServName() {
-	return _irc_serv->getServName();
+Server * Core::getServ(void) {
+	return _irc_serv;;
 }

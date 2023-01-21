@@ -20,8 +20,6 @@
 		cmd = _cmd;
 	}
 	void Message::setRestMess(std::string _restMess){
-		// restMess.clear();
-		// restMess = "";
 		restMess = _restMess;
 	}
 	void Message::setPrefix(std::string _prefix){
@@ -64,10 +62,6 @@
 	void Message::setDeque(std::vector<int> deque) {
 		this->deque = deque;
 	}
-
-	// void Message::clearDeque(std::vector<int> deque) {
-	//     this->deque.erase();
-	// }
 
 	void Message::setMessForSender(std::string msgForSender) {
 		this->msgForSender.clear();

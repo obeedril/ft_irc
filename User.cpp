@@ -3,13 +3,20 @@
 User::User(Server *new_irc_serv){
     flagRegistred = false;
     _irc_serv = new_irc_serv;
+    channelHere = "";
+    login = ""; //nickname
+    userName = "";
+    realName = "";
+    password = "";
+    isAdminServer = false;
+    isOperatorServer = false;
 }
 
 User::User() {
     channelHere = "";
     login = ""; //nickname
-    userName = ""; //username
-    realName = ""; //realname
+    userName = "";
+    realName = "";
     password = "";
 }
 
@@ -21,6 +28,21 @@ int User::getUserFd(){
 
 bool User::getIsAdminHere(){
     return isAdminHere;
+}
+
+bool User::getIsAdminServer() {
+    return isAdminServer;
+}
+
+bool User::getIsOperatorServer() {
+    return isOperatorServer;
+}
+
+void User::setIsAdminServer(bool flag) {
+    isAdminServer = flag;
+}
+void User::setIsOperatorServer(bool flag) {
+    isOperatorServer = flag;
 }
 
 std::string User::getChannelHere(){
@@ -95,7 +117,7 @@ void User::setRegistFlag(bool flag){
     flagRegistred = flag;
 }
 
-void User::setServ(Server *newServ) {
-	_irc_serv = newServ;
+Server * User::getServ(void) {
+	return _irc_serv;
 }
 

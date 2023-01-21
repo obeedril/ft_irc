@@ -45,7 +45,7 @@ int main(int argc, const char* argv[]) {
 	}
 	signal(SIGINT, signalHandler); 
 
-	Server irc_serv = Server(port, argv[1]);
+	Server irc_serv = Server(port, argv[2]);
 	if (checkToOpen())
 		return 1;
 	try {
@@ -54,8 +54,8 @@ int main(int argc, const char* argv[]) {
 	catch (std::exception& e) {
 		std::cout << e.what() << std::endl;
 	}
-	Core core_irc = Core(port);
-	core_irc.setServ(&irc_serv);
+	Core core_irc = Core(port, &irc_serv);
+	// core_irc.setServ(&irc_serv);
 	std::cout << "\x1b[1;95m" << "> IRC server run!\n" << "\x1b[0m";
 
 	
