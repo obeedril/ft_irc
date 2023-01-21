@@ -225,20 +225,20 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 		dequeMaker(&it_user->second, ONE_USER);
 		it->second.setReadyMess(":IRC-kitty CAP * LS :=PASS NICK USER PRIVMSG NOTICE JOIN KICK QUIT\n");
 	}
-	else if (uppStr.find("MODE") != std::string::npos) {
-		it->second.setCmd("MODE");
-		std::cout << "cmd MODE" << std::endl;
-		it->second.setReadyMess(channels.modeChannel(uppStr, &it_user->second)); 
-		it->second.setChannel(channels.parserChannelInMsg(uppStr)); 
-		dequeMaker(&it_user->second, TO_CHANNEL);                 
-	}
-	else if (uppStr.find("WHO") != std::string::npos) {
-		it->second.setCmd("WHO");
-		std::cout << "cmd WHO" << std::endl;
-		it->second.setReadyMess(channels.whoIsInChannel(uppStr, &it_user->second));  
-		it->second.setChannel(channels.parserChannelInMsg(uppStr));  
-		dequeMaker(&it_user->second, ONE_USER);               
-	}
+	// else if (uppStr.find("MODE") != std::string::npos) {
+	// 	it->second.setCmd("MODE");
+	// 	std::cout << "cmd MODE" << std::endl;
+	// 	it->second.setReadyMess(channels.modeChannel(uppStr, &it_user->second)); 
+	// 	it->second.setChannel(channels.parserChannelInMsg(uppStr)); 
+	// 	dequeMaker(&it_user->second, TO_CHANNEL);                 
+	// }
+	// else if (uppStr.find("WHO") != std::string::npos) {
+	// 	it->second.setCmd("WHO");
+	// 	std::cout << "cmd WHO" << std::endl;
+	// 	it->second.setReadyMess(channels.whoIsInChannel(uppStr, &it_user->second));  
+	// 	it->second.setChannel(channels.parserChannelInMsg(uppStr));  
+	// 	dequeMaker(&it_user->second, ONE_USER);               
+	// }
 	else if (uppStr.find("PING", 0) != std::string::npos) {
 		it->second.setCmd("PING");
 		it->second.setMessForSender(":IRC-kitty PONG :@127.0.0.1\n");
@@ -253,8 +253,11 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 			deleteBot(userFd);
 		}
 	}
+	else if (uppStr.find("CAP END", 0) != std::string::npos) {
+		return ;
+	}
 	else {
-		it->second.setMessForSender(":IRC-kitty " + toString(ERR_UNKNOWNCOMMAND) + '\n');
+		it->second.setMessForSender(":IRC-kitty " + toString(ERR_UNKNOWNCOMMAND) + " :Unknown command\n");
 	}
 }
 
