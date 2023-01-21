@@ -12,6 +12,7 @@ private:
 		std::string				serverName;
 
 		ChannelsStorage			channels;
+		
 
 public:
 
@@ -20,7 +21,7 @@ public:
 		);
 	
 
-	void parserPrivmsg(Message &mess);
+	void parserPrivmsg(Message &mess, User &user);
 	void setMessages(std::map<int, Message> _messages);
 	std::map<int, Message> getMessages();
 	void insertMessage(int senderFd, Message mess);
@@ -74,6 +75,7 @@ public:
 	std::string findNameKick(Message mess);
 
 	ChannelsStorage	getChannels();
+	bool  checkLagcheck(std::string str);
 
 };
 

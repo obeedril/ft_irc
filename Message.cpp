@@ -73,10 +73,11 @@
 		return msgForSender;
 	}
 
-	void Message::setListOfRecievers(std::vector<std::string> _listOfRecievers){
-		listOfRecievers = _listOfRecievers;
+	void Message::setChannel(std::string in_channel) {
+		this->in_channel = in_channel;
 	}
 
-    std::vector<std::string> Message::getListOfRecievers(){
-		return listOfRecievers;
+    std::string Message::getChannel() {
+		return(in_channel);
 	}
+

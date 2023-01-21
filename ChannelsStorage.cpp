@@ -41,7 +41,7 @@ std::string ChannelsStorage::getOwnerChannel(std::string channel_name) {
 t_channel ChannelsStorage::getChannelByName(std::string channel_name) {
     t_channel channel_empty;
     channel_empty.name = "";
-    channel_empty.topic = "";
+    channel_empty.topic = "No topic is set";
   
     std::map<std::string, t_channel>::iterator it_ch = channels.find(channel_name);
     if (it_ch != channels.end()) {
@@ -55,7 +55,7 @@ std::string ChannelsStorage::getTopic(std::string channel_name) {
     if (it_ch != channels.end()) {
         return(it_ch->second.topic);
     }
-    return("");
+    return("No topic is set");
 }
 
 void ChannelsStorage::setTopic(std::string channel_name, std::string topic) {
@@ -75,14 +75,29 @@ bool ChannelsStorage::checkIfThisUserBanned(std::string name_channel, std::strin
   return(false);
 }
 
-bool ChannelsStorage::foundUserInThisChannel(std::string name_channel, User *user) {
+bool ChannelsStorage::foundUserInThisChannel(std::string name_channel, std::string user_name) {
     std::list<User*> list_users;
   
     list_users = getChannelByName(name_channel).list_users;
-    if (std::find(list_users.begin(), list_users.end(), user) != list_users.end()) {
-      return(true);
+    for(std::list<User*>::iterator it = list_users.begin(); it != list_users.end(); it++) {
+       if((*it)->getLogin() == user_name) {
+        return(true);
+       }
     }
   return(false);
+}
+
+User *ChannelsStorage::getUserInThisChannel(std::string name_channel, std::string user_name) {
+    std::list<User*> list_users;
+  
+    list_users = getChannelByName(name_channel).list_users;
+    for(std::list<User*>::iterator it = list_users.begin(); it != list_users.end(); it++) {
+       if((*it)->getLogin() == user_name) {
+        return((*it));
+       }
+    }
+  write(2, "getUserInThisChannel ERROR\n", 28);
+  exit(-1);
 }
 
 std::string	ChannelsStorage::joinToCannel(std::string msg, User *user) {
@@ -93,9 +108,9 @@ std::string	ChannelsStorage::joinToCannel(std::string msg, User *user) {
 	std::string		name_channel = "";
   std::string		user_n = user->getLogin();
 	std::vector<std::string> vec_msg = splitString(msg, ' ');
-	// for(int i = 0; i < static_cast<int>(vec_msg.size()); i++) {
-	// 	std::cout << "<" << vec_msg[i] << "> ";
-	// }
+	for(int i = 0; i < static_cast<int>(vec_msg.size()); i++) {
+		std::cout << "<" << vec_msg[i] << "> ";
+	}
   if (vec_msg.size() != 2) {
     str.append(":IRC-kitty " + toString(ERR_NEEDMOREPARAMS) + " " + vec_msg[0] + " :Not enough parameters\n");
   }
@@ -107,13 +122,13 @@ std::string	ChannelsStorage::joinToCannel(std::string msg, User *user) {
   }
   else {
 		name_channel = vec_msg[1];
-    if (foundUserInThisChannel(name_channel, user) == false) {
+    if (foundUserInThisChannel(name_channel, user->getLogin()) == false) {
       addNewChannel(name_channel);
       addUserToChannel(name_channel, user);
-      //Join to channel Success
-  		str.append(":" + user_n + "!" + user_n + "@127.0.0.1 ");
-  		str.append("JOIN :" + name_channel + "\n");
     }
+    //Join to channel Success
+    str.append(":" + user_n + "!" + user_n + "@127.0.0.1 ");
+  	str.append("JOIN :" + name_channel + "\n");
 		//Get Topic
     topic = getTopic(name_channel);
 		str.append(":IRC-kitty 331 " + user_n +  " " + name_channel +  " :" + topic + "\n");
@@ -135,7 +150,7 @@ std::string	ChannelsStorage::joinToCannel(std::string msg, User *user) {
 std::string	ChannelsStorage::kickUser(std::string msg, User *user) {
 	//Params: KICK <channel> <user> [<comment>]
 	std::string		str = "";
-	//std::string		owner = "";
+	std::list<User*> users_in;
   //std::string		name_channel = "";
   std::string		user_n = user->getLogin();
 	std::vector<std::string> vec_msg = splitString(msg, ' ');
@@ -148,7 +163,7 @@ std::string	ChannelsStorage::kickUser(std::string msg, User *user) {
   if (vec_msg.size() < 3) {
     str.append(":IRC-kitty " + toString(ERR_NEEDMOREPARAMS) + " " + vec_msg[0] + " :Not enough parameters\n");
   }
-  else if (foundUserInThisChannel(vec_msg[1], user) == false) {
+  else if (foundUserInThisChannel(vec_msg[1], user->getLogin()) == false) {
     str.append(":IRC-kitty " + toString(ERR_NOTONCHANNEL) + " " + vec_msg[1] + " :You're not on that channel");
   }
   else if (user->getIsAdminHere() == false && getOwnerChannel(vec_msg[1]) != user_n) {
@@ -156,9 +171,18 @@ std::string	ChannelsStorage::kickUser(std::string msg, User *user) {
       + " :You're not channel operator");
   }
   else {
-    bannedUserInThisChannel(vec_msg[1], user);
+    std::cout << "------------AAAAAA!!!!!!!\n";
+    bannedUserInThisChannel(vec_msg[1], getUserInThisChannel(vec_msg[1], vec_msg[2]));
     str.append(":" + user_n + "!" + user_n + "@127.0.0.1 ");
 		str.append(msg + " :" + user_n + "\n");
+    //Get NAMES list in this channel
+    users_in = getChannelByName(vec_msg[1]).list_users;
+		str.append(":IRC-kitty 353 " + user_n + " = " + vec_msg[1] + " :@");
+    for (std::list<User*>::iterator it = users_in.begin(); it != users_in.end(); ++it) {
+	    str.append((*it)->getLogin() + " ");
+    }
+    //End of /NAMES list
+		str.append("\n:IRC-kitty 366 " + user_n +  " " + vec_msg[1] + " :End of /NAMES list\n");
     //:456!456@127.0.0.1 KICK #WE 123 :456
   }
 	std::cout << "\n------ReadyMess KICK-----:\n" << str << std::endl;
@@ -185,7 +209,7 @@ std::string	ChannelsStorage::addTopicToCannel(std::string msg, User *user) {
   if (vec_msg.size() != 2 && vec_msg.size() != 3) {
     str.append(":IRC-kitty " + toString(ERR_NEEDMOREPARAMS) + " " + vec_msg[0] + " :Not enough parameters\n");
   }
-  else if (foundUserInThisChannel(vec_msg[1], user) == false) {
+  else if (foundUserInThisChannel(vec_msg[1], user->getLogin()) == false) {
     str.append(":IRC-kitty " + toString(ERR_NOTONCHANNEL) + " " + vec_msg[1] + " :You're not on that channel");
   }
   else if (getChannelByName(vec_msg[1]).name == "") {
@@ -197,13 +221,13 @@ std::string	ChannelsStorage::addTopicToCannel(std::string msg, User *user) {
     }
     //Get Topic
     topic = getTopic(vec_msg[1]);
-    if (topic == "") {
+    if (topic == "No topic is set") {
       num.append("331 ");
     }
     else {
       num.append("332 ");
     }
-		str.append(":IRC-kitty " + num + user_n +  " " + vec_msg[1] +  " :No topic is set\n");
+		str.append(":IRC-kitty " + num + user_n +  " " + vec_msg[1] +  " :" + topic + "\n");
   }
   std::cout << "\n------ReadyMess TOPIC-----:\n" << str << std::endl;
   return(str);
@@ -237,7 +261,45 @@ void ChannelsStorage::updateChannels(User *user, std::string new_user_name, int 
 //   }
 }
 
+std::vector<int> ChannelsStorage::getDequeByChannel(std::string name_channel, User *user) {
+  std::list<User*> list_users;
+  std::vector<int> vector;
+  if(foundUserInThisChannel(name_channel, user->getLogin()) == true) {
+    list_users = getChannelByName(name_channel).list_users;
+    for(std::list<User*>::iterator it = list_users.begin(); it != list_users.end(); it++) {
+        if(user->getUserFd() != (*it)->getUserFd()) {
+          vector.push_back((*it)->getUserFd());
+        }
+    }
+  }
+  return(vector);
+}
 
+std::vector<int> ChannelsStorage::getDequeByAllInChannel(std::string name_channel, User *user) {
+  std::list<User*> list_users;
+  std::vector<int> vector;
+  if(foundUserInThisChannel(name_channel, user->getLogin()) == true) {
+    list_users = getChannelByName(name_channel).list_users;
+    for(std::list<User*>::iterator it = list_users.begin(); it != list_users.end(); it++) {
+          vector.push_back((*it)->getUserFd());
+    }
+  }
+  return(vector);
+}
+
+std::string	ChannelsStorage::modeChannel(std::string msg, User *user) {
+  std::vector<std::string> vec_msg = splitString(msg, ' ');
+  std::string str = "";
+  user->getUserFd();
+
+	for(int i = 0; i < static_cast<int>(vec_msg.size()); i++) {
+		std::cout << "<" << vec_msg[i] << "> ";
+	}
+	std::cout << "\n";
+  str.append(":IRC-kitty " + toString(367) + " " + vec_msg[1] + " \n");
+  str.append(":IRC-kitty " + toString(368) + " " + vec_msg[1] + " :End of channel ban list\n");
+  return(str);
+}
 
 //### KICK `<channel>` `<user>` `[<comment>]`
 

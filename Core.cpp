@@ -73,10 +73,7 @@ void	Core::run() {
 			}
 			else {
 				writeToUser(s);
-				while(count_mess > 0) {
-					readFromVectorMessage(s);
-					writeToUser(s);
-				}
+				vec_mess.clear();
 			}
 		}
 	}
@@ -147,7 +144,6 @@ int		Core::readFromUser(int user_fd) {
 
 void Core::readFromVectorMessage(int user_fd) {
 	Message		new_message;
-
 	if (vec_mess.size() > 0) {
 		new_message.setRawMessage(vec_mess[0]);
 		storage_messages->insertMessage(user_fd, new_message);
