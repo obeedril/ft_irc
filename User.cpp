@@ -18,6 +18,8 @@ User::User() {
     userName = "";
     realName = "";
     password = "";
+    isAdminServer = false;
+    isOperatorServer = false;
 }
 
 User::~User(){}
@@ -37,6 +39,7 @@ bool User::getIsAdminServer() {
 bool User::getIsOperatorServer() {
     return isOperatorServer;
 }
+
 
 void User::setIsAdminServer(bool flag) {
     isAdminServer = flag;

@@ -18,7 +18,6 @@
 #define RPL_BANLIST				367
 #define RPL_ENDOFBANLIST		368
 #define RPL_CLOSING 			362
-
 #define RPL_MOTDSTART			375
 #define RPL_MOTD				372
 #define RPL_ENDOFMOTD			376

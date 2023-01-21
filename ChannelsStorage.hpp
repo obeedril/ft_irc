@@ -15,9 +15,10 @@ public:
 	~ChannelsStorage();
   //Out func
 	std::map<std::string, t_channel> getChannels();
-	std::string joinToCannel(std::string msg, User *user);
-	std::string	kickUser(std::string msg, User *user);
+	std::string joinToCannel(std::string msg, User *user, int flags);
+	std::string	kickUser(std::string msg, User *user, int flags);
 	std::string	modeChannel(std::string msg, User *user);
+	std::string	whoIsInChannel(std::string msg, User *user);
 	std::string	addTopicToCannel(std::string msg, User *user);
 	//Topic
 	void setTopic(std::string channel_name, std::string topic);
@@ -37,6 +38,7 @@ public:
 	//Deque
 	std::vector<int> getDequeByChannel(std::string name_channel, User *user);
 	std::vector<int> getDequeByAllInChannel(std::string name_channel, User *user);
+	std::string parserChannelInMsg(std::string msg);
 
 };
 

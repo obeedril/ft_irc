@@ -13,6 +13,7 @@ class User {
         std::string realName; //realname
         std::string password;
         bool flagRegistred;
+
         bool isAdminServer;
         bool isOperatorServer;
         Server *_irc_serv;
@@ -28,8 +29,10 @@ class User {
         bool getIsAdminServer();
         bool getIsOperatorServer();
 
+
         void setIsAdminServer(bool);
         void setIsOperatorServer(bool);
+
 
         std::string getChannelHere();
         std::string getLogin(); //nickname
