@@ -118,6 +118,20 @@ inline std::string strTrimBegin(std::string str, char ch){
 	return str;
 }
 
+inline std::string toUpperCase(std::string str, std::string strCmd){
+	std::string uppStr = "";
+
+	std::locale loc;
+	char c;
+
+	for (std::string::size_type i=0; i<strCmd.length(); ++i){
+		c = std::toupper(str[i],loc);
+		uppStr.append(1, c);
+	}
+
+	return uppStr;
+}
+
 
 typedef struct s_message{
 	std::string cmd;

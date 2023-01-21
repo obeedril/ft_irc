@@ -152,32 +152,14 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 		if (pos != std::string::npos){
 			strCmd = str.substr(0, pos);
 		}
-	
-		//std::cout << "STR CMD  |" << strCmd << "|" << std::endl;
-		//-------
-		//std::cout << "STR0  |" << str << "|" << std::endl;
-		//-------
-
-		std::locale loc;
-		char c;
-		// char* charStr = 0;
-		for (std::string::size_type i=0; i<strCmd.length(); ++i){
-			c = std::toupper(str[i],loc);
-			uppStr.append(1, c);
-		}
+		uppStr = toUpperCase(str, strCmd);
 		str = str.substr(strCmd.length());
-
-		//std::cout << "STR1  |" << str << "|" << std::endl;
 
 		uppStr.append(str);
 
-		//-------
-		//std::cout << "STR UPPEND |" << uppStr  << "|" << std::endl;
-		//-------
-	} else {
+	} else 
 		uppStr = str;
-		//std::cout << "STR UPPEND ELSE |" << uppStr  << "|" << std::endl;
-	}
+    
 	it->second.setRawMessage(uppStr);
 	dequeMaker(&it_user->second, TO_ALL_BUT_NO_THIS_USER);
 	if (it_user->second.getPassword() == "" && uppStr.find("PASS", 0) == std::string::npos 
@@ -205,7 +187,6 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 	}
 	else if (uppStr.find("QUIT", 0) != std::string::npos){
 		it->second.setCmd("QUIT");
-		std::cout << "cmd QUIT" << std::endl;
 	}
 	else if (uppStr.find("WHOAMI", 0) != std::string::npos){
 		dequeMaker(&it_user->second, ONE_USER);
@@ -215,13 +196,11 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 		it->second.setCmd("PRIVMSG");
 		parserPrivmsg(it->second, it_user->second);
 		dequeMaker(&it_user->second, LIST_OF_RECIEVERS);
-		std::cout << "cmd PRIVMSG" << std::endl;
 	}
 	else if (uppStr.find("NOTICE", 0) != std::string::npos){
 		it->second.setCmd("NOTICE");
 		parserPrivmsg(it->second, it_user->second);
 		dequeMaker(&it_user->second, LIST_OF_RECIEVERS);
-		std::cout << "cmd NOTICE" << std::endl;
 	}
 	else if (uppStr.find("JOIN", 0) != std::string::npos) {
 		it->second.setCmd("JOIN");
@@ -263,7 +242,6 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 	else if (uppStr.find("PING", 0) != std::string::npos) {
 		it->second.setCmd("PING");
 		it->second.setMessForSender(":IRC-kitty PONG :@127.0.0.1\n");
-		std::cout << "cmd PING" << std::endl;
 	}
 	else if (uppStr.find("BOT", 0) != std::string::npos || it_user->second.getBotDialog() == YES) {
 		dequeMaker(&it_user->second, ONE_USER);
@@ -274,6 +252,9 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 			std::cout << "deleteBot" << std::endl;
 			deleteBot(userFd);
 		}
+	}
+	else {
+		it->second.setMessForSender(":IRC-kitty " + toString(ERR_UNKNOWNCOMMAND) + '\n');
 	}
 }
 
