@@ -108,9 +108,9 @@ std::string	ChannelsStorage::joinToCannel(std::string msg, User *user) {
 	std::string		name_channel = "";
   std::string		user_n = user->getLogin();
 	std::vector<std::string> vec_msg = splitString(msg, ' ');
-	// for(int i = 0; i < static_cast<int>(vec_msg.size()); i++) {
-	// 	std::cout << "<" << vec_msg[i] << "> ";
-	// }
+	for(int i = 0; i < static_cast<int>(vec_msg.size()); i++) {
+		std::cout << "<" << vec_msg[i] << "> ";
+	}
   if (vec_msg.size() != 2) {
     str.append(":IRC-kitty " + toString(ERR_NEEDMOREPARAMS) + " " + vec_msg[0] + " :Not enough parameters\n");
   }

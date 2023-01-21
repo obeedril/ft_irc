@@ -71,10 +71,6 @@ void	Core::run() {
 			else {
 				writeToUser(s);
 				vec_mess.clear();
-				// while(count_mess > 0) {
-				// 	readFromVectorMessage(s);
-				// 	writeToUser(s);
-				// }
 			}
 		}
 	}
