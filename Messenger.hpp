@@ -46,6 +46,8 @@ public:
 
 	// PASS cmd
     int	passCmd(const std::string &msg, User* sender);
+	//QUIT cmd 
+	int	quitCmd(const std::string &msg, User* sender);
 	// NICK cmd
 	int	nickCmd(const std::string &msg, User* sender);
 	int	whoAmICmd(User* sender);

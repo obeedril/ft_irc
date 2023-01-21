@@ -172,7 +172,8 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 	dequeMaker(&it_user->second, TO_ALL_BUT_NO_THIS_USER);
 	if (it_user->second.getPassword() == "" && str.find("PASS", 0) == std::string::npos 
 		&& str.find("CAP LS", 0) == std::string::npos && str.find("PING", 0) == std::string::npos
-		&& str.find("CAP END", 0) == std::string::npos && str.find("WHOAMI", 0) == std::string::npos) {
+		&& str.find("CAP END", 0) == std::string::npos && str.find("WHOAMI", 0) == std::string::npos
+		&& str.find("QUIT", 0) == std::string::npos) {
 		// чтобы без проля нельзя было логиниться
 		dequeMaker(&it_user->second, ONE_USER);
 		it->second.setCmd("");
@@ -219,21 +220,17 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 	}
 	else if (str.find("USER", 0) != std::string::npos) {
 		dequeMaker(&it_user->second, ONE_USER);
+		it->second.setCmd("USER"); //??????
 		userCmd(it->second.getRawMessage(), &it_user->second);
-		// 	it->second.setCmd("USER");
-		// else 
-		// 	it->second.setCmd("");
-		// std::string mss = "";
-		// mss.append(":IRC-kitty 001 Dlana :Welcome to the IRC-kitty IRC Network Dlana!Dlana@127.0.0.1\n");;
-		// it->second.setReadyMess(mss);
-		// std::cout << "'" << mss << "' " << std::endl;
 	}
 	else if (str.find("QUIT", 0) != std::string::npos){
+		dequeMaker(&it_user->second, TO_ALL_BUT_NO_THIS_USER);
 		it->second.setCmd("QUIT");
-		std::cout << "cmd QUIT" << std::endl;
+		quitCmd(it->second.getRawMessage(), &it_user->second);
 	}
 	else if (str.find("WHOAMI", 0) != std::string::npos){
 		dequeMaker(&it_user->second, ONE_USER);
+		it->second.setCmd("WHOAMI");
 		whoAmICmd(&it_user->second);
 	}
 	else if (str.find("PRIVMSG", 0) != std::string::npos){
@@ -281,6 +278,7 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 			deleteBot(userFd);
 		}
 	}
+
 }
 
 std::string Messenger::findNameKick(Message mess) {
@@ -599,6 +597,26 @@ void Messenger::deleteBot(int senderFd) {
 		map_robots.erase(it);
 	}
 }
+
+// QUIT cmd
+int	Messenger::quitCmd(const std::string &msg, User* sender) {
+	size_t posStart = msg.find(" ");
+	size_t posEnd = msg.find("\n");
+	std::string tmp;
+	if (posStart != std::string::npos) {
+		if (posEnd != std::string::npos)
+			tmp = msg.substr(posStart + 1, posEnd - posStart);
+		else 
+			tmp = msg.substr(posStart + 1);
+	}
+	else {
+		tmp = "User " + sender->getLogin() + " left the chat";
+	}
+	if (sender->getRegistFlag() == false)
+		stringOutputMaker(sender, RPL_CLOSING, tmp, "QUIT");
+	return 0;
+}
+
 
 // PASS cmd
 int	Messenger::passCmd(const std::string &msg, User* sender) {

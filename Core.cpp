@@ -62,11 +62,13 @@ void	Core::run() {
 				write(2, "Users not found\n", 26);
 				return ; ////!!!!
 			}
-			else if (length_message <= 0) {
+			else if (length_message <= 0 || storage_messages->getCmdInMessageByFd(s) == "QUIT") {
 				FD_CLR(s, &active_);
 				close(s);
 				storage_messages->getChannels().updateChannels(storage_messages->getUser(s), "", DELETE_USER);
 				storage_messages->deleteUser(s);
+				if (storage_messages->getCmdInMessageByFd(s) == "QUIT")
+					writeToUser(s);
 				break ;
 			}
 			else {
