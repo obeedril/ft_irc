@@ -144,31 +144,13 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 			strCmd = str.substr(0, pos);
 		}
 	
-		std::cout << "STR CMD  |" << strCmd << "|" << std::endl;
-		//-------
-		std::cout << "STR0  |" << str << "|" << std::endl;
-		//-------
-
-		std::locale loc;
-		char c;
-		// char* charStr = 0;
-		for (std::string::size_type i=0; i<strCmd.length(); ++i){
-			c = std::toupper(str[i],loc);
-			uppStr.append(1, c);
-		}
+		uppStr = toUpperCase(str, strCmd);
 		str = str.substr(strCmd.length());
-
-		std::cout << "STR1  |" << str << "|" << std::endl;
 
 		uppStr.append(str);
 
-		//-------
-		std::cout << "STR UPPEND |" << uppStr  << "|" << std::endl;
-		//-------
-	} else {
+	} else 
 		uppStr = str;
-		std::cout << "STR UPPEND ELSE |" << uppStr  << "|" << std::endl;
-	}
 	it->second.setRawMessage(uppStr);
 	dequeMaker(&it_user->second, TO_ALL_BUT_NO_THIS_USER);
 	if (it_user->second.getPassword() == "" && uppStr.find("PASS", 0) == std::string::npos 
