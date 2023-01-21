@@ -79,3 +79,11 @@
 		return msgForSender;
 	}
 
+	void Message::setChannel(std::string in_channel) {
+		this->in_channel = in_channel;
+	}
+
+    std::string Message::getChannel() {
+		return(in_channel);
+	}
+

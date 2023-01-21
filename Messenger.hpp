@@ -11,6 +11,7 @@ private:
 		std::map<int, User>		map_users;
 
 		ChannelsStorage			channels;
+		
 
 public:
 
@@ -69,6 +70,7 @@ public:
 	std::string findNameKick(Message mess);
 
 	ChannelsStorage	getChannels();
+	bool  checkLagcheck(std::string str);
 
 };
 

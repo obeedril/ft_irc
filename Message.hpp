@@ -18,6 +18,7 @@ private:
     std::vector<int> deque;
     std::string msgForSender;
 
+    std::string in_channel;
 
 public:
     Message();
@@ -43,6 +44,8 @@ public:
     void setMessForSender(std::string msgForSender); // for system messages
     std::string getMessForSender();
     // void addReciever();
+    void setChannel(std::string in_channel); 
+    std::string getChannel();
 };
 
 #endif
