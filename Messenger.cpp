@@ -50,8 +50,6 @@ std::map<int, Message> Messenger::getMessages() {
 std::string Messenger::getRawMessageByFd(int senderFd) {
 	std::map<int, Message>::iterator it = messages.find(senderFd);
 	if (it != messages.end()) {
-		//std::cout << "senderFd " << senderFd << std::endl;
-		//std::cout << "getRawMessageByFd INN:" << it->second.getRawMessage() << std::endl;
 		return it->second.getRawMessage();
 	}
 	return "";
@@ -167,10 +165,10 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
     
 	it->second.setRawMessage(uppStr);
 	dequeMaker(&it_user->second, TO_ALL_BUT_NO_THIS_USER);
-	if (it_user->second.getPassword() == "" && str.find("PASS", 0) == std::string::npos 
-		&& str.find("CAP LS", 0) == std::string::npos && str.find("PING", 0) == std::string::npos
-		&& str.find("CAP END", 0) == std::string::npos && str.find("WHOAMI", 0) == std::string::npos
-		&& str.find("QUIT", 0) == std::string::npos) {
+	if (it_user->second.getPassword() == "" && uppStr.find("PASS", 0) == std::string::npos 
+		&& uppStr.find("CAP LS", 0) == std::string::npos && uppStr.find("PING", 0) == std::string::npos
+		&& uppStr.find("CAP END", 0) == std::string::npos && uppStr.find("WHOAMI", 0) == std::string::npos
+		&& uppStr.find("QUIT", 0) == std::string::npos) {
 		// чтобы без проля нельзя было логиниться
 		dequeMaker(&it_user->second, ONE_USER);
 		it->second.setCmd("");
@@ -195,7 +193,7 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 		it->second.setCmd("USER"); //??????
 		userCmd(it->second.getRawMessage(), &it_user->second);
 	}
-	else if (str.find("QUIT", 0) != std::string::npos){
+	else if (uppStr.find("QUIT", 0) != std::string::npos){
 		dequeMaker(&it_user->second, TO_ALL_BUT_NO_THIS_USER);
 		it->second.setCmd("QUIT");
 		quitCmd(it->second.getRawMessage(), &it_user->second);
@@ -217,11 +215,12 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 	}
 	else if (uppStr.find("JOIN", 0) != std::string::npos) {
 		it->second.setCmd("JOIN");
+		std::cout << "cmd JOIN" << std::endl;
 		it->second.setMessForSender(channels.joinToCannel(uppStr, &it_user->second, SYSTEM_MSG));
 		it->second.setReadyMess(channels.joinToCannel(uppStr, &it_user->second, TO_CHANNEL));
 		it->second.setChannel(channels.parserChannelInMsg(uppStr));
 		dequeMaker(&it_user->second, TO_CHANNEL_BUT_NO_THIS_USER);
-		std::cout << "cmd JOIN" << std::endl;
+		
 	}
 	else if (uppStr.find("KICK", 0) != std::string::npos) {
 		it->second.setCmd("KICK");
@@ -238,20 +237,6 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 		dequeMaker(&it_user->second, ONE_USER);
 		it->second.setReadyMess(":IRC-kitty CAP * LS :=PASS NICK USER PRIVMSG NOTICE JOIN KICK QUIT\n");
 	}
-	// else if (uppStr.find("MODE") != std::string::npos) {
-	// 	it->second.setCmd("MODE");
-	// 	std::cout << "cmd MODE" << std::endl;
-	// 	it->second.setReadyMess(channels.modeChannel(uppStr, &it_user->second)); 
-	// 	it->second.setChannel(channels.parserChannelInMsg(uppStr)); 
-	// 	dequeMaker(&it_user->second, TO_CHANNEL);                 
-	// }
-	// else if (uppStr.find("WHO") != std::string::npos) {
-	// 	it->second.setCmd("WHO");
-	// 	std::cout << "cmd WHO" << std::endl;
-	// 	it->second.setReadyMess(channels.whoIsInChannel(uppStr, &it_user->second));  
-	// 	it->second.setChannel(channels.parserChannelInMsg(uppStr));  
-	// 	dequeMaker(&it_user->second, ONE_USER);               
-	// }
 	else if (uppStr.find("PING", 0) != std::string::npos) {
 		it->second.setCmd("PING");
 		it->second.setMessForSender(":IRC-kitty PONG :@127.0.0.1\n");
@@ -266,11 +251,8 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 			deleteBot(userFd);
 		}
 	}
-	else if (uppStr.find("CAP END", 0) != std::string::npos) {
-		return ;
-	}
 	else {
-		it->second.setMessForSender(":IRC-kitty " + toString(ERR_UNKNOWNCOMMAND) + " :Unknown command\n");
+		return ;
 	}
 }
 
@@ -431,13 +413,6 @@ void	Messenger::sendMotd(User* sender) {
 }
 
 void Messenger::dequeMaker(User *user, int flag) {
-	//формирует очередь получателей
-	//flag 1 = for 1 user, 
-	// flag 2 = to all except user in argument, 
-	// flag 3 = to all, 
-	// flag 4 = to channel except user in argument (NOT WORKS!!!!), 
-	// flag 5 = to channel and user in argument (NOT WORKS!!!!)
-	// flag 6 = ANOTHER_ONE_USER 6 - for privmsg
 	std::map<int, Message>::iterator it = messages.find(user->getUserFd());
 	std::map<int, User>::iterator it_u = map_users.begin();
 	if (it->second.getDeque().size())
@@ -481,7 +456,7 @@ void Messenger::dequeMaker(User *user, int flag) {
 		std::string receiver = it->second.getReceiver();
 
 		//std::vector<std::string> vec_msg = splitString(str, ' ');
-        if(channels.getChannelByName(receiver).name == receiver) {
+        if(channels.getChannelByName(receiver)->name == receiver) {
             it->second.setDeque(channels.getDequeByChannel(receiver, &it_u->second));
         }
         else {
@@ -496,28 +471,6 @@ void Messenger::dequeMaker(User *user, int flag) {
                 it->second.setDeque(tmp_vector);
             }
         }
-  
-//--------------------------------------------------------------
-		// int fd = 0;
-
-		// std::vector<std::string>::iterator it_vec = it->second.getListOfRecievers().begin();
-
-		// for(int i = 0; i < static_cast<int>(it->second.getListOfRecievers().size()); i++) {
-		// 	std::cout << "'" << it->second.getListOfRecievers()[i] << "' ";
-		// }
-		// std::cout << std::endl;
-
-
-
-		// for(; it_vec != it->second.getListOfRecievers().end(); it_vec++){
-		// 	fd = getUserFdByLogin(*it_vec);
-		// 	if (fd != -1){
-		// 		deque_users.push_back(fd);
-		// 	}
-		// }
-		
-		// it->second.setDeque(deque_users);
-		// списку получателей
 	}
 	it->second.setDeque(deque_users);
 }

@@ -32,7 +32,7 @@ public:
 	User *getUserInThisChannel(std::string name_channel, std::string user_name);
 	//Channel
 	bool addNewChannel(std::string channel_name);
-	t_channel getChannelByName(std::string channel_name);
+	t_channel *getChannelByName(std::string channel_name);
 	//Update
 	void updateChannels(User *user, std::string new_user_name, int command);
 	//Deque

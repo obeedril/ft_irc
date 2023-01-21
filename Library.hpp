@@ -75,6 +75,7 @@ inline std::vector<std::string> splitString(std::string s, char del) // выре
 	return(vector_string);
 }
 
+
 inline std::vector<std::string> splitString2(std::string s, char del) //здесь вырезаны лишний \n в конце
 {
 	std::stringstream ss(s);

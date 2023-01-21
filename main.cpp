@@ -3,8 +3,6 @@
 bool gFlagExit = 1;
 
 
-//https://github.com/barimehdi77/ft_irc    https://github.com/levensta/IRC-Server/blob/master/srcs/main.cpp
-
 
 void signalHandler(int signum) {
 	(void)signum;
@@ -19,13 +17,6 @@ bool checkToOpen(void) {
 		return 1;
 	}
 	std::fclose(fp);
-
-	// FILE* ff = fopen(PATH_TO_MOTD, "r+");
-	// if (!ff) {
-	// 	std::cerr << "\x1b[1;95m" << "> Can't open motd file!\n" << "\x1b[0m";
-	// 	return 1;
-	// }
-	// std::fclose(ff);
 	return 0;
 }
 
@@ -55,13 +46,11 @@ int main(int argc, const char* argv[]) {
 		std::cout << e.what() << std::endl;
 	}
 	Core core_irc = Core(port, &irc_serv);
-	// core_irc.setServ(&irc_serv);
 	std::cout << "\x1b[1;95m" << "> IRC server run!\n" << "\x1b[0m";
 
 	
 	while (gFlagExit) {
 		core_irc.run();
 	}
-	// delete irc_serv;
 	return (0);
 }
