@@ -109,7 +109,7 @@
 // #define RPL_STATSKLINE			216
 // #define RPL_STATSYLINE			218
 // #define RPL_ENDOFSTATS			219
-// #define RPL_UMODEIS				221
+#define RPL_UMODEIS				221
 // #define RPL_STATSLLINE			241
 // #define RPL_STATSUPTIME			242
 // #define RPL_STATSOLINE			243

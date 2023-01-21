@@ -61,7 +61,7 @@ void	Core::run() {
 				write(2, "Users not found\n", 26);
 				return ; ////!!!!
 			}
-			else if (length_message <= 0) {
+			else if (length_message <= 0 || storage_messages->getCmdInMessageByFd(s) == "QUIT") {
 				FD_CLR(s, &active_);
 				close(s);
 				storage_messages->getChannels().updateChannels(storage_messages->getUser(s), "", DELETE_USER);
@@ -112,8 +112,9 @@ int		Core::writeToUser(int current_fd) {
 	// std::cout << "ReadyMess CORE: " << storage_messages->getReadyMessByFd(current_fd) << std::endl;
 	std::string msg = storage_messages->getReadyMessByFd(current_fd); // заменить на readyMess
 	std::string systemMsg = storage_messages->getSystemMsg(current_fd);
+	std::cout << "\x1b[1;95m" << deque.size() << "\x1b[0m" << std::endl;
 	if (msg != "") {
-		std::cout << "msg: '" << msg <<  "'" << std::endl;
+		std::cout << "msg: <" << msg <<  ">" << std::endl;
 	}
 	if (systemMsg != "") {
 		std::cout << "systemMsg: " << systemMsg << std::endl;

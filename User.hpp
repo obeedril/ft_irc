@@ -13,6 +13,9 @@ class User {
         std::string realName; //realname
         std::string password;
         bool flagRegistred;
+
+        bool isAdminServer;
+        bool isOperatorServer;
         Server *_irc_serv;
 
         t_bot_command botDialog; //for robot
@@ -23,6 +26,8 @@ class User {
         ~User();
         int getUserFd();
         bool getIsAdminHere();
+        bool getIsAdminServer();
+        bool getIsOperatorServer();
         std::string getChannelHere();
         std::string getLogin(); //nickname
         std::string getUserName(); //username
