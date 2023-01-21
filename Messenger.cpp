@@ -210,7 +210,6 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 	}
 	else if (uppStr.find("QUIT", 0) != std::string::npos){
 		it->second.setCmd("QUIT");
-		std::cout << "cmd QUIT" << std::endl;
 	}
 	else if (uppStr.find("WHOAMI", 0) != std::string::npos){
 		dequeMaker(&it_user->second, ONE_USER);
@@ -220,29 +219,23 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 		it->second.setCmd("PRIVMSG");
 		parserPrivmsg(it->second, it_user->second);
 		dequeMaker(&it_user->second, LIST_OF_RECIEVERS);
-		std::cout << "cmd PRIVMSG" << std::endl;
 	}
 	else if (uppStr.find("NOTICE", 0) != std::string::npos){
 		it->second.setCmd("NOTICE");
 		parserPrivmsg(it->second, it_user->second);
 		dequeMaker(&it_user->second, LIST_OF_RECIEVERS);
-		std::cout << "cmd NOTICE" << std::endl;
 	}
 	else if (uppStr.find("JOIN", 0) != std::string::npos) {
 		it->second.setCmd("JOIN");
 		dequeMaker(&it_user->second, ONE_USER);
 		it->second.setMessForSender(channels.joinToCannel(uppStr, &it_user->second));
-		std::cout << "cmd JOIN" << std::endl;
 	}
 	else if (uppStr.find("KICK", 0) != std::string::npos) {
 		it->second.setCmd("KICK");
 		it->second.setMessForSender(channels.kickUser(uppStr, &it_user->second));
-		std::cout << "cmd KICK" << std::endl;
 	}
 	else if (uppStr.find("CAP LS", 0) != std::string::npos) {
 		it->second.setCmd("CAP LS");
-		// std::cout << "cmd CAP LS" << std::endl;
-
 		dequeMaker(&it_user->second, ONE_USER);
 		it->second.setReadyMess(":IRC-kitty CAP * LS :=PASS NICK USER PRIVMSG NOTICE JOIN KICK QUIT\n");
 
@@ -250,7 +243,6 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 	else if (uppStr.find("PING", 0) != std::string::npos) {
 		it->second.setCmd("PING");
 		it->second.setMessForSender(":IRC-kitty PONG :@127.0.0.1\n");
-		std::cout << "cmd PING" << std::endl;
 	}
 	// else if (str.find("PING", 0) != std::string::npos) {
 	// 	it->second.setCmd("CAP LS");
@@ -267,6 +259,9 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 			std::cout << "deleteBot" << std::endl;
 			deleteBot(userFd);
 		}
+	}
+	else {
+		it->second.setMessForSender(":IRC-kitty " + toString(ERR_UNKNOWNCOMMAND) + '\n');
 	}
 }
 
