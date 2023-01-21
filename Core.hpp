@@ -27,7 +27,7 @@ class Core {
 		std::vector<std::string> vec_mess;
 
 	public:
-		Core(int port_);
+		Core(int port_, Server *serv);
 		~Core();
 
 		void	run();
@@ -39,6 +39,7 @@ class Core {
 
 		Messenger *getStorage_messages();
 		void setServ(Server *newServ);
+		Server *getServ();
 		std::string getServName();
 		void readFromVectorMessage(int user_fd);
 		// void check_message(int user_fd);

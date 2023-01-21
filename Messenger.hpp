@@ -9,14 +9,16 @@ private:
 		std::map<int, Message>  messages;
 		std::map<int, Bot>      map_robots;
 		std::map<int, User>		map_users;
+		std::string				serverName;
 
 		ChannelsStorage			channels;
 		
 
 public:
 
-		Messenger();
-		~Messenger();
+		Messenger(std::string server);
+		~Messenger(
+		);
 	
 
 	void parserPrivmsg(Message &mess, User &user);
@@ -26,6 +28,7 @@ public:
 	void deleteMessage(int senderFd);
 	std::string getRawMessageByFd(int senderFd);
 	std::string getReadyMessByFd(int senderFd);
+	std::string getServerName();
 
 	void parsRecvStr(std::string str, int userFd);
 
@@ -44,12 +47,14 @@ public:
 
 	// PASS cmd
     int	passCmd(const std::string &msg, User* sender);
+	//QUIT cmd 
+	int	quitCmd(const std::string &msg, User* sender);
 	// NICK cmd
 	int	nickCmd(const std::string &msg, User* sender);
 	int	whoAmICmd(User* sender);
 	int stringOutputMaker(User *user, int err, const std::string &description, const std::string &command);
 	// std::vector<std::string> stringSplit2(const std::string &line, std::string delimiter);
-
+	void	checkAdmin(User* sender);
 	//    void setMess(Message _mess);
 	//    Message getMess();
 	std::vector<int> getDeq(int senderFd);

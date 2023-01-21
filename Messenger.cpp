@@ -1,6 +1,7 @@
 #include "Library.hpp"
 
-Messenger::Messenger() {
+Messenger::Messenger(std::string server) {
+	serverName = server;
 	ChannelsStorage channels();
 }
 
@@ -20,6 +21,10 @@ void Messenger::deleteMessage(int senderFd) {
 
 void Messenger::setMessages(std::map<int, Message> _messages) {
 	messages = _messages;
+}
+
+std::string Messenger::getServerName() {
+	return serverName;
 }
 
 void Messenger::setReadyMessInMessageByFd(std::string str, int senderFd) {
@@ -162,13 +167,17 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
     
 	it->second.setRawMessage(uppStr);
 	dequeMaker(&it_user->second, TO_ALL_BUT_NO_THIS_USER);
-	if (it_user->second.getPassword() == "" && uppStr.find("PASS", 0) == std::string::npos 
-		&& uppStr.find("CAP LS", 0) == std::string::npos && uppStr.find("PING", 0) == std::string::npos
-		&& uppStr.find("CAP END", 0) == std::string::npos && uppStr.find("WHOAMI", 0) == std::string::npos) {
+	if (it_user->second.getPassword() == "" && str.find("PASS", 0) == std::string::npos 
+		&& str.find("CAP LS", 0) == std::string::npos && str.find("PING", 0) == std::string::npos
+		&& str.find("CAP END", 0) == std::string::npos && str.find("WHOAMI", 0) == std::string::npos
+		&& str.find("QUIT", 0) == std::string::npos) {
 		// чтобы без проля нельзя было логиниться
 		dequeMaker(&it_user->second, ONE_USER);
 		it->second.setCmd("");
-		stringOutputMaker(&it_user->second, 464, "Password is nessesary. Please enter your password first", "");
+		// it->second.setMessForSender(&it_user->second, 464, "Password is nessesary. Please enter your password first", "");
+		stringOutputMaker(&it_user->second, ERR_PASSWDMISMATCH, "Password is nessesary. Please enter your password first", "");
+		it->second.setMessForSender(getReadyMessByFd(it_user->second.getUserFd()));
+		setReadyMessInMessageByFd("", it_user->second.getUserFd());
 		return ;
 	}
 	if (uppStr.find("PASS", 0) != std::string::npos) {
@@ -183,13 +192,17 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 	}
 	else if (uppStr.find("USER", 0) != std::string::npos) {
 		dequeMaker(&it_user->second, ONE_USER);
+		it->second.setCmd("USER"); //??????
 		userCmd(it->second.getRawMessage(), &it_user->second);
 	}
-	else if (uppStr.find("QUIT", 0) != std::string::npos){
+	else if (str.find("QUIT", 0) != std::string::npos){
+		dequeMaker(&it_user->second, TO_ALL_BUT_NO_THIS_USER);
 		it->second.setCmd("QUIT");
+		quitCmd(it->second.getRawMessage(), &it_user->second);
 	}
 	else if (uppStr.find("WHOAMI", 0) != std::string::npos){
 		dequeMaker(&it_user->second, ONE_USER);
+		it->second.setCmd("WHOAMI");
 		whoAmICmd(&it_user->second);
 	}
 	else if (uppStr.find("PRIVMSG", 0) != std::string::npos){
@@ -361,7 +374,26 @@ std::string Messenger::tostring2(std::vector<std::string> &v)
     return os.str();
 }
 
+void	Messenger::checkAdmin(User* sender) {
+
+	if (sender->getLogin() == sender->getServ()->getAdminLogin() && sender->getPassword() == sender->getServ()->getArgPass())
+			sender->setIsAdminServer(true);
+	else 
+		sender->setIsAdminServer(false);
+	std::map<std::string, std::string>::const_iterator itStart= sender->getServ()->getOperatorsMap().begin();
+	std::map<std::string, std::string>::const_iterator itEnd = sender->getServ()->getOperatorsMap().end();
+	for (; itStart != itEnd; itStart++) {
+		if (sender->getLogin() == itStart->first && sender->getPassword() == itStart->second) {
+			sender->setIsOperatorServer(true);
+			return ;
+		}
+	}
+	sender->setIsOperatorServer(false);
+}
+
+
 void	Messenger::sendMotd(User* sender) {
+	// checkAdmin(sender); // не работает!
 	std::vector<std::string> vec = sender->getMotdFromServer();
 	std::string tmp = tostring2(vec);
 	if (tmp.empty()) {
@@ -371,7 +403,7 @@ void	Messenger::sendMotd(User* sender) {
 	}
 
 	//--- отправка кода 001
-	std::string	msg = ":" + sender->getServName() + " ";
+	std::string	msg = ":" + serverName + " ";
 	std::stringstream	ss;
 	ss << RLP_REGIST_OK;
 	msg += "00" + ss.str() + " " + sender->getLogin() + " ";
@@ -379,17 +411,17 @@ void	Messenger::sendMotd(User* sender) {
 	msg += ":Welcome to IRC, ";
 	msg += sender->getLogin() + "!" + sender->getUserName() + "@" + HOST + "\n";
 	// -----начало мотд
-	msg += ":" + sender->getServName() + " ";
+	msg += ":" + serverName + " ";
 	ss << RPL_MOTDSTART;
-	msg += ss.str() + " " + sender->getLogin() + " :- " + sender->getServName() + " Message of the day - \n";
+	msg += ss.str() + " " + sender->getLogin() + " :- " + serverName + " Message of the day - \n";
 	ss.str( "" );
 	// -----сам мотд
-	msg += ":" + sender->getServName() + " ";
+	msg += ":" + serverName + " ";
 	ss << RPL_MOTD; //????
 	msg += ss.str() + " " + sender->getLogin() + " :- " + tmp + "\n";
 	ss.str( "" );
 	// -----конец мотд
-	msg += ":" + sender->getServName() + " ";
+	msg += ":" + serverName + " ";
 	ss << RPL_ENDOFMOTD; //????
 	msg += ss.str() + " " + sender->getLogin() + " :End of /MOTD command" + "\n";
 	// return msg;
@@ -505,7 +537,18 @@ int	Messenger::whoAmICmd(User* sender) {
 	else
 		tmp += "No UserName\n";
 
-	tmp += "Your Password is " + sender->getPassword() + "\n"; // убрать!!!!
+	if (sender->getPassword().length() > 0)
+		tmp += "Your Password is " + sender->getPassword() + "\n";
+	else
+		tmp += "No Password\n";
+
+	tmp += "Am I a ServerAdmin?  ";
+	tmp += sender->getIsAdminServer() ? "yes" : "no";
+	tmp += "\n";
+	tmp += "Am I a ServerOperator?  ";
+	tmp += sender->getIsOperatorServer() ? "yes" : "no";
+	tmp += "\n";
+
 	if (sender->getRegistFlag() == true) {
 		tmp += "Your current Channel is " + sender->getChannelHere() + "\n";
 	}
@@ -534,23 +577,26 @@ int	Messenger::nickCmd(const std::string &msg, User* sender) {
 				return(stringOutputMaker(sender, 0, "You entered your current nick", "") + 1);
 		else if (sender->getUserName() == "" && sender->getLogin() != "") {
 				// return(1);
-				stringOutputMaker(sender, 0, "User changed nick", "NICK");	
+				stringOutputMaker(sender, 0, "User changed nick", "NICK");
+				checkAdmin(sender); // не работает!	
 		}
 		else if (sender->getUserName() != "") {
-			std::string	msg = ":" + sender->getLogin() + "!" + sender->getUserName() + "@" + HOST + " NICK :" + arr[0];
+			std::string	msg = ":" + sender->getLogin() + "!" + sender->getUserName() + "@" + HOST + " NICK :" + arr[0] + "\n";
 			setReadyMessInMessageByFd(msg, sender->getUserFd()); // всем ли давать рассылку о смене ника? влияет ли то, были ли он ранее до конца зареган?
 			if (sender->getRegistFlag() == 0 && sender->getUserName() != "") {
 				sender->setRegistFlag(true);
 				sendMotd(sender);
 			}
+			// checkAdmin(sender); // не работает!
 		}
 	(*sender).setLogin(arr[0]);
+	checkAdmin(sender); // не работает!	
 	return (0);
 }
 
 int Messenger::stringOutputMaker(User *user, int err, const std::string &description, const std::string &command) {
 	// добавляет логин, код ошибки и имя сервера, кладет в rawMessage
-	std::string	msg = ":" + user->getServName() + " ";
+	std::string	msg = ":" + serverName + " ";
 	std::stringstream	ss;
 	if (err != 0)
 	{ 
@@ -561,7 +607,8 @@ int Messenger::stringOutputMaker(User *user, int err, const std::string &descrip
 	if (command != "")
 		msg += " "  + command;
 	if (description != "")
-		msg += " :"  + description + "\n";
+		msg += " :"  + description;
+	msg += "\n";
 	setReadyMessInMessageByFd(msg, user->getUserFd());
 	return 0;
 }
@@ -572,6 +619,26 @@ void Messenger::deleteBot(int senderFd) {
 		map_robots.erase(it);
 	}
 }
+
+// QUIT cmd
+int	Messenger::quitCmd(const std::string &msg, User* sender) {
+	size_t posStart = msg.find(" ");
+	size_t posEnd = msg.find("\n");
+	std::string tmp;
+	if (posStart != std::string::npos) {
+		if (posEnd != std::string::npos)
+			tmp = msg.substr(posStart + 1, posEnd - posStart);
+		else 
+			tmp = msg.substr(posStart + 1);
+	}
+	else {
+		tmp = "User " + sender->getLogin() + " left the chat";
+	}
+	if (sender->getRegistFlag() == false)
+		stringOutputMaker(sender, RPL_CLOSING, tmp, "QUIT");
+	return 0;
+}
+
 
 // PASS cmd
 int	Messenger::passCmd(const std::string &msg, User* sender) {
@@ -588,6 +655,7 @@ int	Messenger::passCmd(const std::string &msg, User* sender) {
 		return(stringOutputMaker(sender, ERR_ALREADYREGISTRED, "You may not reregister", "") + 1);
 
 	(*sender).setPassword(arr[0]);
+	checkAdmin(sender);
 	return (0);
 }
 

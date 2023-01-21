@@ -13,7 +13,8 @@ class Server
 		int										_port;
 		// int										_sockfd;
 		// sockaddr_in								_sockaddr;
-		std::string								_password;
+		std::string								_argvPass;
+		std::string								_configPass;
 		std::string								_admin;
 		std::map<std::string, std::string>		_operators;
 		std::vector<std::string>				_motd;
@@ -33,6 +34,11 @@ class Server
 		void parseConfig();
 		std::string	getServName();
 		std::vector<std::string>	getMotd();
+
+		std::string	getArgPass();
+		std::string	getConfigPass();
+		std::string	getAdminLogin();
+		const std::map<std::string, std::string>&	getOperatorsMap();
 };
 
 #endif

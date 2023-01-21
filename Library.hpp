@@ -35,7 +35,6 @@
 #define PATH_TO_MOTD "welcome.motd"
 #define SERV_NAME "serverName"
 #define ADMIN_NAME "adminName"
-#define ADMIN_PASS "adminPass"
 #define OPERATORS "operators"
 #define ONE_USER 1
 #define TO_ALL_BUT_NO_THIS_USER 2
@@ -72,7 +71,6 @@ inline std::vector<std::string> splitString(std::string s, char del) // выре
 			vector_string.push_back(word.substr(1));
 		else
 			vector_string.push_back(word);
-		//std::cout << ">>> word = |" << *(vector_string.end() - 1) << "|" << "  size = " << vector_string.size() << "|" << std::endl;
 	}
 	return(vector_string);
 }
@@ -153,7 +151,6 @@ enum t_bot_command
 	FINISH
 };
 
-//# include "Utils.hpp"
 # include "Server.hpp"
 # include "ErrorsAndReplies.hpp"
 # include "User.hpp"
