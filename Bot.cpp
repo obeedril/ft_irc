@@ -40,7 +40,7 @@ int Bot::callBot(std::string msg) {
 	switch (bot_com)
 	{
 		case HELLO_BOT: 
-			sprintf(tmp, "%s %s\n", "BOT", ": Hi! I'm Kitty the robot! Do you want to PLAY numbers or find out the WEATHER?\r\n");
+			sprintf(tmp, "%s %s %s\n", ":IRC-kitty", "BOT", ": Hi! I'm Kitty the robot! Do you want to PLAY numbers or find out the WEATHER?\r\n");
 			new_msg = tmp;
 			message.append(tmp);
 			break;
@@ -54,7 +54,7 @@ int Bot::callBot(std::string msg) {
 			exitBot();
 			break;
 		default:
-			sprintf(tmp, "%s %s\n", "BOT",
+			sprintf(tmp, "%s %s %s\n", ":IRC-kitty", "BOT",
 			": Its Robot Kitty! I still here =) Pick one of them command PLAY, WEATHER or BYE_BOT.\r\n");
 			message.append(tmp);
 			bad_dialog++;
@@ -149,9 +149,9 @@ int Bot::parserWeather() {
     in.close(); 
 	char	tmp[512];
 	if (get_weather.length() == 0) {
-		get_weather.append(": The weather is always Nice.\r\n");
+		get_weather.append("The weather is always Nice.\r\n");
 	}
-	sprintf(tmp, "%s : %s\n", "BOT", get_weather.c_str());
+	sprintf(tmp, "%s %s : %s\n", ":IRC-kitty", "BOT", get_weather.c_str());
 	message.append(tmp);
 	return(0);
 }
@@ -162,13 +162,13 @@ int Bot::playGame(std::string msg) {
 	char	tmp[512];
 
 	if (startGame == 0) {
-		sprintf(tmp, "%s %s%s %s\n", "BOT", ": Make a number from 1 to 100. I'll guess it in 7 tries! READY?\r\n",
+		sprintf(tmp, "%s %s %s%s %s\n", ":IRC-kitty", "BOT", ": Make a number from 1 to 100. I'll guess it in 7 tries! READY?\n",
 		"BOT", ": Use the next words: MORE, LESS, YES, BYE_BOT\r\n");
 		message.append(tmp);
 		startGame = 1;
 	}
 	else if (startGame == 1) {
-		sprintf(tmp, "%s %s %d?\r\n", "BOT", ": Okay! This number is", gameNum);
+		sprintf(tmp, "%s %s %s %d?\n", ":IRC-kitty", "BOT", ": Okay! This number is", gameNum);
 		message.append(tmp);
 		startGame = 2;
 	}
@@ -187,12 +187,12 @@ int Bot::playGame(std::string msg) {
 			part = 1;
 		}
 		gameNum += part * k;
-		sprintf(tmp, "%s %s %d?\r\n", "BOT", ": Okay! This number is", gameNum);
+		sprintf(tmp, "%s %s %s %d?\n", ":IRC-kitty", "BOT", ": Okay! This number is", gameNum);
 		message.append(tmp);
 		startGame++;
 	}
 	else {
-		sprintf(tmp, "%s %s\n", "BOT", ": Use the next words: MORE, LESS, YES, BYE_BOT\r\n");
+		sprintf(tmp, "%s %s %s\n", ":IRC-kitty", "BOT", ": Use the next words: MORE, LESS, YES, BYE_BOT\r\n");
 		message.append(tmp);
 		return(++bad_dialog);
 	}
@@ -202,10 +202,10 @@ int Bot::playGame(std::string msg) {
 void Bot::exitBot() {
 	char	tmp[512];
 	if (bad_dialog >= 3) {
-		sprintf(tmp, "%s %s\n", "BOT", ": It is so boooored =( Bye, bye!\r\n");
+		sprintf(tmp, "%s %s %s\n", ":IRC-kitty", "BOT", ": It is so boooored =( Bye, bye!\r\n");
 	}
 	else {
-		sprintf(tmp, "%s %s\n", "BOT", ": Bye, bye!\r\n");
+		sprintf(tmp, "%s %s %s\n", ":IRC-kitty", "BOT", ": Bye, bye!\r\n");
 	}
 	message.append(tmp);//my_client->setMessage(static_cast<std::string>(tmp));
 	my_client->setBotDialog(FINISH);
