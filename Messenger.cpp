@@ -413,6 +413,8 @@ void	Messenger::sendMotd(User* sender) {
 }
 
 void Messenger::dequeMaker(User *user, int flag) {
+
+	std::cout << "\x1b[1;95m" << "MAKER" << flag << " " << user->getLogin() << " " << user->getUserFd() << "\x1b[0m" << std::endl;
 	std::map<int, Message>::iterator it = messages.find(user->getUserFd());
 	std::map<int, User>::iterator it_u = map_users.begin();
 	if (it->second.getDeque().size())
@@ -453,22 +455,22 @@ void Messenger::dequeMaker(User *user, int flag) {
 	}
 	else if (flag == LIST_OF_RECIEVERS){
 
+		std::cout << "receiver0 " << it->second.getReceiver() << std::endl;
 		std::string receiver = it->second.getReceiver();
 
 		//std::vector<std::string> vec_msg = splitString(str, ' ');
         if(channels.getChannelByName(receiver)->name == receiver) {
-            it->second.setDeque(channels.getDequeByChannel(receiver, &it_u->second));
+			std::cout << "receiver1 " << it->second.getReceiver() << std::endl;
+			deque_users = channels.getDequeByChannel(receiver, &it_u->second);
         }
         else {
             if(getUserFdByLogin(receiver) != -1) {
-                std::vector<int> tmp_vector;
-                tmp_vector.push_back(getUserFdByLogin(receiver));
-                it->second.setDeque(tmp_vector);
+				std::cout << "receiver2 " << it->second.getReceiver() << std::endl;
+                // std::vector<int> tmp_vector;
+                deque_users.push_back(getUserFdByLogin(receiver));
             }
             else {
-				std::vector<int> tmp_vector;
-                tmp_vector.push_back(it_u->second.getUserFd());
-                it->second.setDeque(tmp_vector);
+                deque_users.push_back(it_u->second.getUserFd());
             }
         }
 	}
@@ -617,6 +619,8 @@ int Messenger::getUserFdByLogin(std::string login) {
 		if (login.compare(it->second.getLogin()) == 0)
 			return it->first;	
 	}
+		std::cout << "\x1b[1;95m" << "login |" <<  login << "|" << "\x1b[0m" << std::endl;
+
 	return -1;
 }
 
