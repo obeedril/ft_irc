@@ -63,12 +63,15 @@ void	Core::run() {
 				return ; ////!!!!
 			}
 			else if (length_message <= 0 || storage_messages->getCmdInMessageByFd(s) == "QUIT") {
+				storage_messages->dequeMaker(storage_messages->getUser(s), TO_ALL_BUT_NO_THIS_USER);
+				storage_messages->setReadyMessInMessageByFd(
+					storage_messages->getChannels().updateChannels(storage_messages->getUser(s), "", DELETE_USER), s);
+				storage_messages->deleteUser(s);
+				writeToUser(s);
 				FD_CLR(s, &active_);
 				close(s);
-				storage_messages->getChannels().updateChannels(storage_messages->getUser(s), "", DELETE_USER);
-				storage_messages->deleteUser(s);
-				if (storage_messages->getCmdInMessageByFd(s) == "QUIT")
-					writeToUser(s);
+				// if (storage_messages->getCmdInMessageByFd(s) == "QUIT")
+				// 	writeToUser(s);
 				break ;
 			}
 			else {

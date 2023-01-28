@@ -203,6 +203,16 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 		it->second.setCmd("WHOAMI");
 		whoAmICmd(&it_user->second);
 	}
+	else if (uppStr.find("BOT") != std::string::npos || it_user->second.getBotDialog() == YES) {
+		dequeMaker(&it_user->second, ONE_USER);
+		it->second.setCmd("BOT");
+		it_user->second.setBotDialog(YES);
+		it->second.setMessForSender(initBot(userFd, it->second.getRawMessage()));
+		if (it_user->second.getBotDialog() == FINISH) {
+			std::cout << "deleteBot" << std::endl;
+			deleteBot(userFd);
+		}
+	}
 	else if (uppStr.find("PRIVMSG", 0) != std::string::npos){
 		it->second.setCmd("PRIVMSG");
 		parserPrivmsg(it->second, it_user->second);
@@ -241,16 +251,7 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 		it->second.setCmd("PING");
 		it->second.setMessForSender(":IRC-kitty PONG :@127.0.0.1\n");
 	}
-	else if (uppStr.find("BOT", 0) != std::string::npos || it_user->second.getBotDialog() == YES) {
-		dequeMaker(&it_user->second, ONE_USER);
-		it->second.setCmd("BOT");
-		it_user->second.setBotDialog(YES);
-		it->second.setMessForSender(initBot(userFd, it->second.getRawMessage()));
-		if (it_user->second.getBotDialog() == FINISH) {
-			std::cout << "deleteBot" << std::endl;
-			deleteBot(userFd);
-		}
-	}
+	
 	else {
 		return ;
 	}

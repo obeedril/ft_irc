@@ -34,7 +34,7 @@ public:
 	bool addNewChannel(std::string channel_name);
 	t_channel *getChannelByName(std::string channel_name);
 	//Update
-	void updateChannels(User *user, std::string new_user_name, int command);
+	std::string updateChannels(User *user, std::string new_user_name, int command);
 	//Deque
 	std::vector<int> getDequeByChannel(std::string name_channel, User *user);
 	std::vector<int> getDequeByAllInChannel(std::string name_channel, User *user);

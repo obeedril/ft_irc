@@ -43,7 +43,7 @@
 #define TO_CHANNEL 5
 #define ANOTHER_ONE_USER 6
 #define SYSTEM_MSG 11
-#define LIST_OF_RECIEVERS 6
+#define LIST_OF_RECIEVERS 7
 #define HOST "127.0.0.1"
 #define CHANGE_NICK 777
 #define DELETE_USER 999
