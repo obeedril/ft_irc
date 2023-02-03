@@ -2,7 +2,7 @@
 
 Messenger::Messenger(std::string server) {
 	serverName = server;
-	ChannelsStorage channels();
+	channels = new ChannelsStorage();
 }
 
 Messenger::~Messenger() {
@@ -226,19 +226,19 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 	else if (uppStr.find("JOIN", 0) != std::string::npos) {
 		it->second.setCmd("JOIN");
 		std::cout << "cmd JOIN" << std::endl;
-		it->second.setMessForSender(channels.joinToCannel(uppStr, &it_user->second, SYSTEM_MSG));
-		it->second.setReadyMess(channels.joinToCannel(uppStr, &it_user->second, TO_CHANNEL));
-		it->second.setChannel(channels.parserChannelInMsg(uppStr));
+		it->second.setMessForSender(channels->joinToCannel(uppStr, &it_user->second, SYSTEM_MSG));
+		it->second.setReadyMess(channels->joinToCannel(uppStr, &it_user->second, TO_CHANNEL));
+		it->second.setChannel(channels->parserChannelInMsg(uppStr));
 		dequeMaker(&it_user->second, TO_CHANNEL_BUT_NO_THIS_USER);
 		
 	}
 	else if (uppStr.find("KICK", 0) != std::string::npos) {
 		it->second.setCmd("KICK");
-		it->second.setChannel(channels.parserChannelInMsg(uppStr));
+		it->second.setChannel(channels->parserChannelInMsg(uppStr));
 		dequeMaker(&it_user->second, TO_CHANNEL_BUT_NO_THIS_USER);
-		it->second.setMessForSender(channels.kickUser(uppStr, &it_user->second, SYSTEM_MSG));
+		it->second.setMessForSender(channels->kickUser(uppStr, &it_user->second, SYSTEM_MSG));
 		if (it->second.getMessForSender().find("353") != std::string::npos) {
-			it->second.setReadyMess(channels.kickUser(uppStr, &it_user->second, TO_CHANNEL));
+			it->second.setReadyMess(channels->kickUser(uppStr, &it_user->second, TO_CHANNEL));
 		}
 		std::cout << "cmd KICK" << std::endl;
 	}
@@ -440,11 +440,11 @@ void Messenger::dequeMaker(User *user, int flag) {
 		// it->second.setDeque(deque_users);
 	}
 	else if (flag == TO_CHANNEL_BUT_NO_THIS_USER) {
-		deque_users = channels.getDequeByChannel(it->second.getChannel(), user);
+		deque_users = channels->getDequeByChannel(it->second.getChannel(), user);
 	}
 	else if (flag == TO_CHANNEL) {
 		std::cout << "\x1b[1;95m" << "THIS!!!" << "\x1b[0m" << std::endl;
-		deque_users = channels.getDequeByAllInChannel(it->second.getChannel(), user); //заменить msg!!!!!!!!!!!!!
+		deque_users = channels->getDequeByAllInChannel(it->second.getChannel(), user); //заменить msg!!!!!!!!!!!!!
 	}
 	else if (flag == ANOTHER_ONE_USER) {
 		if (it_u->second.getRegistFlag() == true)
@@ -460,9 +460,9 @@ void Messenger::dequeMaker(User *user, int flag) {
 		std::string receiver = it->second.getReceiver();
 
 		//std::vector<std::string> vec_msg = splitString(str, ' ');
-        if(channels.getChannelByName(receiver)->name == receiver) {
+        if(channels->getChannelByName(receiver)->name == receiver) {
 			std::cout << "receiver1 " << it->second.getReceiver() << std::endl;
-			deque_users = channels.getDequeByChannel(receiver, &it_u->second);
+			deque_users = channels->getDequeByChannel(receiver, &it_u->second);
         }
         else {
             if(getUserFdByLogin(receiver) != -1) {
@@ -643,7 +643,7 @@ int Messenger::deleteUser(int fd) {
 	return -1;
 }
 
-ChannelsStorage	Messenger::getChannels(){
+ChannelsStorage*	Messenger::getChannels(){
 	return channels;
 }
 

@@ -6,7 +6,7 @@ ChannelsStorage::ChannelsStorage() {
 ChannelsStorage::~ChannelsStorage() {
 }
 
-std::map<std::string, t_channel> ChannelsStorage::getChannels() {
+std::map<std::string, t_channel>* ChannelsStorage::getChannels() {
 		return channels;
 }
 
@@ -15,12 +15,12 @@ bool ChannelsStorage::addNewChannel(std::string channel_name) {
 		tmp.name = channel_name;
 		tmp.topic = "";
 	
-		return(channels.insert(std::pair<std::string, t_channel> (channel_name, tmp)).second);
+		return(channels->insert(std::pair<std::string, t_channel> (channel_name, tmp)).second);
 }
 
 bool ChannelsStorage::addUserToChannel(std::string channel_name, User *user) {
-	std::map<std::string, t_channel>::iterator it_ch = channels.find(channel_name);
-	if (it_ch != channels.end()) {
+	std::map<std::string, t_channel>::iterator it_ch = channels->find(channel_name);
+	if (it_ch != channels->end()) {
 			it_ch->second.list_users.push_back(user);
 			return(true);
 	}
@@ -28,8 +28,8 @@ bool ChannelsStorage::addUserToChannel(std::string channel_name, User *user) {
 }
 
 std::string ChannelsStorage::getOwnerChannel(std::string channel_name) {
-		std::map<std::string, t_channel>::iterator it_ch = channels.find(channel_name);
-		if (it_ch != channels.end()) {
+		std::map<std::string, t_channel>::iterator it_ch = channels->find(channel_name);
+		if (it_ch != channels->end()) {
 				return(it_ch->second.list_users.front()->getLogin());
 		}
 		return("");
@@ -38,8 +38,8 @@ std::string ChannelsStorage::getOwnerChannel(std::string channel_name) {
 t_channel *ChannelsStorage::getChannelByName(std::string channel_name) {
 		
 	
-		std::map<std::string, t_channel>::iterator it_ch = channels.find(channel_name);
-		if (it_ch != channels.end()) {
+		std::map<std::string, t_channel>::iterator it_ch = channels->find(channel_name);
+		if (it_ch != channels->end()) {
 				return(&it_ch->second);
 		}
 		t_channel *channel_empty = new t_channel;
@@ -49,16 +49,16 @@ t_channel *ChannelsStorage::getChannelByName(std::string channel_name) {
 }
 
 std::string ChannelsStorage::getTopic(std::string channel_name) {
-		std::map<std::string, t_channel>::iterator it_ch = channels.find(channel_name);
-		if (it_ch != channels.end()) {
+		std::map<std::string, t_channel>::iterator it_ch = channels->find(channel_name);
+		if (it_ch != channels->end()) {
 				return(it_ch->second.topic);
 		}
 		return("No topic is set");
 }
 
 void ChannelsStorage::setTopic(std::string channel_name, std::string topic) {
-		std::map<std::string, t_channel>::iterator it_ch = channels.find(channel_name);
-		if (it_ch != channels.end()) {
+		std::map<std::string, t_channel>::iterator it_ch = channels->find(channel_name);
+		if (it_ch != channels->end()) {
 			 it_ch->second.topic = topic;
 		}
 }
@@ -260,8 +260,8 @@ std::string	ChannelsStorage::addTopicToCannel(std::string msg, User *user) {
 }
 
 bool	ChannelsStorage::bannedUserInThisChannel(std::string channel_name, User *user) {
-	std::map<std::string, t_channel>::iterator it_ch = channels.find(channel_name);
-	if (it_ch != channels.end()) {
+	std::map<std::string, t_channel>::iterator it_ch = channels->find(channel_name);
+	if (it_ch != channels->end()) {
 			it_ch->second.list_users.remove(user);
 			it_ch->second.banned_users.push_back(user->getLogin());
 			return(true);
@@ -275,7 +275,7 @@ std::string ChannelsStorage::updateChannels(User *user, std::string new_user_nam
 	std::string		str = "";
 	std::string	user_n	= user->getLogin();
 	if (command == DELETE_USER) {
-		for (std::map<std::string, t_channel>::iterator it = channels.begin(); it != channels.end(); it++) {
+		for (std::map<std::string, t_channel>::iterator it = channels->begin(); it != channels->end(); it++) {
 			if (foundUserInThisChannel(it->second.name, user_n) == true) {
 				str.append(":" + user_n + "!" + user_n + "@127.0.0.1 ");
 				str.append("PART " + it->second.name + "\n");

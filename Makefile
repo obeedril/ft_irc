@@ -1,7 +1,7 @@
 NAME		= ircserv
 
 # FLAGS		= -Wall -Wextra -Werror -g 
-#-fsanitize=address -fvisibility=hidden -fvisibility-inlines-hidden
+# -fsanitize=address -fvisibility=hidden -fvisibility-inlines-hidden
 # -std=c++98
 
 SRCS		= main.cpp \
@@ -10,17 +10,20 @@ SRCS		= main.cpp \
 			User.cpp \
 			Messenger.cpp \
 			Message.cpp \
-			Bot.cpp \
-			ChannelsStorage.cpp
+			ChannelsStorage.cpp \
+			Bot.cpp 
 
 HEADERS		= Library.hpp 
 
 OBJS		=	$(SRCS:.cpp=.o)
 
-CC			=	g++
+CC			=	c++
 
 RM				= rm -Rf
-FLAGS			= -Wall -Wextra -Werror -g -std=c++98
+FLAGS			= -Wall -Wextra -Werror -g -std=c++98 \
+				# -fsanitize=address
+
+
 
 all:			$(NAME)
 
