@@ -47,6 +47,7 @@
 #define HOST "127.0.0.1"
 #define CHANGE_NICK 777
 #define DELETE_USER 999
+#define PART_USER 998
 #define KICK_IN_CHANNEL 888
 
 template<typename T>

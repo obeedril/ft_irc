@@ -35,17 +35,17 @@ std::string ChannelsStorage::getOwnerChannel(std::string channel_name) {
 		return("");
 }
 
-t_channel *ChannelsStorage::getChannelByName(std::string channel_name) {
-		
-	
-		std::map<std::string, t_channel>::iterator it_ch = channels.find(channel_name);
-		if (it_ch != channels.end()) {
-				return(&it_ch->second);
-		}
-		t_channel *channel_empty = new t_channel;
-		channel_empty->name = "";
-		channel_empty->topic = "No topic is set";
-		return(channel_empty);
+t_channel *ChannelsStorage::getChannelByName(std::string channel_name) {	
+	std::cout << "------------getChannelByName------------ exit" << std::endl;
+	std::map<std::string, t_channel>::iterator it_ch = channels.find(channel_name);
+	if (it_ch != channels.end()) {
+			return(&it_ch->second);
+	}
+	t_channel *channel_empty = new t_channel;
+	channel_empty->name = "";
+	channel_empty->topic = "No topic is set";
+	std::cout << "------------getChannelByName------------ exit" << std::endl;
+	return(channel_empty);
 }
 
 std::string ChannelsStorage::getTopic(std::string channel_name) {
@@ -77,10 +77,13 @@ bool ChannelsStorage::foundUserInThisChannel(std::string name_channel, std::stri
 		std::list<User*> list_users;
 		t_channel *channel;
 		channel = getChannelByName(name_channel);
+		std::cout << "------------foundUserInThisChannel------------ mid" << std::endl;
+		std::cout << "------------channel->name------------: " << channel->name << std::endl;
 		if (channel->name == "") {
 			delete channel;
 			return(false);
 		}
+		std::cout << "------------foundUserInThisChannel------------ next" << std::endl;
 		list_users = channel->list_users;
 		for(std::list<User*>::iterator it = list_users.begin(); it != list_users.end(); it++) {
 			 if((*it)->getLogin() == user_name) {
@@ -104,6 +107,10 @@ User *ChannelsStorage::getUserInThisChannel(std::string name_channel, std::strin
 }
 
 std::string	ChannelsStorage::joinToCannel(std::string msg, User *user, int flags) {
+	std::cout << "\x1b[1;93m" << "JOIN channel:\x1b[0m" << std::endl;
+	for (std::map<std::string, t_channel>::iterator it = channels.begin(); it != channels.end(); it++) {
+		std::cout << "\x1b[1;93m" << "Name channels: " << it->second.name << "\x1b[0m" << std::endl;
+	}
 	std::list<User*> users_in;
 	std::string		owner = "";
 	std::string		str = "";
@@ -111,9 +118,7 @@ std::string	ChannelsStorage::joinToCannel(std::string msg, User *user, int flags
 	std::string		name_channel = "";
 
 	std::string		user_n = user->getLogin();
-	std::cout << "\n------user->getLogin() JOIN-----:\n" << str << std::endl;
 	std::vector<std::string> vec_msg = splitString(msg, ' ');
-	std::cout << "\n------splitString JOIN-----:\n" << str << std::endl;
 	// for(int i = 0; i < static_cast<int>(vec_msg.size()); i++) {
 	// 	std::cout << "<" << vec_msg[i] << "> ";
 	// }
@@ -128,13 +133,11 @@ std::string	ChannelsStorage::joinToCannel(std::string msg, User *user, int flags
 	}
 	else {
 		name_channel = vec_msg[1];
-		std::cout << "\n------nnel JOIN false-----:\n" << str << std::endl;
 		if (foundUserInThisChannel(name_channel, user->getLogin()) == false) {
-		 std::cout << "\n------foundUserInThisChannel JOIN false-----:\n" << str << std::endl;
+		 std::cout << "\n------foundUserInThisChannel JOIN == false-----:\n" << str << std::endl;
 			addNewChannel(name_channel);
 			addUserToChannel(name_channel, user);
 		}
-		std::cout << "\n------nnel JOIN ater-----:\n" << str << std::endl;
 		//Join to channel Success
 		str.append(":" + user_n + "!" + user_n + "@127.0.0.1 ");
 		str.append("JOIN :" + name_channel + "\n");
@@ -154,8 +157,8 @@ std::string	ChannelsStorage::joinToCannel(std::string msg, User *user, int flags
 		}
 	}
 	std::cout << "\n------ReadyMess JOIN-----:\n" << str << std::endl;
-	std::cout << "name_channel: " << name_channel << std::endl;
-	std::cout << "user->getUserName(): " << user_n << std::endl;
+	//std::cout << "name_channel: " << name_channel << std::endl;
+	//std::cout << "user->getUserName(): " << user_n << std::endl;
 	return(str);
 }
 
@@ -270,8 +273,36 @@ bool	ChannelsStorage::bannedUserInThisChannel(std::string channel_name, User *us
 }
 
 
-std::string ChannelsStorage::updateChannels(User *user, std::string new_user_name, int command) {
-	new_user_name = "";
+//PART #kvirc
+std::string	ChannelsStorage::partChannel(std::string msg, User *user) {
+	std::list<User*> users_in;
+	std::string		str = "";
+	std::string	user_n	= user->getLogin();
+	std::vector<std::string> vec_msg = splitString(msg, ' ');
+	
+	for(int i = 0; i < static_cast<int>(vec_msg.size()); i++) {
+		std::cout << "<" << vec_msg[i] << "> ";
+	}
+	std::cout << "\n";
+	if (vec_msg.size() < 2) {
+		str.append(":IRC-kitty " + toString(ERR_NEEDMOREPARAMS) + " " + vec_msg[0] + " :Not enough parameters\n");
+	}
+	else if (getChannelByName(vec_msg[1])->name == "") {
+		str.append(":IRC-kitty " + toString(ERR_NOSUCHCHANNEL) + " " + vec_msg[1] + " :No such channel\n");
+	}
+	else {
+		str = updateChannels(user, vec_msg[1], PART_USER);
+		users_in = getChannelByName(vec_msg[1])->list_users;
+		str.append(":IRC-kitty 353 " + user_n + " = " + vec_msg[1] + " :@");
+		for (std::list<User*>::iterator it = users_in.begin(); it != users_in.end(); ++it) {
+			str.append((*it)->getLogin() + " ");
+		}
+		str.append("\n:IRC-kitty 366 " + user_n +  " " + vec_msg[1] + " :End of /NAMES list\n");
+	}
+	return(str);
+}
+
+std::string ChannelsStorage::updateChannels(User *user, std::string part_channel, int command) {
 	std::string		str = "";
 	std::string	user_n	= user->getLogin();
 	if (command == DELETE_USER) {
@@ -282,6 +313,22 @@ std::string ChannelsStorage::updateChannels(User *user, std::string new_user_nam
 			}
 			it->second.list_users.remove(user);
 			it->second.banned_users.remove(user_n);
+			if (it->second.list_users.size() == 0) {
+				std::cout << "\x1b[1;95m" << "channels.erase" << "\x1b[0m" << std::endl;
+				channels.erase(it->second.name);
+			}
+		}
+	}
+	if (command == PART_USER) {
+		std::map<std::string, t_channel>::iterator it = channels.find(part_channel);
+		if (it != channels.end()) {
+			str.append(":" + user_n + "!" + user_n + "@127.0.0.1 ");
+			str.append("PART " + it->second.name + "\n");
+		}
+		it->second.list_users.remove(user);
+		if (it->second.list_users.size() == 0) {
+			std::cout << "\x1b[1;95m" << "channels.erase" << "\x1b[0m" << std::endl;
+			channels.erase(it->second.name);
 		}
 	}
 	return(str);

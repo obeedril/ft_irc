@@ -64,8 +64,11 @@ void	Core::run() {
 			}
 			else if (length_message <= 0 || storage_messages->getCmdInMessageByFd(s) == "QUIT") {
 				storage_messages->dequeMaker(storage_messages->getUser(s), TO_ALL_BUT_NO_THIS_USER);
+
 				storage_messages->setReadyMessInMessageByFd(
-					storage_messages->getChannels().updateChannels(storage_messages->getUser(s), "", DELETE_USER), s);
+					storage_messages->getChannels()->updateChannels(storage_messages->getUser(s), "", DELETE_USER), s);
+				std::cout << "cannels.size(): " << "\x1b[1;96m" 
+				<< storage_messages->getChannels()->getChannels().size() << "\x1b[0m" << std::endl;
 				storage_messages->deleteUser(s);
 				std::cout << "getMapUsers().size(): " << storage_messages->getMapUsers().size() << std::endl;
 				if (storage_messages->getMapUsers().size() > 1) {
@@ -111,11 +114,12 @@ void	Core::error(int err_type) {
 };
 
 int		Core::writeToUser(int current_fd) {
+	//std::cout << "------------writeToUser------------ start" << std::endl;
 	std::vector<int> deque; 
 	deque = storage_messages->getDeq(current_fd);
 	std::string msg = storage_messages->getReadyMessByFd(current_fd);
 	std::string systemMsg = storage_messages->getSystemMsg(current_fd);
-	std::cout << "\x1b[1;95m" << deque.size() << "\x1b[0m" << std::endl;
+	std::cout << "\x1b[1;95m" << "Count deque: " << deque.size() << "\x1b[0m" << std::endl;
 	if (msg != "") {
 		std::cout << "msg: <" << msg <<  ">" << std::endl;
 	}
@@ -129,6 +133,7 @@ int		Core::writeToUser(int current_fd) {
 		}
 	}
 	storage_messages->deleteMessage(current_fd);
+	//std::cout << "------------writeToUser------------ exit" << std::endl;
 	return (0);
 };
 
@@ -142,28 +147,30 @@ int		Core::readFromUser(int user_fd) {
 	str.append(tmp);
 	vec_mess = splitString2(str, '\r');
 	count_mess = vec_mess.size();
-	std::cout << "RECV STR: |" << str << "|" << std::endl;
+	std::cout << "RECV STR: <" << str << ">" << std::endl;
 	if (length_message > 0) {
 		readFromVectorMessage(user_fd);
 	}
+	//std::cout << "------------readFromUser------------ exit" << std::endl;
 	return (length_message);
 };
 
 void Core::readFromVectorMessage(int user_fd) {
 	Message		new_message;
 	if (vec_mess.size() > 0) {
+		std::cout << "------------readFromVectorMessage------------ start" << std::endl;
 		new_message.setRawMessage(vec_mess[0]);
 		storage_messages->insertMessage(user_fd, new_message);
 		storage_messages->parsRecvStr(vec_mess[0], user_fd);
 		vec_mess.erase(vec_mess.begin());
 		count_mess--;
 	}
+	std::cout << "------------readFromVectorMessage------------ exit" << std::endl;
 }
 
 Messenger* Core::getStorage_messages(){
 	return storage_messages;
 };
-
 
 void Core::setServ(Server *newServ) {
 	_irc_serv = newServ;

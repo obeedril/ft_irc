@@ -248,6 +248,13 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 		}
 		std::cout << "cmd KICK" << std::endl;
 	}
+	else if (uppStr.find("PART", 0) != std::string::npos) {
+		it->second.setCmd("PART");
+		it->second.setChannel(channels.parserChannelInMsg(uppStr));
+		dequeMaker(&it_user->second, TO_CHANNEL);
+		it->second.setReadyMess(channels.partChannel(uppStr, &it_user->second));
+		std::cout << "cmd PART" << std::endl;
+	}
 	else if (uppStr.find("CAP LS", 0) != std::string::npos) {
 		it->second.setCmd("CAP LS");
 		dequeMaker(&it_user->second, ONE_USER);
@@ -257,7 +264,6 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 		it->second.setCmd("PING");
 		it->second.setMessForSender(":IRC-kitty PONG :@127.0.0.1\n");
 	}
-	
 	else {
 		return ;
 	}
@@ -296,7 +302,6 @@ std::string Messenger::initBot(int user_fd, std::string msg) {
 	}
 	return(tmp);
 }
-
 
 /* USER command */
 
@@ -645,7 +650,7 @@ int Messenger::deleteUser(int fd) {
 	return -1;
 }
 
-ChannelsStorage	Messenger::getChannels(){
-	return channels;
+ChannelsStorage	*Messenger::getChannels(){
+	return &channels;
 }
 
