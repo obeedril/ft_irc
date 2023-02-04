@@ -65,7 +65,7 @@ void	Core::run() {
 			else if (length_message <= 0 || storage_messages->getCmdInMessageByFd(s) == "QUIT") {
 				storage_messages->dequeMaker(storage_messages->getUser(s), TO_ALL_BUT_NO_THIS_USER);
 				storage_messages->setReadyMessInMessageByFd(
-					storage_messages->getChannels()->updateChannels(storage_messages->getUser(s), "", DELETE_USER), s);
+					storage_messages->getChannels().updateChannels(storage_messages->getUser(s), "", DELETE_USER), s);
 				storage_messages->deleteUser(s);
 				std::cout << "getMapUsers().size(): " << storage_messages->getMapUsers().size() << std::endl;
 				if (storage_messages->getMapUsers().size() > 1) {
@@ -116,8 +116,6 @@ int		Core::writeToUser(int current_fd) {
 	std::string msg = storage_messages->getReadyMessByFd(current_fd);
 	std::string systemMsg = storage_messages->getSystemMsg(current_fd);
 	std::cout << "\x1b[1;95m" << deque.size() << "\x1b[0m" << std::endl;
-	if (deque.size() > 0)
-		std::cout << "\x1b[1;95m" << deque[0] << "\x1b[0m" << std::endl;
 	if (msg != "") {
 		std::cout << "msg: <" << msg <<  ">" << std::endl;
 	}

@@ -6,7 +6,7 @@
 class ChannelsStorage {
 
 private:
-  std::map<std::string, t_channel> *channels;
+  std::map<std::string, t_channel> channels;
   //std::map<int, User>             &map_users;
 
 public:
@@ -14,7 +14,7 @@ public:
 	ChannelsStorage();
 	~ChannelsStorage();
   //Out func
-	std::map<std::string, t_channel> *getChannels();
+	std::map<std::string, t_channel> getChannels();
 	std::string joinToCannel(std::string msg, User *user, int flags);
 	std::string	kickUser(std::string msg, User *user, int flags);
 	std::string	modeChannel(std::string msg, User *user);

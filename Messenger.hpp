@@ -11,7 +11,7 @@ private:
 		std::map<int, User>		map_users;
 		std::string				serverName;
 
-		ChannelsStorage			*channels;
+		ChannelsStorage			channels;
 		
 
 public:
@@ -75,7 +75,7 @@ public:
 	std::string getSystemMsg(int senderFd);
 	std::string findNameKick(Message mess);
 
-	ChannelsStorage*	getChannels();
+	ChannelsStorage	getChannels();
 	bool  checkLagcheck(std::string str);
 
 };

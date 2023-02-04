@@ -101,26 +101,19 @@ inline std::vector<std::string> splitString2(std::string s, char del) //здес
 
 inline std::string strTrimBegin(std::string str, char ch){
 
-	size_t lenStr = 0;
+	int lenStr = 0;
 	lenStr = str.length();
 	char * cstr = new char [lenStr+1];
   	std::strcpy (cstr, str.c_str());
 
-	size_t i = 0;
+	int i = 0;
 	while (cstr[i] == ch && cstr[i] != '\0')
 		i++;
 	if(i > 0)
 		str = str.substr(i, lenStr);
 	if (i == lenStr)
 		str = "";
-	i = str.length();
-	std::strcpy (cstr, str.c_str());
-	while ((cstr[i] == ch || cstr[i] == '\0' || cstr[i] == '\n')  && i > 0)
-		i--;
-	if(i < str.length())
-		str = str.substr(0, i+1);
-	if (i == 0)
-		str = "";
+
 	return str;
 }
 
