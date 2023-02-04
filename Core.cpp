@@ -1,15 +1,11 @@
 # include "Library.hpp"
 
 Core::Core(int port_, Server *serv) {
-
 	_irc_serv = serv;
 	storage_messages = new Messenger(_irc_serv->getServName());
 	listen_sock = 0;
 	this->port = port_;
 	max = 0;
-	count_cli = 0;
-	count_mess = 0;
-	bzero(&id, sizeof(id));
 	FD_ZERO(&active_);
 
 	listen_sock = socket(AF_INET, SOCK_STREAM, 0); 
@@ -59,34 +55,34 @@ void	Core::run() {
 		if (FD_ISSET(s, &read_) && s != listen_sock) {
 			readFromUser(s);
 			if (storage_messages->getUserFd(s) == -1) {
-				write(2, "Users not found\n", 26);
-				return ; ////!!!!
+				return ;
 			}
 			else if (length_message <= 0 || storage_messages->getCmdInMessageByFd(s) == "QUIT") {
-				storage_messages->dequeMaker(storage_messages->getUser(s), TO_ALL_BUT_NO_THIS_USER);
-
-				storage_messages->setReadyMessInMessageByFd(
-					storage_messages->getChannels()->updateChannels(storage_messages->getUser(s), "", DELETE_USER), s);
-				std::cout << "cannels.size(): " << "\x1b[1;96m" 
-				<< storage_messages->getChannels()->getChannels().size() << "\x1b[0m" << std::endl;
-				storage_messages->deleteUser(s);
-				std::cout << "getMapUsers().size(): " << storage_messages->getMapUsers().size() << std::endl;
-				if (storage_messages->getMapUsers().size() > 1) {
-					writeToUser(s);
-				}	
+				quitUser(s);
 				FD_CLR(s, &active_);
 				close(s);
-				// if (storage_messages->getCmdInMessageByFd(s) == "QUIT")
-				// 	writeToUser(s);
 				break ;
 			}
 			else {
 				writeToUser(s);
-				vec_mess.clear();
 			}
 		}
 	}
 };
+
+void Core::quitUser(int fd) {
+	std::string msg = "";
+
+	storage_messages->dequeMaker(storage_messages->getUser(fd), TO_ALL_BUT_NO_THIS_USER);
+	msg = storage_messages->getChannels()->updateChannels(storage_messages->getUser(fd), "", DELETE_USER);
+	storage_messages->setReadyMessInMessageByFd(msg, fd);
+	storage_messages->deleteUser(fd);
+	std::cout	<< "cannels.size(): " << "\x1b[1;96m" 
+				<< storage_messages->getChannels()->getChannels().size() << "\x1b[0m" << std::endl;
+	if (storage_messages->getMapUsers().size() > 1) {
+		writeToUser(fd);
+	}	
+}
 
 int		Core::createNewSocket() {
 	int user_fd = accept(listen_sock, (struct sockaddr *)&servaddr, &len_adr);
@@ -107,24 +103,18 @@ int		Core::createNewSocket() {
 	return (0);
 };
 
-void	Core::error(int err_type) {
-	std::cerr << err_type;
-	write(2, "Fatal error\n", 12);
-	exit(1);
-};
-
 int		Core::writeToUser(int current_fd) {
 	//std::cout << "------------writeToUser------------ start" << std::endl;
 	std::vector<int> deque; 
 	deque = storage_messages->getDeq(current_fd);
 	std::string msg = storage_messages->getReadyMessByFd(current_fd);
 	std::string systemMsg = storage_messages->getSystemMsg(current_fd);
-	std::cout << "\x1b[1;95m" << "Count deque: " << deque.size() << "\x1b[0m" << std::endl;
+	std::cout << "\x1b[1;96m" << "Count deque: " << deque.size() << "\x1b[0m" << std::endl;
 	if (msg != "") {
-		std::cout << "msg: <" << msg <<  ">" << std::endl;
+		std::cout << "---> msg: \n" << msg  << "<---" << std::endl;
 	}
 	if (systemMsg != "") {
-		std::cout << "systemMsg: " << systemMsg << std::endl;
+		std::cout << "---> systemMsg: \n" << systemMsg << "<---" << std::endl;
 		send(current_fd, systemMsg.c_str(), systemMsg.length(), 0);
 	}
 	for(int i = 0; i < static_cast<int>(deque.size()); i++) {
@@ -133,42 +123,26 @@ int		Core::writeToUser(int current_fd) {
 		}
 	}
 	storage_messages->deleteMessage(current_fd);
-	//std::cout << "------------writeToUser------------ exit" << std::endl;
 	return (0);
 };
 
 int		Core::readFromUser(int user_fd) {
 	Message		new_message;
+	char		tmp[4048];
 	std::string	str = "";
-	std::string	cmd = "";
+
 	length_message = 0;
-	char tmp[4048];
 	length_message = recv(user_fd, tmp, 42*4096, 0);
 	str.append(tmp);
-	vec_mess = splitString2(str, '\r');
-	count_mess = vec_mess.size();
+	str = getFirstLine(str);
 	std::cout << "RECV STR: <" << str << ">" << std::endl;
-	if (length_message > 0) {
-		readFromVectorMessage(user_fd);
-	}
-	//std::cout << "------------readFromUser------------ exit" << std::endl;
+	new_message.setRawMessage(str);
+	storage_messages->insertMessage(user_fd, new_message);
+	storage_messages->parsRecvStr(str, user_fd);
 	return (length_message);
 };
 
-void Core::readFromVectorMessage(int user_fd) {
-	Message		new_message;
-	if (vec_mess.size() > 0) {
-		std::cout << "------------readFromVectorMessage------------ start" << std::endl;
-		new_message.setRawMessage(vec_mess[0]);
-		storage_messages->insertMessage(user_fd, new_message);
-		storage_messages->parsRecvStr(vec_mess[0], user_fd);
-		vec_mess.erase(vec_mess.begin());
-		count_mess--;
-	}
-	std::cout << "------------readFromVectorMessage------------ exit" << std::endl;
-}
-
-Messenger* Core::getStorage_messages(){
+Messenger* Core::getStorage_messages() {
 	return storage_messages;
 };
 
@@ -179,3 +153,9 @@ void Core::setServ(Server *newServ) {
 Server * Core::getServ(void) {
 	return _irc_serv;;
 }
+
+void	Core::error(int err_type) {
+	std::cerr << err_type;
+	write(2, "Fatal error\n", 12);
+	exit(1);
+};

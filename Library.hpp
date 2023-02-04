@@ -76,6 +76,13 @@ inline std::vector<std::string> splitString(std::string s, char del) // выре
 	return(vector_string);
 }
 
+inline std::string getFirstLine(std::string s) {
+	std::stringstream ss(s);
+	std::string line;
+	getline(ss, line, '\r');
+	return(line);
+}
+
 
 inline std::vector<std::string> splitString2(std::string s, char del) //здесь вырезаны лишний \n в конце
 {
@@ -100,21 +107,29 @@ inline std::vector<std::string> splitString2(std::string s, char del) //здес
 	return(vector_string);
 }
 
-inline std::string strTrimBegin(std::string str, char ch){
 
-	int lenStr = 0;
+inline std::string strTrimBegin(std::string str, char ch) {
+
+	size_t lenStr = 0;
 	lenStr = str.length();
 	char * cstr = new char [lenStr+1];
   	std::strcpy (cstr, str.c_str());
 
-	int i = 0;
+	size_t i = 0;
 	while (cstr[i] == ch && cstr[i] != '\0')
 		i++;
 	if(i > 0)
 		str = str.substr(i, lenStr);
 	if (i == lenStr)
 		str = "";
-
+	i = str.length();
+	std::strcpy (cstr, str.c_str());
+	while ((cstr[i] == ch || cstr[i] == '\0' || cstr[i] == '\n')  && i > 0)
+		i--;
+	if(i < str.length())
+		str = str.substr(0, i+1);
+	if (i == 0)
+		str = "";
 	return str;
 }
 

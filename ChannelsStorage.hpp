@@ -6,10 +6,11 @@
 class ChannelsStorage {
 
 private:
-  std::map<std::string, t_channel> channels;
+  std::map<std::string, t_channel>	channels;
+  std::string 						serv_name;
 
 public:
-	ChannelsStorage();
+	ChannelsStorage(std::string serv_name);
 	~ChannelsStorage();
 	//Out func
 	std::map<std::string, t_channel> getChannels();
