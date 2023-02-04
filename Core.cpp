@@ -67,7 +67,10 @@ void	Core::run() {
 				storage_messages->setReadyMessInMessageByFd(
 					storage_messages->getChannels()->updateChannels(storage_messages->getUser(s), "", DELETE_USER), s);
 				storage_messages->deleteUser(s);
-				writeToUser(s);
+				std::cout << "getMapUsers().size(): " << storage_messages->getMapUsers().size() << std::endl;
+				if (storage_messages->getMapUsers().size() > 1) {
+					writeToUser(s);
+				}	
 				FD_CLR(s, &active_);
 				close(s);
 				// if (storage_messages->getCmdInMessageByFd(s) == "QUIT")

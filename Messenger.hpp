@@ -29,6 +29,7 @@ public:
 	std::string getRawMessageByFd(int senderFd);
 	std::string getReadyMessByFd(int senderFd);
 	std::string getServerName();
+	std::map<int, User> getMapUsers();
 
 	void parsRecvStr(std::string str, int userFd);
 

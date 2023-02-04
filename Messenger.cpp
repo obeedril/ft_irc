@@ -27,6 +27,12 @@ std::string Messenger::getServerName() {
 	return serverName;
 }
 
+std::map<int, User> Messenger::getMapUsers() {
+	return map_users;
+}
+
+
+
 void Messenger::setReadyMessInMessageByFd(std::string str, int senderFd) {
 	std::map<int, Message>::iterator it = messages.find(senderFd);
 	std::string tmp = it->second.getReadyMess();
