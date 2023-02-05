@@ -158,9 +158,9 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 
 	if (str.find("CAP") == std::string::npos){
 		size_t pos = str.find(" ", 0); //
-		if (pos != std::string::npos){
+		// if (pos != std::string::npos){
 			strCmd = str.substr(0, pos);
-		}
+		// }
 		uppStr = toUpperCase(str, strCmd);
 		str = str.substr(strCmd.length());
 
