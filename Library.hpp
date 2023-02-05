@@ -47,6 +47,7 @@
 #define HOST "127.0.0.1"
 #define CHANGE_NICK 777
 #define DELETE_USER 999
+#define PART_USER 998
 #define KICK_IN_CHANNEL 888
 
 template<typename T>
@@ -75,6 +76,13 @@ inline std::vector<std::string> splitString(std::string s, char del) // выре
 	return(vector_string);
 }
 
+inline std::string getFirstLine(std::string s) {
+	std::stringstream ss(s);
+	std::string line;
+	getline(ss, line, '\r');
+	return(line);
+}
+
 
 inline std::vector<std::string> splitString2(std::string s, char del) //здесь вырезаны лишний \n в конце
 {
@@ -99,7 +107,8 @@ inline std::vector<std::string> splitString2(std::string s, char del) //здес
 	return(vector_string);
 }
 
-inline std::string strTrimBegin(std::string str, char ch){
+
+inline std::string strTrimBegin(std::string str, char ch) {
 
 	size_t lenStr = 0;
 	lenStr = str.length();

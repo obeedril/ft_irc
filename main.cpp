@@ -41,19 +41,16 @@ int main(int argc, const char* argv[]) {
 		return 1;
 	try {
 		irc_serv.parseConfig();
-		Core core_irc = Core(port, &irc_serv);
-		std::cout << "\x1b[1;95m" << "> IRC server run!\n" << "\x1b[0m";
-		while (gFlagExit) {
-		core_irc.run();
-	}
 	}
 	catch (std::exception& e) {
 		std::cout << e.what() << std::endl;
 	}
-	// Core core_irc = Core(port, &irc_serv);
-	// std::cout << "\x1b[1;95m" << "> IRC server run!\n" << "\x1b[0m";
-	// while (gFlagExit) {
-	// 	core_irc.run();
-	// }
+	Core core_irc = Core(port, &irc_serv);
+	std::cout << "\x1b[1;95m" << "> IRC server run!\n" << "\x1b[0m";
+
+	
+	while (gFlagExit) {
+		core_irc.run();
+	}
 	return (0);
 }
