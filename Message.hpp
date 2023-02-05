@@ -40,10 +40,8 @@ public:
 
     std::vector<int> getDeque();
     void setDeque(std::vector<int> deque);
-    // void clearDeque(std::vector<int> deque);
-    void setMessForSender(std::string msgForSender); // for system messages
+    void setMessForSender(std::string msgForSender);
     std::string getMessForSender();
-    // void addReciever();
     void setChannel(std::string in_channel); 
     std::string getChannel();
 };

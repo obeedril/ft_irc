@@ -2,8 +2,6 @@
 
 bool gFlagExit = 1;
 
-
-
 void signalHandler(int signum) {
 	(void)signum;
 	std::cout << "\x1b[1;95m" << "\b\b> Bye-bye!\n" << "\x1b[0m"; 
@@ -48,7 +46,6 @@ int main(int argc, const char* argv[]) {
 	Core core_irc = Core(port, &irc_serv);
 	std::cout << "\x1b[1;95m" << "> IRC server run!\n" << "\x1b[0m";
 
-	
 	while (gFlagExit) {
 		core_irc.run();
 	}

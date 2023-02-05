@@ -11,14 +11,11 @@ class Server
 		std::string								_serverName;
 		std::vector<std::string>				_configTokens;
 		int										_port;
-		// int										_sockfd;
-		// sockaddr_in								_sockaddr;
 		std::string								_argvPass;
 		std::string								_configPass;
 		std::string								_admin;
 		std::map<std::string, std::string>		_operators;
 		std::vector<std::string>				_motd;
-		// std::vector<std::string> commands;
 
 		std::vector<std::string> splitLines(std::string path);
 		std::vector<std::string> checkBraces(std::string buf);

@@ -257,6 +257,7 @@ std::string	ChannelsStorage::partChannel(std::string msg, User *user) {
 }
 
 std::string ChannelsStorage::updateChannels(User *user, std::string part_channel, int command) {
+	std::list<User*> users_in;
 	std::string		str = "";
 	std::string	user_n	= user->getLogin();
 	if (command == DELETE_USER) {
@@ -264,9 +265,19 @@ std::string ChannelsStorage::updateChannels(User *user, std::string part_channel
 			if (foundUserInThisChannel(it->second.name, user_n) == true) {
 				str.append(":" + user_n + "!" + user_n + "@127.0.0.1 ");
 				str.append("PART " + it->second.name + "\n");
+				it->second.list_users.remove(user);
+				it->second.banned_users.remove(user_n);
+				users_in = getChannelByName(it->second.name)->list_users;
+				str.append(serv_name + "353 " + user_n + " = " + it->second.name + " :@");
+				for (std::list<User*>::iterator it = users_in.begin(); it != users_in.end(); ++it) {
+					str.append((*it)->getLogin() + " ");
+				}
+				str.append("\n:" + serv_name + "366 " + user_n +  " " + it->second.name + " :End of /NAMES list\n");
 			}
-			it->second.list_users.remove(user);
-			it->second.banned_users.remove(user_n);
+			else {
+				it->second.list_users.remove(user);
+				it->second.banned_users.remove(user_n);
+			}
 			if (it->second.list_users.size() == 0) {
 				channels.erase(it->second.name);
 			}

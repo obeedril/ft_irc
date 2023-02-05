@@ -72,14 +72,13 @@ void	Core::run() {
 
 void Core::quitUser(int fd) {
 	std::string msg = "";
-
 	storage_messages->dequeMaker(storage_messages->getUser(fd), TO_ALL_BUT_NO_THIS_USER);
 	msg = storage_messages->getChannels()->updateChannels(storage_messages->getUser(fd), "", DELETE_USER);
 	storage_messages->setReadyMessInMessageByFd(msg, fd);
 	storage_messages->deleteUser(fd);
-	if (storage_messages->getMapUsers().size() > 1) {
+	if (storage_messages->getMapUsers().size() >= 1) {
 		writeToUser(fd);
-	}	
+	}
 }
 
 int		Core::createNewSocket() {

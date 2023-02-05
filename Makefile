@@ -1,9 +1,5 @@
 NAME		= ircserv
 
-# FLAGS		= -Wall -Wextra -Werror -g 
-#-fsanitize=address -fvisibility=hidden -fvisibility-inlines-hidden
-# -std=c++98
-
 SRCS		= main.cpp \
 			Core.cpp \
 			Server.cpp \
