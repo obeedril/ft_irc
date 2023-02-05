@@ -196,7 +196,7 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 		if (nickCmd(it->second.getRawMessage(), &it_user->second) == 0)
 			it->second.setCmd("NICK");
 	}
-	else if (uppStr.find("USER", 0) != std::string::npos && uppStr.at(4)== ' ') {
+	else if (uppStr.find("USER", 0) != std::string::npos && (uppStr.at(4)== ' ' || uppStr.at(4)== '\n')) {
 		dequeMaker(&it_user->second, ONE_USER);
 		it->second.setCmd("USER");
 		userCmd(it->second.getRawMessage(), &it_user->second);
@@ -231,7 +231,7 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 		parserPrivmsg(it->second, it_user->second);
 		dequeMaker(&it_user->second, LIST_OF_RECIEVERS);
 	}
-	else if (uppStr.find("JOIN", 0) != std::string::npos && uppStr.at(4)== ' ') {
+	else if (uppStr.find("JOIN", 0) != std::string::npos && (uppStr.at(4)== ' ' || uppStr.at(4)== '\n')) {
 		it->second.setCmd("JOIN");
 		std::cout << "cmd JOIN" << std::endl;
 		it->second.setMessForSender(channels.joinToCannel(uppStr, &it_user->second, SYSTEM_MSG));
@@ -239,7 +239,7 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 		it->second.setChannel(channels.parserChannelInMsg(uppStr));
 		dequeMaker(&it_user->second, TO_CHANNEL_BUT_NO_THIS_USER);
 	}
-	else if (uppStr.find("TOPIC", 0) != std::string::npos && uppStr.at(5)== ' ') {
+	else if (uppStr.find("TOPIC", 0) != std::string::npos && ( uppStr.at(5)== ' ' || uppStr.at(4)== '\n')) {
 		//<TOPIC #kvirc :GO>
 		it->second.setCmd("TOPIC");
 		std::cout << "cmd TOPIC" << std::endl;
@@ -248,7 +248,7 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 		dequeMaker(&it_user->second, TO_CHANNEL);
 		
 	}
-	else if (uppStr.find("KICK", 0) != std::string::npos && uppStr.at(4)== ' ') {
+	else if (uppStr.find("KICK", 0) != std::string::npos && (uppStr.at(4)== ' ' || uppStr.at(4)== '\n')) {
 		it->second.setCmd("KICK");
 		it->second.setChannel(channels.parserChannelInMsg(uppStr));
 		dequeMaker(&it_user->second, TO_CHANNEL_BUT_NO_THIS_USER);
