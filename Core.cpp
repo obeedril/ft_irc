@@ -77,8 +77,6 @@ void Core::quitUser(int fd) {
 	msg = storage_messages->getChannels()->updateChannels(storage_messages->getUser(fd), "", DELETE_USER);
 	storage_messages->setReadyMessInMessageByFd(msg, fd);
 	storage_messages->deleteUser(fd);
-	std::cout	<< "cannels.size(): " << "\x1b[1;96m" 
-				<< storage_messages->getChannels()->getChannels().size() << "\x1b[0m" << std::endl;
 	if (storage_messages->getMapUsers().size() > 1) {
 		writeToUser(fd);
 	}	
@@ -99,12 +97,12 @@ int		Core::createNewSocket() {
 	new_user.setUserName("");
 	new_user.setBotDialog(NO);
 	storage_messages->addUser(user_fd, new_user);
+	fcntl(user_fd, F_SETFL, O_NONBLOCK);
 	FD_SET(user_fd, &active_);
 	return (0);
 };
 
 int		Core::writeToUser(int current_fd) {
-	//std::cout << "------------writeToUser------------ start" << std::endl;
 	std::vector<int> deque; 
 	deque = storage_messages->getDeq(current_fd);
 	std::string msg = storage_messages->getReadyMessByFd(current_fd);

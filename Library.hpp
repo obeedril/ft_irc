@@ -28,8 +28,8 @@
 # include <cstring>
 # include <locale>
 
-#include <cmath> //для робота
-#include <stdlib.h> //itoa
+#include <cmath> 
+#include <stdlib.h> 
 
 #define PATH_TO_CONFIG "config.conf"
 #define PATH_TO_MOTD "welcome.motd"
@@ -58,8 +58,7 @@ std::string toString(const T& value)
 	return oss.str();
 }
 
-inline std::vector<std::string> splitString(std::string s, char del) // вырезаем ДО и ПОСЛЕ /n - это нужно 
-  //при считывании из RECV 
+inline std::vector<std::string> splitString(std::string s, char del) 
 {
 	std::stringstream ss(s);
 	std::string word;
@@ -79,12 +78,16 @@ inline std::vector<std::string> splitString(std::string s, char del) // выре
 inline std::string getFirstLine(std::string s) {
 	std::stringstream ss(s);
 	std::string line;
+	size_t pos = 0;
 	getline(ss, line, '\r');
+	pos = line.find("\n");
+	if (pos != std::string::npos) {
+		line = line.substr(0, pos);
+	}
 	return(line);
 }
 
-
-inline std::vector<std::string> splitString2(std::string s, char del) //здесь вырезаны лишний \n в конце
+inline std::vector<std::string> splitString2(std::string s, char del)
 {
 	std::stringstream ss(s);
 	std::string word;
@@ -106,7 +109,6 @@ inline std::vector<std::string> splitString2(std::string s, char del) //здес
 	}
 	return(vector_string);
 }
-
 
 inline std::string strTrimBegin(std::string str, char ch) {
 
@@ -146,7 +148,6 @@ inline std::string toUpperCase(std::string str, std::string strCmd){
 
 	return uppStr;
 }
-
 
 typedef struct s_message{
 	std::string cmd;

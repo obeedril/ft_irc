@@ -98,13 +98,15 @@ void Messenger::parserPrivmsg(Message &mess, User &user){
 	} else {
 		receivers_str = tmp.substr(0, pos);
 		mess.setReceiver(strTrimBegin(receivers_str, ' '));
-		mess.setReadyMess(tmp.substr(pos + 1, len) + "\n");
+		// mess.setReadyMess(tmp.substr(pos + 1, len) + "\n");
+				mess.setReadyMess(tmp.substr(pos + 1, len));
 	}
 	tmp = "";
 	
 	if(mess.getReadyMess() != "" && mess.getReceiver() != "") {
 		tmp.append(":" + user.getLogin() + "!" + user.getLogin() + "@127.0.0.1 ");
 		tmp.append(mess.getCmd() + " " + mess.getReceiver() + " :" + mess.getReadyMess() + "\n");
+				//tmp.append(mess.getCmd() + " " + mess.getReceiver() + " :" + mess.getReadyMess());
 		mess.setReadyMess(tmp);
 	} else {
 		mess.setReadyMess("");

@@ -38,8 +38,6 @@ public:
 	std::vector<int>	getDequeByAllInChannel(std::string name_channel, User *user);
 	std::string			parserChannelInMsg(std::string msg);
 
-	//std::string	modeChannel(std::string msg, User *user);
-	//std::string	whoIsInChannel(std::string msg, User *user);
 };
 
 #endif

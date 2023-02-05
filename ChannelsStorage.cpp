@@ -112,9 +112,6 @@ std::string	ChannelsStorage::joinToCannel(std::string msg, User *user, int flags
 
 	std::string		user_n = user->getLogin();
 	std::vector<std::string> vec_msg = splitString(msg, ' ');
-	// for(int i = 0; i < static_cast<int>(vec_msg.size()); i++) {
-	// 	std::cout << "<" << vec_msg[i] << "> ";
-	// }
 	if (vec_msg.size() != 2 && flags == SYSTEM_MSG) {
 		str.append(serv_name + toString(ERR_NEEDMOREPARAMS) + " " + vec_msg[0] + " :Not enough parameters\n");
 	}
@@ -130,21 +127,17 @@ std::string	ChannelsStorage::joinToCannel(std::string msg, User *user, int flags
 			addNewChannel(name_channel);
 			addUserToChannel(name_channel, user);
 		}
-		//Join to channel Success
 		str.append(":" + user_n + "!" + user_n + "@127.0.0.1 ");
 		str.append("JOIN :" + name_channel + "\n");
 		
 		if (flags == SYSTEM_MSG) {
-			//Get Topic
 			topic = getTopic(name_channel);
 			str.append(serv_name + "331 " + user_n +  " " + name_channel +  " :" + topic + "\n");
-			//Get NAMES list in this channel
 			users_in = getChannelByName(name_channel)->list_users;
 			str.append(serv_name + "353 " + user_n + " = " + name_channel + " :@");
 			for (std::list<User*>::iterator it = users_in.begin(); it != users_in.end(); ++it) {
 				str.append((*it)->getLogin() + " ");
 			}
-			//End of /NAMES list
 			str.append("\n" + serv_name + "366 " + user_n +  " " + name_channel + " :End of /NAMES list\n");
 		}
 	}
@@ -153,17 +146,11 @@ std::string	ChannelsStorage::joinToCannel(std::string msg, User *user, int flags
 }
 
 std::string	ChannelsStorage::kickUser(std::string msg, User *user, int flags) {
-	//Params: KICK <channel> <user> [<comment>]
 	std::string		str = "";
 	std::list<User*> users_in;
-	//std::string		name_channel = "";
 	std::string		user_n = user->getLogin();
 	std::vector<std::string> vec_msg = splitString(msg, ' ');
 
-	for(int i = 0; i < static_cast<int>(vec_msg.size()); i++) {
-		std::cout << "<" << vec_msg[i] << "> ";
-	}
-	std::cout << "\n";
 	if (vec_msg.size() < 3 && flags == SYSTEM_MSG) {
 		str.append(serv_name + toString(ERR_NEEDMOREPARAMS) + " " + vec_msg[0] + " :Not enough parameters\n");
 	}
@@ -186,22 +173,16 @@ std::string	ChannelsStorage::kickUser(std::string msg, User *user, int flags) {
 		}
 		str.append(":" + user_n + "!" + user_n + "@127.0.0.1 ");
 		str.append(msg + " :" + user_n + "\n");
-		
-		 if (flags == SYSTEM_MSG) {
-		//Get NAMES list in this channel
-		users_in = getChannelByName(vec_msg[1])->list_users;
-		str.append(serv_name + "353 " + user_n + " = " + vec_msg[1] + " :@");
-		for (std::list<User*>::iterator it = users_in.begin(); it != users_in.end(); ++it) {
-			str.append((*it)->getLogin() + " ");
+		if (flags == SYSTEM_MSG) {
+			users_in = getChannelByName(vec_msg[1])->list_users;
+			str.append(serv_name + "353 " + user_n + " = " + vec_msg[1] + " :@");
+			for (std::list<User*>::iterator it = users_in.begin(); it != users_in.end(); ++it) {
+				str.append((*it)->getLogin() + " ");
+			}
+			str.append("\n" + serv_name +  "366 " + user_n +  " " + vec_msg[1] + " :End of /NAMES list\n");
 		}
-		//End of /NAMES list
-		str.append("\n" + serv_name +  "366 " + user_n +  " " + vec_msg[1] + " :End of /NAMES list\n");
-		//:456!456@127.0.0.1 KICK #WE 123 :456
-		 }
 	}
 	std::cout << "\n------ReadyMess KICK-----:\n" << str << std::endl;
-	std::cout << getOwnerChannel(vec_msg[1]) << std::endl;
-	std::cout << user_n << std::endl;
 	return(str);
 }
 
@@ -214,11 +195,6 @@ std::string	ChannelsStorage::addTopicToCannel(std::string msg, User *user) {
 	std::string		num = "";
 	std::string		user_n = user->getLogin();
 	std::vector<std::string> vec_msg = splitString(msg, ' ');
-	
-	for(int i = 0; i < static_cast<int>(vec_msg.size()); i++) {
-		std::cout << "<" << vec_msg[i] << "> ";
-	}
-	std::cout << "\n";
 	
 	if (vec_msg.size() != 2 && vec_msg.size() != 3) {
 		str.append(serv_name + toString(ERR_NEEDMOREPARAMS) + " " + vec_msg[0] + " :Not enough parameters\n");
@@ -233,7 +209,6 @@ std::string	ChannelsStorage::addTopicToCannel(std::string msg, User *user) {
 		if (vec_msg.size() == 3) {
 			setTopic(vec_msg[1], vec_msg[2]);
 		}
-		//Get Topic
 		topic = getTopic(vec_msg[1]);
 		if (topic == ":No topic is set") {
 			num.append("331 ");
@@ -257,18 +232,12 @@ bool	ChannelsStorage::bannedUserInThisChannel(std::string channel_name, User *us
 	return(false);
 }
 
-
-//PART #kvirc
 std::string	ChannelsStorage::partChannel(std::string msg, User *user) {
 	std::list<User*> users_in;
 	std::string		str = "";
 	std::string	user_n	= user->getLogin();
 	std::vector<std::string> vec_msg = splitString(msg, ' ');
 	
-	for(int i = 0; i < static_cast<int>(vec_msg.size()); i++) {
-		std::cout << "<" << vec_msg[i] << "> ";
-	}
-	std::cout << "\n";
 	if (vec_msg.size() < 2) {
 		str.append(serv_name + toString(ERR_NEEDMOREPARAMS) + " " + vec_msg[0] + " :Not enough parameters\n");
 	}
@@ -299,7 +268,6 @@ std::string ChannelsStorage::updateChannels(User *user, std::string part_channel
 			it->second.list_users.remove(user);
 			it->second.banned_users.remove(user_n);
 			if (it->second.list_users.size() == 0) {
-				std::cout << "\x1b[1;95m" << "channels.erase" << "\x1b[0m" << std::endl;
 				channels.erase(it->second.name);
 			}
 		}
@@ -312,7 +280,6 @@ std::string ChannelsStorage::updateChannels(User *user, std::string part_channel
 		}
 		it->second.list_users.remove(user);
 		if (it->second.list_users.size() == 0) {
-			std::cout << "\x1b[1;95m" << "channels.erase" << "\x1b[0m" << std::endl;
 			channels.erase(it->second.name);
 		}
 	}
@@ -326,8 +293,6 @@ std::vector<int> ChannelsStorage::getDequeByChannel(std::string name_channel, Us
 		list_users = getChannelByName(name_channel)->list_users;
 		for(std::list<User*>::iterator it = list_users.begin(); it != list_users.end(); it++) {
 			if(user->getUserFd() != (*it)->getUserFd()) {
-				std::cout	<< "\x1b[1;94m" << "FD: " << (*it)->getUserFd()
-							<< "   FD send: " << user->getUserFd() << "\x1b[0m" << std::endl;
 				vector.push_back((*it)->getUserFd());
 			}
 		}
