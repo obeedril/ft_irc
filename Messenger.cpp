@@ -474,11 +474,6 @@ int	Messenger::whoAmICmd(User* sender) {
 	tmp += "Am I a ServerOperator?  ";
 	tmp += sender->getIsOperatorServer() ? "yes" : "no";
 	tmp += "\n";
-	if (sender->getRegistFlag() == true) {
-		tmp += "Your current Channel is " + sender->getChannelHere() + "\n";
-	}
-	else
-		tmp += "Watch out! You're NOT registred yet\n";
 	setReadyMessInMessageByFd(tmp, sender->getUserFd());
 	return 0;
 }
