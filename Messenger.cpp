@@ -184,32 +184,32 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 		setReadyMessInMessageByFd("", it_user->second.getUserFd());
 		return ;
 	}
-	if (uppStr.find("PASS", 0) != std::string::npos) {
+	if (uppStr.find("PASS", 0) != std::string::npos && (uppStr.at(4)== ' ' || uppStr.at(4)== '\n')) {
 		dequeMaker(&it_user->second, ONE_USER);
 		if (passCmd(it->second.getRawMessage(), &it_user->second) == 0)
 			it->second.setCmd("PASS");
 	}
-	else if (uppStr.find("NICK", 0) != std::string::npos) {
+	else if (uppStr.find("NICK", 0) != std::string::npos && uppStr.at(4)== ' ') {
 		dequeMaker(&it_user->second, ONE_USER);
 		if (nickCmd(it->second.getRawMessage(), &it_user->second) == 0)
 			it->second.setCmd("NICK");
 	}
-	else if (uppStr.find("USER", 0) != std::string::npos) {
+	else if (uppStr.find("USER", 0) != std::string::npos && uppStr.at(4)== ' ') {
 		dequeMaker(&it_user->second, ONE_USER);
-		it->second.setCmd("USER"); //??????
+		it->second.setCmd("USER");
 		userCmd(it->second.getRawMessage(), &it_user->second);
 	}
-	else if (uppStr.find("QUIT", 0) != std::string::npos){
+	else if (uppStr.find("QUIT\n", 0) != std::string::npos){
 		dequeMaker(&it_user->second, TO_ALL_BUT_NO_THIS_USER);
 		it->second.setCmd("QUIT");
 		quitCmd(it->second.getRawMessage(), &it_user->second);
 	}
-	else if (uppStr.find("WHOAMI", 0) != std::string::npos){
+	else if (uppStr.find("WHOAMI\n", 0) != std::string::npos){
 		dequeMaker(&it_user->second, ONE_USER);
 		it->second.setCmd("WHOAMI");
 		whoAmICmd(&it_user->second);
 	}
-	else if (uppStr.find("BOT") != std::string::npos || it_user->second.getBotDialog() == YES) {
+	else if (uppStr.find("BOT\n") != std::string::npos || it_user->second.getBotDialog() == YES) {
 		dequeMaker(&it_user->second, ONE_USER);
 		it->second.setCmd("BOT");
 		it_user->second.setBotDialog(YES);
@@ -219,17 +219,17 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 			deleteBot(userFd);
 		}
 	}
-	else if (uppStr.find("PRIVMSG", 0) != std::string::npos){
+	else if (uppStr.find("PRIVMSG", 0) != std::string::npos && uppStr.at(7)== ' '){
 		it->second.setCmd("PRIVMSG");
 		parserPrivmsg(it->second, it_user->second);
 		dequeMaker(&it_user->second, LIST_OF_RECIEVERS);
 	}
-	else if (uppStr.find("NOTICE", 0) != std::string::npos){
+	else if (uppStr.find("NOTICE", 0) != std::string::npos && uppStr.at(6)== ' '){
 		it->second.setCmd("NOTICE");
 		parserPrivmsg(it->second, it_user->second);
 		dequeMaker(&it_user->second, LIST_OF_RECIEVERS);
 	}
-	else if (uppStr.find("JOIN", 0) != std::string::npos) {
+	else if (uppStr.find("JOIN", 0) != std::string::npos && uppStr.at(4)== ' ') {
 		it->second.setCmd("JOIN");
 		std::cout << "cmd JOIN" << std::endl;
 		it->second.setMessForSender(channels.joinToCannel(uppStr, &it_user->second, SYSTEM_MSG));
@@ -237,7 +237,7 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 		it->second.setChannel(channels.parserChannelInMsg(uppStr));
 		dequeMaker(&it_user->second, TO_CHANNEL_BUT_NO_THIS_USER);
 	}
-	else if (uppStr.find("TOPIC", 0) != std::string::npos) {
+	else if (uppStr.find("TOPIC", 0) != std::string::npos && uppStr.at(5)== ' ') {
 		//<TOPIC #kvirc :GO>
 		it->second.setCmd("TOPIC");
 		std::cout << "cmd TOPIC" << std::endl;
@@ -246,7 +246,7 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 		dequeMaker(&it_user->second, TO_CHANNEL);
 		
 	}
-	else if (uppStr.find("KICK", 0) != std::string::npos) {
+	else if (uppStr.find("KICK", 0) != std::string::npos && uppStr.at(4)== ' ') {
 		it->second.setCmd("KICK");
 		it->second.setChannel(channels.parserChannelInMsg(uppStr));
 		dequeMaker(&it_user->second, TO_CHANNEL_BUT_NO_THIS_USER);
@@ -256,7 +256,7 @@ void Messenger::parsRecvStr(std::string str, int userFd) {
 		}
 		std::cout << "cmd KICK" << std::endl;
 	}
-	else if (uppStr.find("PART", 0) != std::string::npos) {
+	else if (uppStr.find("PART", 0) != std::string::npos && uppStr.at(4)== ' ') {
 		it->second.setCmd("PART");
 		it->second.setChannel(channels.parserChannelInMsg(uppStr));
 		dequeMaker(&it_user->second, TO_CHANNEL);
